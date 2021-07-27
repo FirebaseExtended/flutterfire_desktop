@@ -1,0 +1,4 @@
+name: flutterfire_dart
+
+packages:
+  - packages/**
