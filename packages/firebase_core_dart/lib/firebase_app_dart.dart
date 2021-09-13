@@ -1,10 +1,11 @@
 part of firebase_core_dart;
 
+/// A Dart only implementation of a Firebase app instance.
 class FirebaseAppDart extends FirebaseAppPlatform {
   FirebaseAppDart._(this._core, String name, FirebaseOptions options)
       : super(name, options);
 
-  FirebaseCoreDart _core;
+  final FirebaseCoreDart _core;
 
   bool _isAutomaticDataCollectionEnabled = false;
 
