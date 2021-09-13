@@ -30,3 +30,6 @@ flutter:
       windows:
         dartPluginClass: FirebaseCoreDart
         pluginClass: none
+      macos:
+        dartPluginClass: FirebaseCoreDart
+        pluginClass: none
