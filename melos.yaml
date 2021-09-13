@@ -2,3 +2,25 @@ name: flutterfire_dart
 
 packages:
   - packages/**
+
+scripts:
+  lint:all:
+    run: melos run analyze && melos run format
+    description: Run all static analysis checks
+
+  analyze:
+    run: |
+      melos exec -c 1 -- \
+        dart analyze . --fatal-infos
+    description: |
+      Run `dart analyze` in all packages.
+       - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+
+  format: dart format -o write .
+
+  test:
+    description: Run tests in a specific package.
+    run: melos exec --concurrency=1 -- "dart pub run test --reporter expanded"
+    select-package:
+      dir-exists:
+        - "test/"
