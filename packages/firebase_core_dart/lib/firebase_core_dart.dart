@@ -1,20 +1,13 @@
 library firebase_core_dart;
 
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 part 'firebase_app_dart.dart';
 
 /// A Dart only implementation of FirebaseCore for managing Firebase app
 /// instances.
 class FirebaseCoreDart extends FirebasePlatform {
-  /// Registers that [FirebaseCoreDart] is the platform implementation.
-  static void registerWith(Registrar registrar) {
-    FirebasePlatform.instance = FirebaseCoreDart();
-  }
-
-  final Map<String, FirebaseAppPlatform> _apps =
-      <String, FirebaseAppPlatform>{};
+  final Map<String, FirebaseAppPlatform> _apps = <String, FirebaseAppPlatform>{};
 
   @override
   List<FirebaseAppPlatform> get apps {
