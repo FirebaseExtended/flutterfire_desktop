@@ -43,7 +43,7 @@ class _SignInPageState extends State<SignInPage> {
             return FlatButton(
               textColor: Theme.of(context).buttonColor,
               onPressed: () async {
-                final User user = _auth.currentUser;
+                final user = _auth.currentUser;
                 if (user == null) {
                   Scaffold.of(context).showSnackBar(const SnackBar(
                     content: Text('No one has signed in.'),
@@ -52,7 +52,7 @@ class _SignInPageState extends State<SignInPage> {
                 }
                 await _signOut();
 
-                final String uid = user.uid;
+                final uid = user.uid;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('$uid has successfully signed out.'),
                 ));
@@ -85,9 +85,9 @@ class _SignInPageState extends State<SignInPage> {
 }
 
 class _UserInfoCard extends StatefulWidget {
-  final User user;
-
   const _UserInfoCard(this.user);
+
+  final User user;
 
   @override
   _UserInfoCardState createState() => _UserInfoCardState();

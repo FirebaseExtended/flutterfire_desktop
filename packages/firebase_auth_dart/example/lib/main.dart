@@ -13,11 +13,19 @@ import 'package:flutter_signin_button/button_builder.dart';
 import '../register_page.dart';
 import '../signin_page.dart';
 
+// Initialize with a secondary app until dart-only initialization is merged.
+FirebaseOptions get firebaseOptions => const FirebaseOptions(
+      appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
+      apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+      projectId: 'react-native-firebase-testing',
+      messagingSenderId: '448618578101',
+    );
+
 // Requires that the Firebase Auth emulator is running locally
 // e.g via `melos run firebase:emulator`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: firebaseOptions);
   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
   runApp(AuthExampleApp());
 }
