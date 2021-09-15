@@ -1,7 +1,7 @@
 part of firebase_auth_dart;
 
 /// A Dart only implmentation of FirebaseAuth for managing Firebase users.
-class FirebaseAuthCorePlatform extends FirebaseAuthPlatform {
+class FirebaseAuthDart extends FirebaseAuthPlatform {
   @override
   UserPlatform? currentUser;
 

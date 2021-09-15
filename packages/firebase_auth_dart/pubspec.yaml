@@ -1,14 +1,19 @@
 name: firebase_auth_dart
-description: TBD
-version: 1.0.0
-# homepage: https://www.example.com
+description: TODO
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_dart
+version: 0.1.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   firebase_auth_platform_interface: ^6.1.0
-  firebase_core: ^1.6.0
+  firebase_core:
+    git:
+      url: git://github.com/pr-Mais/flutterfire
+      path: packages/firebase_core/firebase_core
+      ref: "@mais/firebase-dart"
   flutter:
     sdk: flutter
   meta: ^1.3.0
@@ -23,6 +28,7 @@ dependency_overrides:
       url: git://github.com/pr-Mais/flutterfire
       path: packages/firebase_core/firebase_core
       ref: "@mais/firebase-dart"
+
 
 flutter:
   plugin:
