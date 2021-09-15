@@ -35,7 +35,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
-    throw UnimplementedError();
+    return FirebaseAuthDart(app: app);
   }
 
   @override
@@ -43,7 +43,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
     Map<String, dynamic>? currentUser,
     String? languageCode,
   }) {
-    throw UnimplementedError();
+    return this;
   }
 
   @override
