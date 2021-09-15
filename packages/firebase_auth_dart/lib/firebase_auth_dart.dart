@@ -1,20 +1,55 @@
 library firebase_auth_dart;
 
+import 'dart:async';
+
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 /// A Dart only implmentation of FirebaseAuth for managing Firebase users.
 class FirebaseAuthDart extends FirebaseAuthPlatform {
+  /// Entry point for the [FirebaseAuthDart] classs.
+  FirebaseAuthDart({required FirebaseApp app}) : super(appInstance: app) {
+    // Create a app instance broadcast stream for both delegate listener events
+    _userChangesListeners[app.name] =
+        StreamController<UserPlatform?>.broadcast();
+  }
+
+  FirebaseAuthDart._() : super(appInstance: null);
+
+  /// Stub initializer to allow creating an instance without
+  /// registering delegates or listeners.
+  ///
+  // ignore: prefer_constructors_over_static_methods
+  static FirebaseAuthDart get instance {
+    return FirebaseAuthDart._();
+  }
+
   @override
   UserPlatform? currentUser;
 
   @override
   String? tenantId;
 
+  static final Map<String, StreamController<UserPlatform?>>
+      _userChangesListeners = <String, StreamController<UserPlatform?>>{};
+
   @override
   FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
-    // TODO: implement delegateFor
     throw UnimplementedError();
+  }
+
+  @override
+  FirebaseAuthPlatform setInitialValues({
+    Map<String, dynamic>? currentUser,
+    String? languageCode,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<UserPlatform?> userChanges() async* {
+    yield currentUser;
+    yield* _userChangesListeners[app.name]!.stream;
   }
 
   @override
@@ -92,13 +127,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   Future<void> sendSignInLinkToEmail(
       String email, ActionCodeSettings actionCodeSettings) {
     // TODO: implement sendSignInLinkToEmail
-    throw UnimplementedError();
-  }
-
-  @override
-  FirebaseAuthPlatform setInitialValues(
-      {Map<String, dynamic>? currentUser, String? languageCode}) {
-    // TODO: implement setInitialValues
     throw UnimplementedError();
   }
 
@@ -188,12 +216,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
     print('Hi!');
 
     return Future.value();
-  }
-
-  @override
-  Stream<UserPlatform?> userChanges() {
-    // TODO: implement userChanges
-    throw UnimplementedError();
   }
 
   @override

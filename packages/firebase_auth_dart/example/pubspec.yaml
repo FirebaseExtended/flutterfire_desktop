@@ -32,6 +32,9 @@ dependencies:
   google_sign_in: ^5.0.0-nullsafety
 
 dependency_overrides:
+  firebase_auth_dart:
+    path:
+      ../
   firebase_core:
     git:
       url: git://github.com/pr-Mais/flutterfire
