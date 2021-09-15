@@ -21,13 +21,15 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  firebase_core:
+  firebase_auth:
     git: 
       url: git://github.com/pr-Mais/flutterfire
-      path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-core-dart"
+      path: packages/firebase_auth/firebase_auth
+      ref: "@mais/firebase-dart"
+  flutter_signin_button: ^1.0.0
   flutter:
     sdk: flutter
+  google_sign_in: ^5.0.0-nullsafety
 
 
 dev_dependencies:

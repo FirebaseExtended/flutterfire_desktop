@@ -7,12 +7,11 @@
 // @dart=2.9
 
 import 'dart:async';
+import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key key}) : super(key: key);
@@ -27,33 +26,36 @@ class MyApp extends StatelessWidget {
       );
 
   Future<void> initializeDefault() async {
-    FirebaseApp app = await Firebase.initializeApp(options: firebaseOptions);
+    final app = await Firebase.initializeApp(options: firebaseOptions);
     assert(app != null);
-    print('Initialized default app $app');
+    log('Initialized default app $app');
   }
 
   Future<void> initializeSecondary() async {
-    final app = await Firebase.initializeApp(name: name, options: firebaseOptions);
+    final app = await Firebase.initializeApp(
+      name: name,
+      options: firebaseOptions,
+    );
 
     assert(app != null);
-    print('Initialized $app');
+    log('Initialized $app');
   }
 
   void apps() {
-    final List<FirebaseApp> apps = Firebase.apps;
-    print('Currently initialized apps: $apps');
+    final apps = Firebase.apps;
+    log('Currently initialized apps: $apps');
   }
 
   void options() {
-    final FirebaseApp app = Firebase.app(name);
-    final FirebaseOptions options = app?.options;
-    print('Current options for app $name: $options');
+    final app = Firebase.app(name);
+    final options = app?.options;
+    log('Current options for app $name: $options');
   }
 
   Future<void> delete() async {
-    final FirebaseApp app = Firebase.app(name);
+    final app = Firebase.app(name);
     await app?.delete();
-    print('App $name deleted');
+    log('App $name deleted');
   }
 
   @override
@@ -69,11 +71,26 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              ElevatedButton(onPressed: initializeDefault, child: const Text('Initialize default app')),
-              ElevatedButton(onPressed: initializeSecondary, child: const Text('Initialize secondary app')),
-              ElevatedButton(onPressed: apps, child: const Text('Get apps')),
-              ElevatedButton(onPressed: options, child: const Text('List options')),
-              ElevatedButton(onPressed: delete, child: const Text('Delete app')),
+              ElevatedButton(
+                onPressed: initializeDefault,
+                child: const Text('Initialize default app'),
+              ),
+              ElevatedButton(
+                onPressed: initializeSecondary,
+                child: const Text('Initialize secondary app'),
+              ),
+              ElevatedButton(
+                onPressed: apps,
+                child: const Text('Get apps'),
+              ),
+              ElevatedButton(
+                onPressed: options,
+                child: const Text('List options'),
+              ),
+              ElevatedButton(
+                onPressed: delete,
+                child: const Text('Delete app'),
+              ),
             ],
           ),
         ),
