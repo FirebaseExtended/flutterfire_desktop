@@ -25,7 +25,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  UserPlatform? currentUser;
+  UserPlatform? get currentUser;
 
   @override
   String? tenantId;
@@ -50,6 +50,13 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   Stream<UserPlatform?> userChanges() async* {
     yield currentUser;
     yield* _userChangesListeners[app.name]!.stream;
+  }
+
+  @override
+  Future<UserCredentialPlatform> signInWithEmailAndPassword(
+      String email, String password) {
+    // TODO: implement signInWithEmailAndPassword
+    throw UnimplementedError();
   }
 
   @override
@@ -173,13 +180,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<UserCredentialPlatform> signInWithEmailAndPassword(
-      String email, String password) {
-    // TODO: implement signInWithEmailAndPassword
-    throw UnimplementedError();
-  }
-
-  @override
   Future<UserCredentialPlatform> signInWithEmailLink(
       String email, String emailLink) {
     // TODO: implement signInWithEmailLink
@@ -213,8 +213,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   Future<void> useAuthEmulator(String host, int port) {
-    print('Hi!');
-
+    // TODO: implement useAuthEmulator
     return Future.value();
   }
 
