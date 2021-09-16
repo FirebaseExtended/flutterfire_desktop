@@ -36,30 +36,58 @@ class IPAuth {
   Future<IPUser> signInWithEmailAndPassword(
       String email, String password) async {
     try {
-      final body = {
-        'email': email,
-        'password': password,
-        'returnSecureToken': true,
-      };
-
-      final _response = await http.post(
+      final _userMap = await _makeRequest(
         _endpoint.signInWithEmailAndPassword,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
+        {
+          'email': email,
+          'password': password,
+          'returnSecureToken': true,
+        },
       );
-
-      if (_response.statusCode == 200) {
-        final _userMap = jsonDecode(_response.body);
-
-        return IPUser.fromJson(_userMap);
-      } else {
-        // ignore: avoid_dynamic_calls
-        final String errorCode = jsonDecode(_response.body)['error']['message'];
-        throw IPException.fromErrorCode(errorCode);
-      }
+      return IPUser.fromJson(_userMap);
     } catch (exception) {
       log('$exception', name: 'IPAuth/signInWithEmailAndPassword');
+
       rethrow;
+    }
+  }
+
+  /// Sign users up using email and password.
+  Future<IPUser> signUpWithEmailAndPassword(
+      String email, String password) async {
+    try {
+      final _userMap = await _makeRequest(
+        _endpoint.signUpWithEmailAndPassword,
+        {
+          'email': email,
+          'password': password,
+          'returnSecureToken': true,
+        },
+      );
+      return IPUser.fromJson(_userMap);
+    } catch (exception) {
+      log('$exception', name: 'IPAuth/signUpWithEmailAndPassword');
+
+      rethrow;
+    }
+  }
+
+  /// Helper function to construct a request and throw on errors.
+  Future<Map<String, dynamic>> _makeRequest(
+      Uri url, Map<String, dynamic> body) async {
+    final _response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (_response.statusCode == 200) {
+      final _bodyMap = jsonDecode(_response.body);
+      return _bodyMap;
+    } else {
+      // ignore: avoid_dynamic_calls
+      final String errorCode = jsonDecode(_response.body)['error']['message'];
+      throw IPException.fromErrorCode(errorCode);
     }
   }
 }
@@ -76,8 +104,21 @@ class IPEndpoint {
   static const String _host = 'identitytoolkit.googleapis.com';
   static const String _apiVersion = 'v1';
 
+  Uri _baseUrl(String? endpoint) => Uri(
+        scheme: _scheme,
+        host: _host,
+        pathSegments: [
+          _apiVersion,
+          endpoint!,
+        ],
+        queryParameters: {
+          'key': apiKey,
+        },
+      );
+
   static const Map<String, String> _endpoints = {
     'signInWithEmailAndPassword': 'accounts:signInWithPassword',
+    'signUp': 'accounts:signUp',
   };
 
   /// Get the Uri representation of signInWithEmailAndPassword endpoint
@@ -85,11 +126,14 @@ class IPEndpoint {
   ///
   /// https://cloud.google.com/identity-platform/docs/use-rest-api#section-sign-in-email-password
   Uri get signInWithEmailAndPassword {
-    return Uri(scheme: _scheme, host: _host, pathSegments: [
-      _apiVersion,
-      _endpoints['signInWithEmailAndPassword']!,
-    ], queryParameters: {
-      'key': apiKey,
-    });
+    return _baseUrl(_endpoints['signInWithEmailAndPassword']);
+  }
+
+  /// Get the Uri representation of signUp endpoint
+  /// as per IP REST API documentation.
+  ///
+  /// https://cloud.google.com/identity-platform/docs/use-rest-api#section-create-email-password
+  Uri get signUpWithEmailAndPassword {
+    return _baseUrl(_endpoints['signUp']);
   }
 }
