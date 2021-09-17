@@ -20,38 +20,38 @@ class ErrorCode {
 }
 
 /// And exception wrapping error codes from the IP API.
-class IPException implements Exception {
+class AuthException implements Exception {
   // ignore: public_member_api_docs
-  IPException([this.message = '', this.code]);
+  AuthException([this.message = '', this.code]);
 
   /// Constrict and IPException based on the returned error code.
-  factory IPException.fromErrorCode(String? code) {
+  factory AuthException.fromErrorCode(String? code) {
     switch (code) {
       case ErrorCode.emailNotFound:
-        return IPException(
+        return AuthException(
             'There is no user record corresponding to this identifier.'
             ' The user may have been deleted.',
             code);
       case ErrorCode.invalidPassword:
-        return IPException(
+        return AuthException(
             'The password is invalid or the user does not have a password.',
             code);
       case ErrorCode.userDisabled:
-        return IPException(
+        return AuthException(
             'The user account has been disabled by an administrator.', code);
       case ErrorCode.emailExists:
-        return IPException(
+        return AuthException(
             'The email address is already in use by another account.', code);
       case ErrorCode.operationNotAllowed:
-        return IPException(
+        return AuthException(
             'Password sign-in is disabled for this project.', code);
       case ErrorCode.tooManyAttempts:
-        return IPException(
+        return AuthException(
             'We have blocked all requests from this device'
             ' due to unusual activity. Try again later.',
             code);
       default:
-        return IPException('Unknown error happened.', 'UNKNOWN');
+        return AuthException('Unknown error happened.', 'UNKNOWN');
     }
   }
 

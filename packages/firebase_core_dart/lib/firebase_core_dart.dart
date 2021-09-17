@@ -7,7 +7,8 @@ part 'firebase_app_dart.dart';
 /// A Dart only implementation of FirebaseCore for managing Firebase app
 /// instances.
 class FirebaseCoreDart extends FirebasePlatform {
-  final Map<String, FirebaseAppPlatform> _apps = <String, FirebaseAppPlatform>{};
+  final Map<String, FirebaseAppPlatform> _apps =
+      <String, FirebaseAppPlatform>{};
 
   @override
   List<FirebaseAppPlatform> get apps {

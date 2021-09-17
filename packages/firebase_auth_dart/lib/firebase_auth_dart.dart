@@ -5,16 +5,36 @@ import 'dart:async';
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-/// A Dart only implmentation of FirebaseAuth for managing Firebase users.
+import 'src/firebase_auth_user.dart';
+import 'src/firebase_auth_user_credential.dart';
+import 'src/interop/dart_auth.dart';
+import 'src/interop/dart_user.dart';
+
+/// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDart extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDart] classs.
-  FirebaseAuthDart({required FirebaseApp app}) : super(appInstance: app) {
+  FirebaseAuthDart({required FirebaseApp app})
+      : _auth = DartAuth(apiKey: app.options.apiKey),
+        super(appInstance: app) {
     // Create a app instance broadcast stream for both delegate listener events
     _userChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
+    _authStateChangesListeners[app.name] =
+        StreamController<UserPlatform?>.broadcast();
+
+    _auth!.onAuthStateChanged.map((DartUser? event) {
+      if (event == null) {
+        return null;
+      }
+      return User(this, event);
+    }).listen((user) {
+      _authStateChangesListeners[app.name]!.add(user);
+    });
   }
 
-  FirebaseAuthDart._() : super(appInstance: null);
+  FirebaseAuthDart._()
+      : _auth = null,
+        super(appInstance: null);
 
   /// Stub initializer to allow creating an instance without
   /// registering delegates or listeners.
@@ -24,14 +44,27 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
     return FirebaseAuthDart._();
   }
 
+  /// Instance of auth from Identity Provider API service.
+  final DartAuth? _auth;
+
   @override
-  UserPlatform? get currentUser;
+  UserPlatform? get currentUser {
+    final dartCurrentUser = _auth!.currentUser;
+
+    if (dartCurrentUser == null) {
+      return null;
+    }
+
+    return User(this, _auth!.currentUser!);
+  }
 
   @override
   String? tenantId;
 
   static final Map<String, StreamController<UserPlatform?>>
       _userChangesListeners = <String, StreamController<UserPlatform?>>{};
+  static final Map<String, StreamController<UserPlatform?>>
+      _authStateChangesListeners = <String, StreamController<UserPlatform?>>{};
 
   @override
   FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
@@ -54,9 +87,16 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   Future<UserCredentialPlatform> signInWithEmailAndPassword(
-      String email, String password) {
-    // TODO: implement signInWithEmailAndPassword
-    throw UnimplementedError();
+      String email, String password) async {
+    try {
+      return UserCredential(
+        this,
+        await _auth!.signInWithEmailAndPassword(email, password),
+      );
+    } catch (exception) {
+      //TODO: implment exception handling util
+      rethrow;
+    }
   }
 
   @override

@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:firebase_auth_dart/src/interop/auth.dart';
-import 'package:firebase_auth_dart/src/interop/exception.dart';
-import 'package:firebase_auth_dart/src/interop/user.dart';
+import 'package:firebase_auth_dart/src/interop/dart_auth.dart';
+import 'package:firebase_auth_dart/src/interop/dart_exception.dart';
+import 'package:firebase_auth_dart/src/interop/dart_user.dart';
+import 'package:firebase_auth_dart/src/interop/dart_user_credential.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,10 +13,8 @@ void main() {
     HttpOverrides.global = null;
   });
   group('IPAuth', () {
-    final auth = IPAuth(
-      settings: IPAuthSettings(
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-      ),
+    final auth = DartAuth(
+      apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
     );
     group('Sign in with email and password', () {
       test('Successful sign-in', () async {
@@ -24,7 +23,7 @@ void main() {
 
         final user = await auth.signInWithEmailAndPassword(email, password);
 
-        expect(user, isA<IPUser>());
+        expect(user, isA<DartUserCredential>());
       });
       test("User doesn't exist", () async {
         const email = 'ghostuser@test.com';
@@ -34,7 +33,7 @@ void main() {
         } catch (exception) {
           expect(
             exception,
-            isA<IPException>().having(
+            isA<AuthException>().having(
               (error) => error.code,
               'error code',
               ErrorCode.emailNotFound,
@@ -50,7 +49,7 @@ void main() {
         } catch (exception) {
           expect(
             exception,
-            isA<IPException>().having(
+            isA<AuthException>().having(
               (error) => error.code,
               'error code',
               ErrorCode.invalidPassword,
@@ -66,7 +65,7 @@ void main() {
         } catch (exception) {
           expect(
             exception,
-            isA<IPException>().having(
+            isA<AuthException>().having(
               (error) => error.code,
               'error code',
               ErrorCode.userDisabled,
@@ -81,7 +80,7 @@ void main() {
         const email = 'ipauth@test.com';
         const password = '123qws';
         final user = await auth.signUpWithEmailAndPassword(email, password);
-        expect(user, isA<IPUser>());
+        expect(user, isA<DartUser>());
       });
       test('User already exists', () async {
         const email = 'ipauth@test.com';
@@ -91,7 +90,7 @@ void main() {
         } catch (exception) {
           expect(
             exception,
-            isA<IPException>().having(
+            isA<AuthException>().having(
               (error) => error.code,
               'error code',
               ErrorCode.emailExists,
@@ -108,7 +107,7 @@ void main() {
         } catch (exception) {
           expect(
             exception,
-            isA<IPException>().having(
+            isA<AuthException>().having(
               (error) => error.code,
               'error code',
               ErrorCode.operationNotAllowed,
