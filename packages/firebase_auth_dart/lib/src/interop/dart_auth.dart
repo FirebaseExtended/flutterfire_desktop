@@ -142,7 +142,7 @@ class DartAuth {
 
   /// Fetch the list of providers associated with a specified email.
   ///
-  /// Throws **[AuthException]** with following codes:
+  /// Throws **[AuthException]** with following possible codes:
   /// - `INVALID_EMAIL`: user doesn't exist
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
@@ -169,7 +169,7 @@ class DartAuth {
 
   /// Send a password reset email.
   ///
-  /// Throws **[AuthException]** with following codes:
+  /// Throws **[AuthException]** with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<String?> sendPasswordResetEmail(String email) async {
     try {
@@ -188,6 +188,32 @@ class DartAuth {
       throw authException;
     } catch (exception) {
       log('$exception', name: 'IPAuth/sendPasswordResetEmail');
+
+      rethrow;
+    }
+  }
+
+  /// Send a sign in link to email.
+  ///
+  /// Throws **[AuthException]** with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  Future<String?> sendSignInLinkToEmail(String email) async {
+    try {
+      final _response = await _identityToolkit.getOobConfirmationCode(
+        Relyingparty(
+          email: email,
+          requestType: 'EMAIL_SIGNIN',
+        ),
+      );
+
+      return _response.email;
+    } on DetailedApiRequestError catch (exception) {
+      final authException = AuthException.fromErrorCode(exception.message);
+      log('$authException', name: 'DartAuth/${authException.code}');
+
+      throw authException;
+    } catch (exception) {
+      log('$exception', name: 'IPAuth/sendSignInLinkToEmail');
 
       rethrow;
     }

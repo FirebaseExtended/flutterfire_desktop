@@ -194,16 +194,24 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   Future<void> sendPasswordResetEmail(String email,
-      [ActionCodeSettings? actionCodeSettings]) {
-    // TODO: implement sendPasswordResetEmail
-    throw UnimplementedError();
+      [ActionCodeSettings? actionCodeSettings]) async {
+    try {
+      await _auth!.sendPasswordResetEmail(email);
+    } catch (e) {
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override
   Future<void> sendSignInLinkToEmail(
-      String email, ActionCodeSettings actionCodeSettings) {
-    // TODO: implement sendSignInLinkToEmail
-    throw UnimplementedError();
+      String email, ActionCodeSettings actionCodeSettings) async {
+    try {
+      await _auth!.sendSignInLinkToEmail(email);
+    } catch (e) {
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override
