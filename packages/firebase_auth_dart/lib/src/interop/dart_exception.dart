@@ -17,6 +17,12 @@ class ErrorCode {
 
   /// Thrown if this device is blocked due to unusual activity.
   static const tooManyAttempts = 'TOO_MANY_ATTEMPTS_TRY_LATER';
+
+  /// Thrown if the email address is badly formatted.
+  static const invalidEmail = 'INVALID_EMAIL';
+
+  /// Thrown if the identifier provided to `createAuthUri` is invalid.
+  static const invalidIdentifier = 'INVALID_IDENTIFIER';
 }
 
 /// And exception wrapping error codes from the IP API.
@@ -50,6 +56,10 @@ class AuthException implements Exception {
             'We have blocked all requests from this device'
             ' due to unusual activity. Try again later.',
             code);
+      case ErrorCode.invalidEmail:
+        return AuthException('Email address is badly formatted.', code);
+      case ErrorCode.invalidIdentifier:
+        return AuthException('Invalid identifier, either empty or null.', code);
       default:
         return AuthException('Unknown error happened.', 'UNKNOWN');
     }

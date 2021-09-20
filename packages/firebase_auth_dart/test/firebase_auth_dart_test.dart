@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUpAll(() {
     // Avoid HTTP error 400 mocked returns
-    // TODO(Mais): once done create mock clients
+    // TODO(pr-Mais): once done create mock clients
     HttpOverrides.global = null;
   });
   group('IPAuth', () {
@@ -79,14 +79,14 @@ void main() {
       test('Successful', () async {
         const email = 'ipauth@test.com';
         const password = '123qws';
-        final user = await auth.signUpWithEmailAndPassword(email, password);
+        final user = await auth.createUserWithEmailAndPassword(email, password);
         expect(user, isA<DartUser>());
       });
       test('User already exists', () async {
         const email = 'ipauth@test.com';
         const password = '123qws';
         try {
-          await auth.signUpWithEmailAndPassword(email, password);
+          await auth.createUserWithEmailAndPassword(email, password);
         } catch (exception) {
           expect(
             exception,
@@ -103,7 +103,7 @@ void main() {
         const email = 'ipauth@test.com';
         const password = '123qws';
         try {
-          await auth.signUpWithEmailAndPassword(email, password);
+          await auth.createUserWithEmailAndPassword(email, password);
         } catch (exception) {
           expect(
             exception,
@@ -111,6 +111,83 @@ void main() {
               (error) => error.code,
               'error code',
               ErrorCode.operationNotAllowed,
+            ),
+          );
+        }
+      });
+    });
+
+    group('Fetch providers list for email', () {
+      test('Providers list of an existing email', () async {
+        const email = 'ipauth@test.com';
+
+        final providersList = await auth.fetchSignInMethodsForEmail(email);
+
+        expect(
+          providersList,
+          isA<List<String>>().having(
+            (list) => list[0],
+            'first provider',
+            'password',
+          ),
+        );
+      });
+      test("Exception if email doesn't exist", () async {
+        const email = 'fakewichdontexist@test.com';
+
+        try {
+          await auth.fetchSignInMethodsForEmail(email);
+        } catch (exception) {
+          expect(
+            exception,
+            isA<AuthException>().having(
+              (error) => error.code,
+              'error code',
+              ErrorCode.invalidEmail,
+            ),
+          );
+        }
+      });
+      test('Invalid identifier', () async {
+        try {
+          await auth.fetchSignInMethodsForEmail('');
+        } catch (exception) {
+          expect(
+            exception,
+            isA<AuthException>(),
+          );
+        }
+      });
+    });
+
+    group('Password reset email', () {
+      test('Successfully send an email', () async {
+        // place an email which you have access to here
+        const email = '';
+
+        final responseEmail = await auth.sendPasswordResetEmail(email);
+
+        expect(
+          responseEmail,
+          isA<String>().having(
+            (email) => email,
+            "user's email",
+            email,
+          ),
+        );
+      });
+      test("Exception if email doesn't exist", () async {
+        const email = 'fakewichdontexist@test.com';
+
+        try {
+          await auth.sendPasswordResetEmail(email);
+        } catch (exception) {
+          expect(
+            exception,
+            isA<AuthException>().having(
+              (error) => error.code,
+              'error code',
+              ErrorCode.emailNotFound,
             ),
           );
         }

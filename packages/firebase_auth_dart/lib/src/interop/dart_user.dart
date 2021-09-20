@@ -1,28 +1,24 @@
-import 'package:googleapis/identitytoolkit/v3.dart';
-
 /// User object wrapping the responses from identity toolkit.
 class DartUser {
   /// Default constructor.
   DartUser(
-    this.token,
+    this.idToken,
     this.uid,
     this.email,
+    this.displayName,
+    this.photoUrl,
   );
 
-  /// Return a dart user object  from `verifyPassword` endpoint in Google's identity toolkit.
-  DartUser.fromVerifyPasswordResponse(VerifyPasswordResponse response)
-      : token = response.idToken ?? '',
-        email = response.email,
-        uid = response.localId ?? '';
-
-  /// Return a dart user object  from `signupNewUser` endpoint in Google's identity toolkit.
-  DartUser.fromSignUpResponse(SignupNewUserResponse response)
-      : token = response.idToken ?? '',
-        email = response.email,
-        uid = response.localId ?? '';
+  /// Return a dart user object from Google's identity toolkit response.
+  DartUser.fromResponse(Map<String, dynamic> response)
+      : idToken = response['idToken'] ?? '',
+        email = response['email'],
+        uid = response['localId'] ?? '',
+        displayName = response['displayName'] ?? '',
+        photoUrl = response['photoUrl'] ?? '';
 
   /// The `idToken` field from API response.
-  final String token;
+  final String idToken;
 
   /// The `localId` field from API response.
   final String uid;
@@ -30,9 +26,18 @@ class DartUser {
   /// The `email` field from API response.
   final String? email;
 
+  /// The `displayName` field from API response.
+  final String? displayName;
+
+  /// The `photoUrl` field from API response.
+  final String? photoUrl;
+
   /// A Map representation of this instance.
   Map<String, dynamic> toMap() => {
+        'idToken': idToken,
         'localId': uid,
         'email': email,
+        'displayName': displayName,
+        'photoUrl': photoUrl,
       };
 }

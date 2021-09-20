@@ -21,14 +21,26 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
         StreamController<UserPlatform?>.broadcast();
     _authStateChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
+    _idTokenChangesListeners[app.name] =
+        StreamController<UserPlatform?>.broadcast();
 
-    _auth!.onAuthStateChanged.map((DartUser? event) {
-      if (event == null) {
+    _auth!.onAuthStateChanged.map((DartUser? dartUser) {
+      if (dartUser == null) {
         return null;
       }
-      return User(this, event);
-    }).listen((user) {
+      return User(this, dartUser);
+    }).listen((User? user) {
       _authStateChangesListeners[app.name]!.add(user);
+    });
+
+    _auth!.onIdTokenChanged.map((DartUser? dartUser) {
+      if (dartUser == null) {
+        return null;
+      }
+      return User(this, dartUser);
+    }).listen((User? user) {
+      _idTokenChangesListeners[app.name]!.add(user);
+      _userChangesListeners[app.name]!.add(user);
     });
   }
 
@@ -63,8 +75,12 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   static final Map<String, StreamController<UserPlatform?>>
       _userChangesListeners = <String, StreamController<UserPlatform?>>{};
+
   static final Map<String, StreamController<UserPlatform?>>
       _authStateChangesListeners = <String, StreamController<UserPlatform?>>{};
+
+  static final Map<String, StreamController<UserPlatform?>>
+      _idTokenChangesListeners = <String, StreamController<UserPlatform?>>{};
 
   @override
   FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
@@ -80,12 +96,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Stream<UserPlatform?> userChanges() async* {
-    yield currentUser;
-    yield* _userChangesListeners[app.name]!.stream;
-  }
-
-  @override
   Future<UserCredentialPlatform> signInWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -94,7 +104,17 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailAndPassword(email, password),
       );
     } catch (exception) {
-      //TODO: implment exception handling util
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> fetchSignInMethodsForEmail(String email) async {
+    try {
+      return await _auth!.fetchSignInMethodsForEmail(email);
+    } catch (exception) {
+      // TODO(pr_Mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -102,12 +122,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   @override
   Future<void> applyActionCode(String code) {
     // TODO: implement applyActionCode
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<UserPlatform?> authStateChanges() {
-    // TODO: implement authStateChanges
     throw UnimplementedError();
   }
 
@@ -125,15 +139,16 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   Future<UserCredentialPlatform> createUserWithEmailAndPassword(
-      String email, String password) {
-    // TODO: implement createUserWithEmailAndPassword
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<String>> fetchSignInMethodsForEmail(String email) {
-    // TODO: implement fetchSignInMethodsForEmail
-    throw UnimplementedError();
+      String email, String password) async {
+    try {
+      return UserCredential(
+        this,
+        await _auth!.createUserWithEmailAndPassword(email, password),
+      );
+    } catch (e) {
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override
@@ -143,9 +158,28 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Stream<UserPlatform?> idTokenChanges() {
-    // TODO: implement idTokenChanges
-    throw UnimplementedError();
+  Stream<UserPlatform?> authStateChanges() async* {
+    yield currentUser;
+    yield* _authStateChangesListeners[app.name]!.stream;
+  }
+
+  @override
+  Stream<UserPlatform?> idTokenChanges() async* {
+    yield currentUser;
+    yield* _idTokenChangesListeners[app.name]!.stream;
+  }
+
+  @override
+  Stream<UserPlatform?> userChanges() async* {
+    yield currentUser;
+    yield* _userChangesListeners[app.name]!.stream;
+  }
+
+  @override
+  void sendAuthChangesEvent(String appName, UserPlatform? userPlatform) {
+    assert(_userChangesListeners[appName] != null);
+
+    _userChangesListeners[appName]!.add(userPlatform);
   }
 
   @override
@@ -157,11 +191,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   @override
   // TODO: implement languageCode
   String? get languageCode => throw UnimplementedError();
-
-  @override
-  void sendAuthChangesEvent(String appName, UserPlatform? userPlatform) {
-    // TODO: implement sendAuthChangesEvent
-  }
 
   @override
   Future<void> sendPasswordResetEmail(String email,
