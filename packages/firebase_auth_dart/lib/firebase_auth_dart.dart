@@ -132,6 +132,17 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
+  Future<void> sendPasswordResetEmail(String email,
+      [ActionCodeSettings? actionCodeSettings]) async {
+    try {
+      await _auth!.sendPasswordResetEmail(email);
+    } catch (e) {
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> confirmPasswordReset(String code, String newPassword) {
     // TODO: implement confirmPasswordReset
     throw UnimplementedError();
@@ -191,17 +202,6 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   @override
   // TODO: implement languageCode
   String? get languageCode => throw UnimplementedError();
-
-  @override
-  Future<void> sendPasswordResetEmail(String email,
-      [ActionCodeSettings? actionCodeSettings]) async {
-    try {
-      await _auth!.sendPasswordResetEmail(email);
-    } catch (e) {
-      // TODO(pr_Mais): throw FirebaseAuthException
-      rethrow;
-    }
-  }
 
   @override
   Future<void> sendSignInLinkToEmail(
@@ -283,9 +283,12 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<void> signOut() {
-    // TODO: implement signOut
-    throw UnimplementedError();
+  Future<void> signOut() async {
+    try {
+      await _auth!.signOut();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override

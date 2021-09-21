@@ -177,6 +177,8 @@ class DartAuth {
         Relyingparty(
           email: email,
           requestType: 'PASSWORD_RESET',
+          // have to be sent, otherwise the user won't be redirected to the app.
+          // continueUrl: ,
         ),
       );
 
@@ -203,6 +205,8 @@ class DartAuth {
         Relyingparty(
           email: email,
           requestType: 'EMAIL_SIGNIN',
+          // have to be sent, otherwise the user won't be redirected to the app.
+          // continueUrl: ,
         ),
       );
 
@@ -214,6 +218,20 @@ class DartAuth {
       throw authException;
     } catch (exception) {
       log('$exception', name: 'IPAuth/sendSignInLinkToEmail');
+
+      rethrow;
+    }
+  }
+
+  /// Sign user out by cleaning currentUser and all streams.
+  ///
+  Future<void> signOut() async {
+    try {
+      currentUser = null;
+      _changeController!.add(null);
+      _idTokenChangedController!.add(null);
+    } catch (exception) {
+      log('$exception', name: 'IPAuth/signOut');
 
       rethrow;
     }
