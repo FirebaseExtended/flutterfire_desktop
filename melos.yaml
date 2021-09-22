@@ -24,3 +24,11 @@ scripts:
     select-package:
       dir-exists:
         - "test/"
+        
+  firebase:emulator:
+      run: |
+        cd .github/workflows/scripts && ./start-firebase-emulator.sh
+      description: |
+        Start the Firebase emulator suite. Used by Functions, Firestore, Auth and Storage
+        integration testing.
+        - Requires Node.js and NPM installed.

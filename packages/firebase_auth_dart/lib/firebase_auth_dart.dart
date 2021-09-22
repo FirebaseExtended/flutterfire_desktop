@@ -1,9 +1,11 @@
 library firebase_auth_dart;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart';
 
 import 'src/firebase_auth_user.dart';
 import 'src/firebase_auth_user_credential.dart';
@@ -14,7 +16,7 @@ import 'src/interop/dart_user.dart';
 class FirebaseAuthDart extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDart] classs.
   FirebaseAuthDart({required FirebaseApp app})
-      : _auth = DartAuth(apiKey: app.options.apiKey),
+      : _auth = DartAuth(options: DartAuthOptions(apiKey: app.options.apiKey)),
         super(appInstance: app) {
     // Create a app instance broadcast stream for both delegate listener events
     _userChangesListeners[app.name] =
@@ -57,7 +59,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   /// Instance of auth from Identity Provider API service.
-  final DartAuth? _auth;
+  DartAuth? _auth;
 
   @override
   UserPlatform? get currentUser {
@@ -292,9 +294,47 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<void> useAuthEmulator(String host, int port) {
-    // TODO: implement useAuthEmulator
-    return Future.value();
+  Future<void> useAuthEmulator(String host, int port) async {
+    // 1. Get the emulator project configs, it must be initialized first.
+    // http://localhost:9099/emulator/v1/projects/{project-id}/config
+
+    final localEmulator = Uri(
+      scheme: 'http',
+      host: host,
+      port: port,
+      pathSegments: [
+        'emulator',
+        'v1',
+        'projects',
+        app.options.projectId,
+        'config'
+      ],
+    );
+
+    final resposne = await get(localEmulator);
+
+    final Map emulatorProjectConfig = json.decode(resposne.body);
+
+    // 2. Check if the emulator is in use, if it isn't an error will be returned.
+    if (emulatorProjectConfig.containsKey('error')) {
+      throw FirebaseAuthException(
+        code: emulatorProjectConfig['error']['status'],
+        message: emulatorProjectConfig['error']['message'],
+      );
+    }
+
+    // 3. Instantiate an instance of [DartAuth] with emulator options.
+    _auth = DartAuth(
+      options: DartAuthOptions(
+        // Just a dummy API key.
+        apiKey: 'emulator:test',
+        host: host,
+        port: port,
+        useEmulator: true,
+      ),
+    );
+
+    return;
   }
 
   @override

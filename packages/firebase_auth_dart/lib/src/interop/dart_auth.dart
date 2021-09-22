@@ -14,21 +14,65 @@ import 'dart_user_credential.dart';
 
 part 'providers.dart';
 
+/// The options used for all requests made by [DartAuth] instance.
+class DartAuthOptions {
+  // ignore: public_member_api_docs
+  DartAuthOptions({
+    required this.apiKey,
+    this.host = 'localhost',
+    this.port = 9099,
+    this.useEmulator = false,
+  });
+
+  /// The API key used for all requests made by DartAuth instance.
+  ///
+  /// Leave empty if `useEmulator` is true.
+  final String apiKey;
+
+  /// The Firebase Auth emulator host, defaults to `localhost`.
+  final String? host;
+
+  /// The Firebase Auth emulator port, defaults to `9099`,
+  /// check your terminal for the port being used.
+  final int? port;
+
+  /// Whether to use Firebase Auth emulator for all requests.
+  ///
+  /// You must start the emulator in order to use it, see:
+  /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
+  final bool useEmulator;
+}
+
 /// Pure Dart service wrapper around the Identity Platform REST API.
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class DartAuth {
   // ignore: public_member_api_docs
-  DartAuth({required this.apiKey}) {
-    _client = clientViaApiKey(apiKey);
-    _identityToolkit = IdentityToolkitApi(_client).relyingparty;
+  DartAuth({required this.options})
+      : assert(
+            options.apiKey.isNotEmpty,
+            'API key must not be empty, please provide a valid API key, '
+            'or a dummy one if you are using the emulator.') {
+    _client = clientViaApiKey(options.apiKey);
+
+    // Use auth emulator if available
+    if (options.useEmulator) {
+      final rootUrl =
+          'http://${options.host}:${options.port}/www.googleapis.com/';
+
+      _identityToolkit =
+          IdentityToolkitApi(_client, rootUrl: rootUrl).relyingparty;
+    } else {
+      _identityToolkit = IdentityToolkitApi(_client).relyingparty;
+    }
+
     _idTokenChangedController =
         StreamController<DartUser?>.broadcast(sync: true);
     _changeController = StreamController<DartUser?>.broadcast(sync: true);
   }
 
   /// The settings this instance is configured with.
-  final String apiKey;
+  final DartAuthOptions options;
 
   late http.Client _client;
 
