@@ -267,7 +267,43 @@ class DartAuth {
     }
   }
 
-  /// Sign user out by cleaning currentUser and all streams.
+  /// Sign in anonymous users.
+  ///
+  Future<DartUserCredential> signInAnonymously() async {
+    try {
+      final _response = await _identityToolkit.signupNewUser(
+        IdentitytoolkitRelyingpartySignupNewUserRequest(),
+      );
+
+      final user = DartUser.fromResponse(_response.toJson());
+
+      currentUser = user;
+      _changeController!.add(user);
+      _idTokenChangedController!.add(user);
+
+      final providerId = _AuthProvider.anonymous.providerId;
+
+      return DartUserCredential(
+        user: user,
+        authCredential: AuthCredential(
+          providerId: providerId,
+          signInMethod: providerId,
+        ),
+        additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+      );
+    } on DetailedApiRequestError catch (exception) {
+      final authException = AuthException.fromErrorCode(exception.message);
+      log('$authException', name: 'DartAuth/${authException.code}');
+
+      throw authException;
+    } catch (exception) {
+      log('$exception', name: 'IPAuth/signOut');
+
+      rethrow;
+    }
+  }
+
+  /// Sign user out by cleaning currentUser, local persistence and all streams.
   ///
   Future<void> signOut() async {
     try {

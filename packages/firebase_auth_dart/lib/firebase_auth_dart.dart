@@ -240,9 +240,16 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<UserCredentialPlatform> signInAnonymously() {
-    // TODO: implement signInAnonymously
-    throw UnimplementedError();
+  Future<UserCredentialPlatform> signInAnonymously() async {
+    try {
+      return UserCredential(
+        this,
+        await _auth!.signInAnonymously(),
+      );
+    } catch (e) {
+      // TODO(pr_Mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override
