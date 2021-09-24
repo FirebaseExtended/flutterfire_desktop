@@ -1,10 +1,7 @@
 import 'dart:io';
 
-import 'package:firebase_auth_dart/src/interop/dart_auth.dart';
-import 'package:firebase_auth_dart/src/interop/dart_exception.dart';
-import 'package:firebase_auth_dart/src/interop/dart_user.dart';
-import 'package:firebase_auth_dart/src/interop/dart_user_credential.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_auth_dart/firebase_auth.dart';
+import 'package:test/test.dart';
 
 void main() {
   setUpAll(() {
@@ -13,17 +10,20 @@ void main() {
     HttpOverrides.global = null;
   });
   group('IPAuth', () {
-    final auth = DartAuth(
-      apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+    final auth = Auth(
+      options: AuthOptions(
+        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+        projectId: '',
+      ),
     );
-    group('Sign in with email and password', () {
+    group('Sign in/out with email and password', () {
       test('Successful sign-in', () async {
-        const email = 'ipauth@test.com';
-        const password = '123qwe';
+        const email = 'ipauth+10@test.com';
+        const password = '123qws';
 
         final user = await auth.signInWithEmailAndPassword(email, password);
 
-        expect(user, isA<DartUserCredential>());
+        expect(user, isA<UserCredential>());
       });
       test("User doesn't exist", () async {
         const email = 'ghostuser@test.com';
@@ -42,7 +42,7 @@ void main() {
         }
       });
       test('Wrong password', () async {
-        const email = 'ipauth@test.com';
+        const email = 'mais@test.com';
         const password = '123qwsdgsdfg';
         try {
           await auth.signInWithEmailAndPassword(email, password);
@@ -77,10 +77,10 @@ void main() {
 
     group('Sign up with email and password', () {
       test('Successful', () async {
-        const email = 'ipauth@test.com';
+        const email = 'ipauth+10@test.com';
         const password = '123qws';
         final user = await auth.createUserWithEmailAndPassword(email, password);
-        expect(user, isA<DartUser>());
+        expect(user, isA<UserCredential>());
       });
       test('User already exists', () async {
         const email = 'ipauth@test.com';
@@ -181,6 +181,37 @@ void main() {
 
         try {
           await auth.sendPasswordResetEmail(email);
+        } catch (exception) {
+          expect(
+            exception,
+            isA<AuthException>().having(
+              (error) => error.code,
+              'error code',
+              ErrorCode.emailNotFound,
+            ),
+          );
+        }
+      });
+    });
+
+    group('Email link sign in', () {
+      test('Successfully send an email', () async {
+        // place an email which you have access to here
+        const email = 'mais@invertase.io';
+
+        final responseEmail = await auth.sendSignInLinkToEmail(email);
+
+        expect(
+          responseEmail,
+          email,
+        );
+      });
+
+      test("Exception if email doesn't exist", () async {
+        const email = 'fakewichdontexist@test.com';
+
+        try {
+          await auth.sendSignInLinkToEmail(email);
         } catch (exception) {
           expect(
             exception,

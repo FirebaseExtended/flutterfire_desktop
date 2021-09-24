@@ -1,3 +1,5 @@
+part of firebase_auth_dart;
+
 /// All possible error codes returned from Identity Platform REST API.
 class ErrorCode {
   /// Thrown if there is no registered user corresponding to this email.

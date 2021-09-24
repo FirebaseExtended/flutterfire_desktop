@@ -50,10 +50,11 @@ class _SignInPageState extends State<SignInPage> {
                   ));
                   return;
                 }
+
                 await _signOut();
 
                 final uid = user.uid;
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('$uid has successfully signed out.'),
                 ));
               },
@@ -66,7 +67,7 @@ class _SignInPageState extends State<SignInPage> {
         return ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[
-            _UserInfoCard(user),
+            _UserInfoCard(user: user),
             _EmailPasswordForm(),
             _EmailLinkSignInSection(),
             _AnonymouslySignInSection(),
@@ -85,7 +86,7 @@ class _SignInPageState extends State<SignInPage> {
 }
 
 class _UserInfoCard extends StatefulWidget {
-  const _UserInfoCard(this.user);
+  const _UserInfoCard({Key key, this.user}) : super(key: key);
 
   final User user;
 
@@ -111,71 +112,73 @@ class _UserInfoCardState extends State<_UserInfoCard> {
               ),
             ),
             if (widget.user != null)
-              if (widget.user.photoURL != null)
-                Container(
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: Image.network(widget.user.photoURL),
-                )
-              else
-                Align(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    color: Colors.black,
-                    child: const Text(
-                      'No image',
-                      textAlign: TextAlign.center,
-                    ),
+              // if (widget.user.photoURL != null)
+              //   Container(
+              //     alignment: Alignment.center,
+              //     margin: const EdgeInsets.only(bottom: 8),
+              //     child: Image.network(widget.user.photoURL),
+              //   )
+              // else
+              //   Align(
+              //     child: Container(
+              //       padding: const EdgeInsets.all(8),
+              //       margin: const EdgeInsets.only(bottom: 8),
+              //       color: Colors.black,
+              //       child: const Text(
+              //         'No image',
+              //         textAlign: TextAlign.center,
+              //       ),
+              //     ),
+              //   ),
+              Text(widget.user == null
+                      ? 'Not signed in'
+                      :
+                      // '${widget.user.isAnonymous ? 'User is anonymous\n\n' : ''}'
+                      //     'Email: ${widget.user.email} (verified: ${widget.user.emailVerified})\n\n'
+                      //     'Phone number: ${widget.user.phoneNumber}\n\n'
+                      //     'Name: ${widget.user.displayName}\n\n\n'
+                      'ID: ${widget.user.uid}\n\n'
+                  // 'Tenant ID: ${widget.user.tenantId}\n\n'
+                  // 'Refresh token: ${widget.user.refreshToken}\n\n\n'
+                  // 'Created: ${widget.user.metadata.creationTime.toString()}\n\n'
+                  // 'Last login: ${widget.user.metadata.lastSignInTime}\n\n'
                   ),
-                ),
-            Text(widget.user == null
-                ? 'Not signed in'
-                : '${widget.user.isAnonymous ? 'User is anonymous\n\n' : ''}'
-                    'Email: ${widget.user.email} (verified: ${widget.user.emailVerified})\n\n'
-                    'Phone number: ${widget.user.phoneNumber}\n\n'
-                    'Name: ${widget.user.displayName}\n\n\n'
-                    'ID: ${widget.user.uid}\n\n'
-                    'Tenant ID: ${widget.user.tenantId}\n\n'
-                    'Refresh token: ${widget.user.refreshToken}\n\n\n'
-                    'Created: ${widget.user.metadata.creationTime.toString()}\n\n'
-                    'Last login: ${widget.user.metadata.lastSignInTime}\n\n'),
-            if (widget.user != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    widget.user.providerData.isEmpty
-                        ? 'No providers'
-                        : 'Providers:',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  for (var provider in widget.user.providerData)
-                    Dismissible(
-                      key: Key(provider.uid),
-                      onDismissed: (action) =>
-                          widget.user.unlink(provider.providerId),
-                      child: Card(
-                        color: Colors.grey[700],
-                        child: ListTile(
-                          leading: provider.photoURL == null
-                              ? IconButton(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: () =>
-                                      widget.user.unlink(provider.providerId))
-                              : Image.network(provider.photoURL),
-                          title: Text(provider.providerId),
-                          subtitle: Text(
-                              "${provider.uid == null ? "" : "ID: ${provider.uid}\n"}"
-                              "${provider.email == null ? "" : "Email: ${provider.email}\n"}"
-                              "${provider.phoneNumber == null ? "" : "Phone number: ${provider.phoneNumber}\n"}"
-                              "${provider.displayName == null ? "" : "Name: ${provider.displayName}\n"}"),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+            // if (widget.user != null)
+            //   Column(
+            //     crossAxisAlignment: CrossAxisAlignment.stretch,
+            //     children: [
+            //       Text(
+            //         widget.user.providerData.isEmpty
+            //             ? 'No providers'
+            //             : 'Providers:',
+            //         style: const TextStyle(fontWeight: FontWeight.bold),
+            //         textAlign: TextAlign.center,
+            //       ),
+            //       for (var provider in widget.user.providerData)
+            //         Dismissible(
+            //           key: Key(provider.uid),
+            //           onDismissed: (action) =>
+            //               widget.user.unlink(provider.providerId),
+            //           child: Card(
+            //             color: Colors.grey[700],
+            //             child: ListTile(
+            //               leading: provider.photoURL == null
+            //                   ? IconButton(
+            //                       icon: const Icon(Icons.remove),
+            //                       onPressed: () =>
+            //                           widget.user.unlink(provider.providerId))
+            //                   : Image.network(provider.photoURL),
+            //               title: Text(provider.providerId),
+            //               subtitle: Text(
+            //                   "${provider.uid == null ? "" : "ID: ${provider.uid}\n"}"
+            //                   "${provider.email == null ? "" : "Email: ${provider.email}\n"}"
+            //                   "${provider.phoneNumber == null ? "" : "Phone number: ${provider.phoneNumber}\n"}"
+            //                   "${provider.displayName == null ? "" : "Name: ${provider.displayName}\n"}"),
+            //             ),
+            //           ),
+            //         ),
+            //     ],
+            //   ),
             Visibility(
               visible: widget.user != null,
               child: Container(
@@ -191,7 +194,8 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                     IconButton(
                       onPressed: () => showDialog(
                         context: context,
-                        builder: (context) => UpdateUserDialog(widget.user),
+                        builder: (context) =>
+                            UpdateUserDialog(user: widget.user),
                       ),
                       icon: const Icon(Icons.text_snippet),
                     ),
@@ -210,10 +214,12 @@ class _UserInfoCardState extends State<_UserInfoCard> {
   }
 }
 
+// ignore: public_member_api_docs
 class UpdateUserDialog extends StatefulWidget {
+  // ignore: public_member_api_docs
+  const UpdateUserDialog({Key key, this.user}) : super(key: key);
+  // ignore: public_member_api_docs
   final User user;
-
-  const UpdateUserDialog(this.user);
 
   @override
   _UpdateUserDialogState createState() => _UpdateUserDialogState();
@@ -249,7 +255,7 @@ class _UpdateUserDialogState extends State<UpdateUserDialog> {
               autocorrect: false,
               validator: (String value) {
                 if (value.isNotEmpty) {
-                  var uri = Uri.parse(value);
+                  final uri = Uri.parse(value);
                   if (uri.isAbsolute) {
                     //You can get the data with dart:io or http and check it here
                     return null;
@@ -315,7 +321,9 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
                   validator: (String value) {
-                    if (value.isEmpty) return 'Please enter some text';
+                    if (value.isEmpty) {
+                      return 'Please enter some text';
+                    }
                     return null;
                   },
                 ),
@@ -323,7 +331,9 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
                   controller: _passwordController,
                   decoration: const InputDecoration(labelText: 'Password'),
                   validator: (String value) {
-                    if (value.isEmpty) return 'Please enter some text';
+                    if (value.isEmpty) {
+                      return 'Please enter some text';
+                    }
                     return null;
                   },
                   obscureText: true,
@@ -357,19 +367,19 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
   // Example code of how to sign in with email and password.
   Future<void> _signInWithEmailAndPassword() async {
     try {
-      final User user = (await _auth.signInWithEmailAndPassword(
+      final user = (await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       ))
           .user;
 
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user.email} signed in'),
         ),
       );
     } catch (e) {
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to sign in with Email & Password'),
         ),
@@ -410,7 +420,9 @@ class _EmailLinkSignInSectionState extends State<_EmailLinkSignInSection> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: (String value) {
-                  if (value.isEmpty) return 'Please enter your email.';
+                  if (value.isEmpty) {
+                    return 'Please enter your email.';
+                  }
                   return null;
                 },
               ),
@@ -473,7 +485,7 @@ class _AnonymouslySignInSection extends StatefulWidget {
 
 class _AnonymouslySignInSectionState extends State<_AnonymouslySignInSection> {
   bool _success;
-  String _userID = '';
+  final String _userID = '';
 
   @override
   Widget build(BuildContext context) {
@@ -522,7 +534,7 @@ class _AnonymouslySignInSectionState extends State<_AnonymouslySignInSection> {
   // Example code of how to sign in anonymously.
   Future<void> _signInAnonymously() async {
     try {
-      final User user = (await _auth.signInAnonymously()).user;
+      final user = (await _auth.signInAnonymously()).user;
 
       Scaffold.of(context).showSnackBar(
         SnackBar(
@@ -685,7 +697,7 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
   }
 
   Future<void> _verifyWebPhoneNumber() async {
-    ConfirmationResult confirmationResult =
+    var confirmationResult =
         await _auth.signInWithPhoneNumber(_phoneNumberController.text);
 
     webConfirmationResult = confirmationResult;
@@ -762,11 +774,11 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
   // Example code of how to sign in with phone.
   Future<void> _signInWithPhoneNumber() async {
     try {
-      final PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      final credential = PhoneAuthProvider.credential(
         verificationId: _verificationId,
         smsCode: _smsController.text,
       );
-      final User user = (await _auth.signInWithCredential(credential)).user;
+      final user = (await _auth.signInWithCredential(credential)).user;
 
       widget._scaffold.showSnackBar(SnackBar(
         content: Text('Successfully signed in UID: ${user.uid}'),
@@ -964,7 +976,7 @@ class _OtherProvidersSignInSectionState
     try {
       UserCredential userCredential;
       if (kIsWeb) {
-        GithubAuthProvider githubProvider = GithubAuthProvider();
+        final githubProvider = GithubAuthProvider();
         userCredential = await _auth.signInWithPopup(githubProvider);
       } else {
         final AuthCredential credential = GithubAuthProvider.credential(
@@ -994,7 +1006,7 @@ class _OtherProvidersSignInSectionState
       final AuthCredential credential = FacebookAuthProvider.credential(
         _tokenController.text,
       );
-      final User user = (await _auth.signInWithCredential(credential)).user;
+      final user = (await _auth.signInWithCredential(credential)).user;
 
       Scaffold.of(context).showSnackBar(
         SnackBar(
@@ -1017,7 +1029,7 @@ class _OtherProvidersSignInSectionState
       UserCredential userCredential;
 
       if (kIsWeb) {
-        TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+        final twitterProvider = TwitterAuthProvider();
         await _auth.signInWithPopup(twitterProvider);
       } else {
         final AuthCredential credential = TwitterAuthProvider.credential(
@@ -1047,12 +1059,11 @@ class _OtherProvidersSignInSectionState
       UserCredential userCredential;
 
       if (kIsWeb) {
-        var googleProvider = GoogleAuthProvider();
+        final googleProvider = GoogleAuthProvider();
         userCredential = await _auth.signInWithPopup(googleProvider);
       } else {
-        final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
+        final googleUser = await GoogleSignIn().signIn();
+        final googleAuth = await googleUser.authentication;
         final googleAuthCredential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,

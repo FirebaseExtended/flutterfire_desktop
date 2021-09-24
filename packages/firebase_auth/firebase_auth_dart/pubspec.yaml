@@ -1,0 +1,16 @@
+name: firebase_auth_dart
+description: TODO
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_dart
+version: 0.1.0
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  googleapis: ^5.0.1
+  googleapis_auth: ^1.1.0
+  http: ^0.13.3
+
+dev_dependencies:
+  test: ^1.16.0

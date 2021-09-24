@@ -1,7 +1,7 @@
-part of auth_interop;
+part of firebase_auth_dart;
 
 /// Representation of an authentication provider.
-enum _AuthProvider {
+enum AuthProvider {
   password,
   phone,
   anonymous,
@@ -13,25 +13,25 @@ enum _AuthProvider {
 }
 
 // ignore: public_member_api_docs
-extension on _AuthProvider {
+extension ProviderID on AuthProvider {
   // ignore: public_member_api_docs
   String get providerId {
     switch (this) {
-      case _AuthProvider.password:
+      case AuthProvider.password:
         return 'password';
-      case _AuthProvider.phone:
+      case AuthProvider.phone:
         return 'phone';
-      case _AuthProvider.anonymous:
+      case AuthProvider.anonymous:
         return 'anonymous';
-      case _AuthProvider.google:
+      case AuthProvider.google:
         return 'google.com';
-      case _AuthProvider.facebook:
+      case AuthProvider.facebook:
         return 'facebook.com';
-      case _AuthProvider.twitter:
+      case AuthProvider.twitter:
         return 'twitter.com';
-      case _AuthProvider.github:
+      case AuthProvider.github:
         return 'github.com';
-      case _AuthProvider.custom:
+      case AuthProvider.custom:
         return 'custom';
     }
   }

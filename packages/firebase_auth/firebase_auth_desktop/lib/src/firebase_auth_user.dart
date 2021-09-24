@@ -1,14 +1,12 @@
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
-
-import 'interop/dart_user.dart';
+import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 
 /// Dart delegate implementation of [UserPlatform].
 class User extends UserPlatform {
   // ignore: public_member_api_docs
-  User(FirebaseAuthPlatform auth, this._dartUser)
-      : super(auth, _dartUser.toMap());
+  User(FirebaseAuthPlatform auth, this._user) : super(auth, _user.toMap());
 
-  final DartUser _dartUser;
+  final auth_dart.User _user;
 
   @override
   Future<void> delete() {
@@ -22,7 +20,7 @@ class User extends UserPlatform {
 
   @override
   // TODO: implement email
-  String? get email => _dartUser.email;
+  String? get email => _user.email;
 
   @override
   // TODO: implement emailVerified
@@ -108,7 +106,7 @@ class User extends UserPlatform {
 
   @override
   // TODO: implement uid
-  String get uid => _dartUser.uid;
+  String get uid => _user.uid;
 
   @override
   Future<UserPlatform> unlink(String providerId) {

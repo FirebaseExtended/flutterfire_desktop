@@ -5,7 +5,6 @@
 
 // @dart=2.9
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_builder.dart';
@@ -13,7 +12,7 @@ import 'package:flutter_signin_button/button_builder.dart';
 import '../register_page.dart';
 import '../signin_page.dart';
 
-// Initialize with a secondary app until dart-only initialization is merged.
+/// Initialize with a secondary app until dart-only initialization is merged.
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
       apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
@@ -26,7 +25,7 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: firebaseOptions);
-  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
   runApp(AuthExampleApp());
 }
 

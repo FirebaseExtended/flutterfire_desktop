@@ -1,22 +1,22 @@
-library firebase_auth_dart;
+library firebase_auth_desktop;
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:http/http.dart';
+import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 
 import 'src/firebase_auth_user.dart';
 import 'src/firebase_auth_user_credential.dart';
-import 'src/interop/dart_auth.dart';
-import 'src/interop/dart_user.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
-class FirebaseAuthDart extends FirebaseAuthPlatform {
-  /// Entry point for the [FirebaseAuthDart] classs.
-  FirebaseAuthDart({required FirebaseApp app})
-      : _auth = DartAuth(options: DartAuthOptions(apiKey: app.options.apiKey)),
+class FirebaseAuthDesktop extends FirebaseAuthPlatform {
+  /// Entry point for the [FirebaseAuthDesktop] classs.
+  FirebaseAuthDesktop({required FirebaseApp app})
+      : _auth = auth_dart.Auth(
+          options: auth_dart.AuthOptions(
+              apiKey: app.options.apiKey, projectId: app.options.projectId),
+        ),
         super(appInstance: app) {
     // Create a app instance broadcast stream for both delegate listener events
     _userChangesListeners[app.name] =
@@ -26,7 +26,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
     _idTokenChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
 
-    _auth!.onAuthStateChanged.map((DartUser? dartUser) {
+    _auth!.onAuthStateChanged.map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -35,7 +35,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
       _authStateChangesListeners[app.name]!.add(user);
     });
 
-    _auth!.onIdTokenChanged.map((DartUser? dartUser) {
+    _auth!.onIdTokenChanged.map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -46,7 +46,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
     });
   }
 
-  FirebaseAuthDart._()
+  FirebaseAuthDesktop._()
       : _auth = null,
         super(appInstance: null);
 
@@ -54,12 +54,12 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
   /// registering delegates or listeners.
   ///
   // ignore: prefer_constructors_over_static_methods
-  static FirebaseAuthDart get instance {
-    return FirebaseAuthDart._();
+  static FirebaseAuthDesktop get instance {
+    return FirebaseAuthDesktop._();
   }
 
   /// Instance of auth from Identity Provider API service.
-  DartAuth? _auth;
+  auth_dart.Auth? _auth;
 
   @override
   UserPlatform? get currentUser {
@@ -86,7 +86,7 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
-    return FirebaseAuthDart(app: app);
+    return FirebaseAuthDesktop(app: app);
   }
 
   @override
@@ -302,46 +302,26 @@ class FirebaseAuthDart extends FirebaseAuthPlatform {
 
   @override
   Future<void> useAuthEmulator(String host, int port) async {
-    // 1. Get the emulator project configs, it must be initialized first.
-    // http://localhost:9099/emulator/v1/projects/{project-id}/config
+    try {
+      await _auth!.useAuthEmulator(host, port);
 
-    final localEmulator = Uri(
-      scheme: 'http',
-      host: host,
-      port: port,
-      pathSegments: [
-        'emulator',
-        'v1',
-        'projects',
-        app.options.projectId,
-        'config'
-      ],
-    );
-
-    final resposne = await get(localEmulator);
-
-    final Map emulatorProjectConfig = json.decode(resposne.body);
-
-    // 2. Check if the emulator is in use, if it isn't an error will be returned.
-    if (emulatorProjectConfig.containsKey('error')) {
-      throw FirebaseAuthException(
-        code: emulatorProjectConfig['error']['status'],
-        message: emulatorProjectConfig['error']['message'],
+      // 3. Instantiate an instance of [DartAuth] with emulator options.
+      _auth = auth_dart.Auth(
+        options: auth_dart.AuthOptions(
+          // Just a dummy API key.
+          apiKey: 'emulator:test',
+          projectId: app.options.projectId,
+          host: host,
+          port: port,
+          useEmulator: true,
+        ),
       );
+
+      return;
+    } catch (exception) {
+      // TODO(pr-Mais): throw [FirebaseAuthException]
+      rethrow;
     }
-
-    // 3. Instantiate an instance of [DartAuth] with emulator options.
-    _auth = DartAuth(
-      options: DartAuthOptions(
-        // Just a dummy API key.
-        apiKey: 'emulator:test',
-        host: host,
-        port: port,
-        useEmulator: true,
-      ),
-    );
-
-    return;
   }
 
   @override

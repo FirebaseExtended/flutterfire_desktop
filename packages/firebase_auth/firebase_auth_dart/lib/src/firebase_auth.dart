@@ -1,24 +1,11 @@
-library auth_interop;
+part of firebase_auth_dart;
 
-import 'dart:async';
-import 'dart:developer';
-
-import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
-import 'package:googleapis/identitytoolkit/v3.dart';
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
-
-import 'dart_exception.dart';
-import 'dart_user.dart';
-import 'dart_user_credential.dart';
-
-part 'providers.dart';
-
-/// The options used for all requests made by [DartAuth] instance.
-class DartAuthOptions {
+/// The options used for all requests made by [Auth] instance.
+class AuthOptions {
   // ignore: public_member_api_docs
-  DartAuthOptions({
+  AuthOptions({
     required this.apiKey,
+    required this.projectId,
     this.host = 'localhost',
     this.port = 9099,
     this.useEmulator = false,
@@ -28,6 +15,9 @@ class DartAuthOptions {
   ///
   /// Leave empty if `useEmulator` is true.
   final String apiKey;
+
+  /// The Id of GCP or Firebase project.
+  final String projectId;
 
   /// The Firebase Auth emulator host, defaults to `localhost`.
   final String? host;
@@ -46,9 +36,9 @@ class DartAuthOptions {
 /// Pure Dart service wrapper around the Identity Platform REST API.
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
-class DartAuth {
+class Auth {
   // ignore: public_member_api_docs
-  DartAuth({required this.options})
+  Auth({required this.options})
       : assert(
             options.apiKey.isNotEmpty,
             'API key must not be empty, please provide a valid API key, '
@@ -66,13 +56,12 @@ class DartAuth {
       _identityToolkit = IdentityToolkitApi(_client).relyingparty;
     }
 
-    _idTokenChangedController =
-        StreamController<DartUser?>.broadcast(sync: true);
-    _changeController = StreamController<DartUser?>.broadcast(sync: true);
+    _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
+    _changeController = StreamController<User?>.broadcast(sync: true);
   }
 
   /// The settings this instance is configured with.
-  final DartAuthOptions options;
+  final AuthOptions options;
 
   late http.Client _client;
 
@@ -80,31 +69,31 @@ class DartAuth {
   late RelyingpartyResource _identityToolkit;
 
   // ignore: close_sinks
-  StreamController<DartUser?>? _changeController;
+  late StreamController<User?> _changeController;
 
   // ignore: close_sinks
-  StreamController<DartUser?>? _idTokenChangedController;
+  late StreamController<User?> _idTokenChangedController;
 
   /// Sends events when the users sign-in state changes.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<DartUser?> get onAuthStateChanged {
-    return _changeController!.stream;
+  Stream<User?> get onAuthStateChanged {
+    return _changeController.stream;
   }
 
   /// Sends events for changes to the signed-in user's ID token,
   /// which includes sign-in, sign-out, and token refresh events.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<DartUser?> get onIdTokenChanged {
-    return _idTokenChangedController!.stream;
+  Stream<User?> get onIdTokenChanged {
+    return _idTokenChangedController.stream;
   }
 
   /// The currently signed in user for this instance.
-  DartUser? currentUser;
+  User? currentUser;
 
   /// Sign users in using email and password.
-  Future<DartUserCredential> signInWithEmailAndPassword(
+  Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
     try {
       final _response = await _identityToolkit.verifyPassword(
@@ -116,18 +105,18 @@ class DartAuth {
       );
 
       // Map the json response to an actual user.
-      final user = DartUser.fromResponse(_response.toJson());
+      final user = User.fromResponse(_response.toJson());
 
       currentUser = user;
-      _changeController!.add(user);
-      _idTokenChangedController!.add(user);
+      _changeController.add(user);
+      _idTokenChangedController.add(user);
 
-      final providerId = _AuthProvider.password.providerId;
+      final providerId = AuthProvider.password.providerId;
 
       // Make a credential object based on the current sign-in method.
-      return DartUserCredential(
+      return UserCredential(
         user: user,
-        authCredential: AuthCredential(
+        credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,
         ),
@@ -146,7 +135,7 @@ class DartAuth {
   }
 
   /// Sign users up using email and password.
-  Future<DartUserCredential> createUserWithEmailAndPassword(
+  Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
       final _response = await _identityToolkit.signupNewUser(
@@ -156,17 +145,17 @@ class DartAuth {
         ),
       );
 
-      final user = DartUser.fromResponse(_response.toJson());
+      final user = User.fromResponse(_response.toJson());
 
       currentUser = user;
-      _changeController!.add(user);
-      _idTokenChangedController!.add(user);
+      _changeController.add(user);
+      _idTokenChangedController.add(user);
 
-      final providerId = _AuthProvider.password.providerId;
+      final providerId = AuthProvider.password.providerId;
 
-      return DartUserCredential(
+      return UserCredential(
         user: user,
-        authCredential: AuthCredential(
+        credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,
         ),
@@ -269,23 +258,23 @@ class DartAuth {
 
   /// Sign in anonymous users.
   ///
-  Future<DartUserCredential> signInAnonymously() async {
+  Future<UserCredential> signInAnonymously() async {
     try {
       final _response = await _identityToolkit.signupNewUser(
         IdentitytoolkitRelyingpartySignupNewUserRequest(),
       );
 
-      final user = DartUser.fromResponse(_response.toJson());
+      final user = User.fromResponse(_response.toJson());
 
       currentUser = user;
-      _changeController!.add(user);
-      _idTokenChangedController!.add(user);
+      _changeController.add(user);
+      _idTokenChangedController.add(user);
 
-      final providerId = _AuthProvider.anonymous.providerId;
+      final providerId = AuthProvider.anonymous.providerId;
 
-      return DartUserCredential(
+      return UserCredential(
         user: user,
-        authCredential: AuthCredential(
+        credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,
         ),
@@ -297,7 +286,7 @@ class DartAuth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/signOut');
+      log('$exception', name: 'IPAuth/signInAnonymously');
 
       rethrow;
     }
@@ -308,10 +297,45 @@ class DartAuth {
   Future<void> signOut() async {
     try {
       currentUser = null;
-      _changeController!.add(null);
-      _idTokenChangedController!.add(null);
+      _changeController.add(null);
+      _idTokenChangedController.add(null);
     } catch (exception) {
       log('$exception', name: 'IPAuth/signOut');
+
+      rethrow;
+    }
+  }
+
+  /// Check if an emulator is running, throws if there isn't.
+  Future<void> useAuthEmulator(String host, int port) async {
+    try {
+      // 1. Get the emulator project configs, it must be initialized first.
+      // http://localhost:9099/emulator/v1/projects/{project-id}/config
+
+      final localEmulator = Uri(
+        scheme: 'http',
+        host: host,
+        port: port,
+        pathSegments: [
+          'emulator',
+          'v1',
+          'projects',
+          options.projectId,
+          'config'
+        ],
+      );
+
+      final resposne = await http.get(localEmulator);
+
+      final Map emulatorProjectConfig = json.decode(resposne.body);
+
+      // 2. Check if the emulator is in use, if it isn't an error will be returned.
+      if (emulatorProjectConfig.containsKey('error')) {
+        throw AuthException.fromErrorCode(
+            emulatorProjectConfig['error']['status']);
+      }
+    } catch (exception) {
+      log('$exception', name: 'IPAuth/useAuthEmulator');
 
       rethrow;
     }

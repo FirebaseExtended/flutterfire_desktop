@@ -1,7 +1,9 @@
+part of firebase_auth_dart;
+
 /// User object wrapping the responses from identity toolkit.
-class DartUser {
+class User {
   /// Default constructor.
-  DartUser(
+  User(
     this.idToken,
     this.uid,
     this.email,
@@ -10,7 +12,7 @@ class DartUser {
   );
 
   /// Return a dart user object from Google's identity toolkit response.
-  DartUser.fromResponse(Map<String, dynamic> response)
+  User.fromResponse(Map<String, dynamic> response)
       : idToken = response['idToken'] ?? '',
         email = response['email'],
         uid = response['localId'] ?? '',
