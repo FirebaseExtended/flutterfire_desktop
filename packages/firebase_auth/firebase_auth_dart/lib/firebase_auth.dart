@@ -11,8 +11,6 @@ import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 
-export 'firebase_auth.dart';
-
 part 'src/firebase_auth.dart';
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_providers.dart';

@@ -11,7 +11,7 @@ class AuthOptions {
     this.useEmulator = false,
   });
 
-  /// The API key used for all requests made by DartAuth instance.
+  /// The API key used for all requests made by [Auth] instance.
   ///
   /// Leave empty if `useEmulator` is true.
   final String apiKey;
@@ -38,15 +38,16 @@ class AuthOptions {
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class Auth {
   // ignore: public_member_api_docs
-  Auth({required this.options})
+  Auth({required this.options, http.Client? client})
       : assert(
             options.apiKey.isNotEmpty,
             'API key must not be empty, please provide a valid API key, '
             'or a dummy one if you are using the emulator.') {
-    _client = clientViaApiKey(options.apiKey);
+    final _client = client ?? clientViaApiKey(options.apiKey);
 
     // Use auth emulator if available
     if (options.useEmulator) {
+      // Adding localhost and port to the rootUrl for all requests.
       final rootUrl =
           'http://${options.host}:${options.port}/www.googleapis.com/';
 
@@ -62,8 +63,6 @@ class Auth {
 
   /// The settings this instance is configured with.
   final AuthOptions options;
-
-  late http.Client _client;
 
   /// The indentity toolkit API instance used to make all requests.
   late RelyingpartyResource _identityToolkit;
@@ -134,7 +133,13 @@ class Auth {
     }
   }
 
-  /// Sign users up using email and password.
+  /// Create new user using email and password.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  /// - `INVALID_EMAIL`
+  /// - `EMAIL_EXISTS`
+  /// - `OPERATION_NOT_ALLOWED`
+  /// - `TOO_MANY_ATTEMPTS_TRY_LATER`
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -175,7 +180,7 @@ class Auth {
 
   /// Fetch the list of providers associated with a specified email.
   ///
-  /// Throws **[AuthException]** with following possible codes:
+  /// Throws [AuthException] with following possible codes:
   /// - `INVALID_EMAIL`: user doesn't exist
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
@@ -202,7 +207,7 @@ class Auth {
 
   /// Send a password reset email.
   ///
-  /// Throws **[AuthException]** with following possible codes:
+  /// Throws [AuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<String?> sendPasswordResetEmail(String email) async {
     try {
@@ -230,7 +235,7 @@ class Auth {
 
   /// Send a sign in link to email.
   ///
-  /// Throws **[AuthException]** with following possible codes:
+  /// Throws [AuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<String?> sendSignInLinkToEmail(String email) async {
     try {
