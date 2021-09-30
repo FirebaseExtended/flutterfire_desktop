@@ -217,7 +217,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<void> setLanguageCode(String languageCode) {
+  Future<void> setLanguageCode(String? languageCode) {
     // TODO: implement setLanguageCode
     throw UnimplementedError();
   }
@@ -303,19 +303,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> useAuthEmulator(String host, int port) async {
     try {
-      await _auth!.useAuthEmulator(host, port);
-
-      // 3. Instantiate an instance of [DartAuth] with emulator options.
-      _auth = auth_dart.Auth(
-        options: auth_dart.AuthOptions(
-          // Just a dummy API key.
-          apiKey: 'emulator:test',
-          projectId: app.options.projectId,
-          host: host,
-          port: port,
-          useEmulator: true,
-        ),
-      );
+      await _auth!.useAuthEmulator();
 
       return;
     } catch (exception) {

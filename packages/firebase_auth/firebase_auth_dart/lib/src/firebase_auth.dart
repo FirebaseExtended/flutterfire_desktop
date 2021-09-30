@@ -6,9 +6,6 @@ class AuthOptions {
   AuthOptions({
     required this.apiKey,
     required this.projectId,
-    this.host = 'localhost',
-    this.port = 9099,
-    this.useEmulator = false,
   });
 
   /// The API key used for all requests made by [Auth] instance.
@@ -18,19 +15,6 @@ class AuthOptions {
 
   /// The Id of GCP or Firebase project.
   final String projectId;
-
-  /// The Firebase Auth emulator host, defaults to `localhost`.
-  final String? host;
-
-  /// The Firebase Auth emulator port, defaults to `9099`,
-  /// check your terminal for the port being used.
-  final int? port;
-
-  /// Whether to use Firebase Auth emulator for all requests.
-  ///
-  /// You must start the emulator in order to use it, see:
-  /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
-  final bool useEmulator;
 }
 
 /// Pure Dart service wrapper around the Identity Platform REST API.
@@ -46,16 +30,8 @@ class Auth {
     final _client = client ?? clientViaApiKey(options.apiKey);
 
     // Use auth emulator if available
-    if (options.useEmulator) {
-      // Adding localhost and port to the rootUrl for all requests.
-      final rootUrl =
-          'http://${options.host}:${options.port}/www.googleapis.com/';
 
-      _identityToolkit =
-          IdentityToolkitApi(_client, rootUrl: rootUrl).relyingparty;
-    } else {
-      _identityToolkit = IdentityToolkitApi(_client).relyingparty;
-    }
+    _identityToolkit = IdentityToolkitApi(_client).relyingparty;
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -172,7 +148,7 @@ class Auth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/signUpWithEmailAndPassword');
+      log('$exception', name: 'DartAuth/signUpWithEmailAndPassword');
 
       rethrow;
     }
@@ -199,7 +175,7 @@ class Auth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/fetchSignInMethodsForEmail');
+      log('$exception', name: 'DartAuth/fetchSignInMethodsForEmail');
 
       rethrow;
     }
@@ -227,7 +203,39 @@ class Auth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/sendPasswordResetEmail');
+      log('$exception', name: 'DartAuth/sendPasswordResetEmail');
+
+      rethrow;
+    }
+  }
+
+  /// Verify password reset code and updates the password if all went good.
+  /// `oldPassword` is optional, as this can be used to reset a password
+  /// in case the user forgot the old one.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  /// - `OPERATION_NOT_ALLOWED`: Password sign-in is disabled for this project.
+  /// - `EXPIRED_OOB_CODE`: The action code has expired.
+  /// - `INVALID_OOB_CODE`: The action code is invalid. This can happen if the
+  ///    code is malformed, expired, or has already been used.
+  /// - `USER_DISABLED`: The user account has been disabled by an administrator.
+  Future<String> resetUserPassword(
+      {String? newPassword, String? oldPassword}) async {
+    try {
+      final _response = await _identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          idToken: '',
+        ),
+      );
+
+      return _response.email!;
+    } on DetailedApiRequestError catch (exception) {
+      final authException = AuthException.fromErrorCode(exception.message);
+      log('$authException', name: 'DartAuth/${authException.code}');
+
+      throw authException;
+    } catch (exception) {
+      log('$exception', name: 'DartAuth/resetPassword');
 
       rethrow;
     }
@@ -255,7 +263,7 @@ class Auth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/sendSignInLinkToEmail');
+      log('$exception', name: 'DartAuth/sendSignInLinkToEmail');
 
       rethrow;
     }
@@ -291,7 +299,7 @@ class Auth {
 
       throw authException;
     } catch (exception) {
-      log('$exception', name: 'IPAuth/signInAnonymously');
+      log('$exception', name: 'DartAuth/signInAnonymously');
 
       rethrow;
     }
@@ -301,48 +309,53 @@ class Auth {
   ///
   Future<void> signOut() async {
     try {
+      // TODO: figure out the correct sign-out flow
       currentUser = null;
       _changeController.add(null);
       _idTokenChangedController.add(null);
     } catch (exception) {
-      log('$exception', name: 'IPAuth/signOut');
+      log('$exception', name: 'DartAuth/signOut');
 
       rethrow;
     }
   }
 
-  /// Check if an emulator is running, throws if there isn't.
-  Future<void> useAuthEmulator(String host, int port) async {
+  /// Use the emulator to perform all requests,
+  /// check your terminal for the port being used.
+  ///
+  /// You must start the emulator in order to use it,
+  /// the mthod will throw if there's no running emulator,
+  /// see:
+  /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
+  Future<Map> useAuthEmulator(
+      {String host = 'localhost', int port = 9099}) async {
+    // 1. Get the emulator project configs, it must be initialized first.
+    // http://localhost:9099/emulator/v1/projects/{project-id}/config
+    final localEmulator = Uri(
+      scheme: 'http',
+      host: host,
+      port: port,
+      path: '/emulator/v1/projects/${options.projectId}/config',
+    );
+
+    http.Response response;
+
     try {
-      // 1. Get the emulator project configs, it must be initialized first.
-      // http://localhost:9099/emulator/v1/projects/{project-id}/config
-
-      final localEmulator = Uri(
-        scheme: 'http',
-        host: host,
-        port: port,
-        pathSegments: [
-          'emulator',
-          'v1',
-          'projects',
-          options.projectId,
-          'config'
-        ],
-      );
-
-      final resposne = await http.get(localEmulator);
-
-      final Map emulatorProjectConfig = json.decode(resposne.body);
-
-      // 2. Check if the emulator is in use, if it isn't an error will be returned.
-      if (emulatorProjectConfig.containsKey('error')) {
-        throw AuthException.fromErrorCode(
-            emulatorProjectConfig['error']['status']);
-      }
+      response = await http.get(localEmulator);
     } catch (exception) {
-      log('$exception', name: 'IPAuth/useAuthEmulator');
-
+      log('$exception', name: 'DartAuth/useAuthEmulator');
       rethrow;
     }
+
+    final Map emulatorProjectConfig = json.decode(response.body);
+
+    // 3. Update the requester to use emulator
+    final rootUrl = 'http://$host:$port/www.googleapis.com/';
+
+    _identityToolkit =
+        IdentityToolkitApi(clientViaApiKey(options.apiKey), rootUrl: rootUrl)
+            .relyingparty;
+
+    return emulatorProjectConfig;
   }
 }
