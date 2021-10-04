@@ -10,7 +10,6 @@ class AuthOptions {
 
   /// The API key used for all requests made by [Auth] instance.
   ///
-  /// Leave empty if `useEmulator` is true.
   final String apiKey;
 
   /// The Id of GCP or Firebase project.
@@ -80,7 +79,7 @@ class Auth {
       );
 
       // Map the json response to an actual user.
-      final user = User.fromResponse(_response.toJson());
+      final user = User(_response.toJson(), this);
 
       currentUser = user;
       _changeController.add(user);
@@ -126,7 +125,7 @@ class Auth {
         ),
       );
 
-      final user = User.fromResponse(_response.toJson());
+      final user = User(_response.toJson(), this);
 
       currentUser = user;
       _changeController.add(user);
@@ -277,7 +276,9 @@ class Auth {
         IdentitytoolkitRelyingpartySignupNewUserRequest(),
       );
 
-      final user = User.fromResponse(_response.toJson());
+      final _data = _response.toJson();
+
+      final user = User(_data, this);
 
       currentUser = user;
       _changeController.add(user);
@@ -327,8 +328,7 @@ class Auth {
   /// the mthod will throw if there's no running emulator,
   /// see:
   /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
-  Future<Map> useAuthEmulator(
-      {String host = 'localhost', int port = 9099}) async {
+  Future<Map> useEmulator({String host = 'localhost', int port = 9099}) async {
     // 1. Get the emulator project configs, it must be initialized first.
     // http://localhost:9099/emulator/v1/projects/{project-id}/config
     final localEmulator = Uri(
@@ -342,8 +342,20 @@ class Auth {
 
     try {
       response = await http.get(localEmulator);
+    } on SocketException catch (exception) {
+      final socketException = SocketException(
+        'Error happened while trying to connect to the local emulator, '
+        'make sure you have it running, and you provided the correct port.',
+        port: port,
+        osError: exception.osError,
+        address: exception.address,
+      );
+
+      log(socketException.message, name: 'DartAuth/useEmulator');
+
+      throw socketException;
     } catch (exception) {
-      log('$exception', name: 'DartAuth/useAuthEmulator');
+      log('$exception', name: 'DartAuth/useEmulator');
       rethrow;
     }
 
@@ -351,11 +363,36 @@ class Auth {
 
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
-
     _identityToolkit =
         IdentityToolkitApi(clientViaApiKey(options.apiKey), rootUrl: rootUrl)
             .relyingparty;
 
     return emulatorProjectConfig;
+  }
+
+  /// Exchange a refresh token for a new ID token.
+  Future<IdToken> refreshIdToken(String refreshToken) async {
+    try {
+      final _response = await http.post(
+          Uri.parse(
+              'https://securetoken.googleapis.com/v1/token?key=${options.apiKey}'),
+          body: {
+            'grant_type': 'refresh_token',
+            'refresh_token': refreshToken,
+          },
+          headers: {
+            'Content-Typ': 'application/x-www-form-urlencoded'
+          });
+
+      final Map<String, dynamic> _data = json.decode(_response.body);
+
+      _idTokenChangedController.add(currentUser);
+
+      return IdToken(_data);
+    } on HttpException catch (_) {
+      rethrow;
+    } catch (exception) {
+      rethrow;
+    }
   }
 }

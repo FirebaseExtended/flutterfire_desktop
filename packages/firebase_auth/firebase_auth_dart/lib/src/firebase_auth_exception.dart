@@ -32,7 +32,7 @@ class AuthException implements Exception {
   // ignore: public_member_api_docs
   AuthException([this.message = '', this.code]);
 
-  /// Constrict and IPException based on the returned error code.
+  /// Construct an exception based on the returned error code.
   factory AuthException.fromErrorCode(String? code) {
     switch (code) {
       case ErrorCode.emailNotFound:
@@ -67,12 +67,12 @@ class AuthException implements Exception {
     }
   }
 
-  /// A message describing the IP error.
+  /// A message describing the error.
   final String message;
 
   // ignore: public_member_api_docs
   final String? code;
 
   @override
-  String toString() => message;
+  String toString() => code != null ? '$code: $message' : message;
 }
