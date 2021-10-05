@@ -1,13 +1,15 @@
+// ignore_for_file: require_trailing_commas
+
 library firebase_auth_desktop;
 
 import 'dart:async';
 
+import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 
-import 'src/firebase_auth_user.dart';
-import 'src/firebase_auth_user_credential.dart';
+part 'src/firebase_auth_user.dart';
+part 'src/firebase_auth_user_credential.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {

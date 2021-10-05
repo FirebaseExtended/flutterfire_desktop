@@ -374,15 +374,15 @@ class Auth {
   Future<IdToken> refreshIdToken(String refreshToken) async {
     try {
       final _response = await http.post(
-          Uri.parse(
-              'https://securetoken.googleapis.com/v1/token?key=${options.apiKey}'),
-          body: {
-            'grant_type': 'refresh_token',
-            'refresh_token': refreshToken,
-          },
-          headers: {
-            'Content-Typ': 'application/x-www-form-urlencoded'
-          });
+        Uri.parse(
+          'https://securetoken.googleapis.com/v1/token?key=${options.apiKey}',
+        ),
+        body: {
+          'grant_type': 'refresh_token',
+          'refresh_token': refreshToken,
+        },
+        headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
+      );
 
       final Map<String, dynamic> _data = json.decode(_response.body);
 

@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
-import 'package:async/async.dart';
 
 const mockEmail = 'test@test.com';
 const mockPassword = 'password';
@@ -54,6 +55,11 @@ Future<Response> _mockFailedRequests(Request req) async {
 }
 
 void main() {
+  final auth = Auth(
+    options: AuthOptions(
+        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+        projectId: 'react-native-firebase-testing'),
+  );
   final authWithSuccessRes = Auth(
     options: AuthOptions(apiKey: 'test', projectId: ''),
     client: MockClient(_mockSuccessRequests),
@@ -69,6 +75,12 @@ void main() {
   setUp(() {
     onAuthStateChanged = StreamQueue(authWithSuccessRes.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(authWithSuccessRes.onIdTokenChanged);
+  });
+
+  setUpAll(() {
+    // Avoid HTTP error 400 mocked returns
+    // TODO(pr-Mais): once done create mock clients
+    HttpOverrides.global = null;
   });
 
   group('Email and password ', () {
@@ -121,6 +133,52 @@ void main() {
         () => authWithFailedRes.fetchSignInMethodsForEmail(''),
         throwsA(isA<AuthException>()),
       );
+    });
+  });
+
+  group('Password reset ', () {
+    test('verify.', () async {
+      await auth.sendPasswordResetEmail('mais@invertase.io');
+
+      //expect(providersList, ['password']);
+    });
+
+    test('confirm.', () {});
+  });
+
+  group('Use emulator ', () {
+    test('throw.', () {
+      expect(auth.useEmulator(), throwsA(isA<AuthException>()));
+    });
+
+    test('update requester.', () async {
+      expect(await auth.useEmulator(), isA<Map>());
+    });
+  });
+
+  group('IdToken ', () {
+    test('user have IdToken and refreshToken.', () async {
+      final userCred = await auth.signInAnonymously();
+      expect(userCred.user!.getIdToken(), isNotEmpty);
+      expect(userCred.user!.refreshToken, isNotEmpty);
+    });
+
+    test('force refresh.', () async {
+      await auth.useEmulator();
+      final userCred = await auth.signInAnonymously();
+      final token = await auth.refreshIdToken(userCred.user!.refreshToken!);
+      expect(token, isNot(equals(userCred.user!.getIdToken())));
+    });
+    test('refresh once expired.', () async {
+      final userCred = await auth.signInAnonymously();
+      final token = await userCred.user!.getIdToken();
+
+      expect(token, isNot(equals(userCred.user!.getIdToken())));
+    });
+    test('getIdToken equals idToken.', () async {
+      final userCred = await auth.signInAnonymously();
+      final token = await userCred.user!.getIdToken();
+      expect(token, equals(userCred.user!.getIdToken()));
     });
   });
 }

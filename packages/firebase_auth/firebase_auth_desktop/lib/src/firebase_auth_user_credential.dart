@@ -1,7 +1,4 @@
-import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
-import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
-
-import 'firebase_auth_user.dart';
+part of firebase_auth_desktop;
 
 /// Dart delegate implementation of [UserCredentialPlatform].
 class UserCredential extends UserCredentialPlatform {
