@@ -20,4 +20,4 @@ part 'src/firebase_auth_exception.dart';
 part 'src/firebase_auth_credential.dart';
 part 'src/firebase_auth_user_credential.dart';
 part 'src/firebase_auth_additional_user_info.dart';
-part 'src/id_token.dart';
+part 'src/firebase_auth_id_token.dart';

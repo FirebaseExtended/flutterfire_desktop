@@ -23,9 +23,10 @@ class Auth {
   // ignore: public_member_api_docs
   Auth({required this.options, http.Client? client})
       : assert(
-            options.apiKey.isNotEmpty,
-            'API key must not be empty, please provide a valid API key, '
-            'or a dummy one if you are using the emulator.') {
+          options.apiKey.isNotEmpty,
+          'API key must not be empty, please provide a valid API key, '
+          'or a dummy one if you are using the emulator.',
+        ) {
     final _client = client ?? clientViaApiKey(options.apiKey);
 
     // Use auth emulator if available
@@ -68,7 +69,9 @@ class Auth {
 
   /// Sign users in using email and password.
   Future<UserCredential> signInWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       final _response = await _identityToolkit.verifyPassword(
         IdentitytoolkitRelyingpartyVerifyPasswordRequest(
@@ -116,7 +119,9 @@ class Auth {
   /// - `OPERATION_NOT_ALLOWED`
   /// - `TOO_MANY_ATTEMPTS_TRY_LATER`
   Future<UserCredential> createUserWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       final _response = await _identityToolkit.signupNewUser(
         IdentitytoolkitRelyingpartySignupNewUserRequest(
@@ -368,31 +373,5 @@ class Auth {
             .relyingparty;
 
     return emulatorProjectConfig;
-  }
-
-  /// Exchange a refresh token for a new ID token.
-  Future<IdToken> refreshIdToken(String refreshToken) async {
-    try {
-      final _response = await http.post(
-        Uri.parse(
-          'https://securetoken.googleapis.com/v1/token?key=${options.apiKey}',
-        ),
-        body: {
-          'grant_type': 'refresh_token',
-          'refresh_token': refreshToken,
-        },
-        headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
-      );
-
-      final Map<String, dynamic> _data = json.decode(_response.body);
-
-      _idTokenChangedController.add(currentUser);
-
-      return IdToken(_data);
-    } on HttpException catch (_) {
-      rethrow;
-    } catch (exception) {
-      rethrow;
-    }
   }
 }

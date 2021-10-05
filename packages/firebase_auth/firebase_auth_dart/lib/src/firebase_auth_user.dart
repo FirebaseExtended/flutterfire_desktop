@@ -3,12 +3,11 @@ part of firebase_auth_dart;
 /// User object wrapping the responses from identity toolkit.
 class User {
   /// Return a dart user object from Google's identity toolkit response.
-  User(this._user, this._auth) : _idToken = IdToken(_user);
+  User(this._user, this._auth) : _idToken = IdToken(_user, _auth);
 
   final Auth _auth;
   final Map<String, dynamic> _user;
-
-  IdToken _idToken;
+  final IdToken _idToken;
 
   /// Returns a JWT refresh token for the user.
   ///
@@ -28,11 +27,9 @@ class User {
   /// of token expiration.
   Future<String?> getIdToken([bool forceRefresh = false]) async {
     try {
-      final expired = _idToken.expirationTime!.isBefore(DateTime.now());
+      await _idToken.refreshIdToken(forceRefresh);
 
-      if (forceRefresh || expired) {
-        _idToken = await _auth.refreshIdToken(refreshToken!);
-      }
+      _auth._idTokenChangedController.add(this);
 
       return _idToken.token;
     } catch (e) {
