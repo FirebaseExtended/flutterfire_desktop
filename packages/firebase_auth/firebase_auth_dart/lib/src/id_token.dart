@@ -5,10 +5,29 @@ class IdToken {
   // ignore: public_member_api_docs
   @protected
   IdToken(this._data) {
+    // we need this to calculate expiration & issueing time
     _data['requestTime'] = DateTime.now();
 
+    /// There is a bit of incosistency between the endpoints
+    /// that updates the [IdToken].
+    ///
+    /// The mthod [Auth.refreshIdToken] references an endpoint
+    /// which has the following response payload:
+    /// ```
+    /// {
+    ///   'expires_in': 3500,
+    ///   'id_token': 'TOKEN'
+    /// }
+    /// ```
+    ///
+    /// Other methods have the following payload:
+    /// ```
+    /// {
+    ///   'expiresIn': 3500,
+    ///   'IdToken': 'TOKEN',
+    /// }
+    /// ```
     if (_data.containsKey('expires_in')) {
-      // rename keys to match other endpoints
       _data['expiresIn'] = _data['expires_in'];
       _data['idToken'] = _data['id_token'];
 
