@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 part of firebase_auth_dart;
 
 /// The options used for all requests made by [Auth] instance.
@@ -40,6 +42,9 @@ class Auth {
   /// The settings this instance is configured with.
   final AuthOptions options;
 
+  /// The currently signed in user for this instance.
+  User? currentUser;
+
   /// The indentity toolkit API instance used to make all requests.
   late RelyingpartyResource _identityToolkit;
 
@@ -64,14 +69,12 @@ class Auth {
     return _idTokenChangedController.stream;
   }
 
-  /// The currently signed in user for this instance.
-  User? currentUser;
-
-  /// Sign users in using email and password.
+  /// Sign in a user using email and password.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  ///
   Future<UserCredential> signInWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
+      String email, String password) async {
     try {
       final _response = await _identityToolkit.verifyPassword(
         IdentitytoolkitRelyingpartyVerifyPasswordRequest(
@@ -119,9 +122,7 @@ class Auth {
   /// - `OPERATION_NOT_ALLOWED`
   /// - `TOO_MANY_ATTEMPTS_TRY_LATER`
   Future<UserCredential> createUserWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
+      String email, String password) async {
     try {
       final _response = await _identityToolkit.signupNewUser(
         IdentitytoolkitRelyingpartySignupNewUserRequest(
@@ -368,9 +369,10 @@ class Auth {
 
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
-    _identityToolkit =
-        IdentityToolkitApi(clientViaApiKey(options.apiKey), rootUrl: rootUrl)
-            .relyingparty;
+    _identityToolkit = IdentityToolkitApi(
+      clientViaApiKey(options.apiKey),
+      rootUrl: rootUrl,
+    ).relyingparty;
 
     return emulatorProjectConfig;
   }

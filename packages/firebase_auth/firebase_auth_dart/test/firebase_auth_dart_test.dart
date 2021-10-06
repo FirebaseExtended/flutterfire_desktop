@@ -6,7 +6,11 @@ import 'package:firebase_auth_dart/firebase_auth.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
+
+import 'firebase_auth_dart_test.mocks.dart';
 
 const mockEmail = 'test@test.com';
 const mockPassword = 'password';
@@ -35,8 +39,10 @@ Future<Response> _mockSuccessRequests(Request req) async {
     body = json
         .encode(SignupNewUserResponse(email: mockEmail, idToken: '').toJson());
   } else if (req.url.path.contains('createAuthUri')) {
-    body = json.encode(CreateAuthUriResponse(
-        providerId: 'password', allProviders: ['password']).toJson());
+    body = json.encode(
+      CreateAuthUriResponse(providerId: 'password', allProviders: ['password'])
+          .toJson(),
+    );
   } else {
     return Response('Error: Unknown endpoint', 404);
   }
@@ -54,12 +60,13 @@ Future<Response> _mockFailedRequests(Request req) async {
   }
 }
 
+@GenerateMocks([User, Auth, UserCredential])
 void main() {
-  final auth = Auth(
-    options: AuthOptions(
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-        projectId: 'react-native-firebase-testing'),
-  );
+  late Auth realAuth;
+  late Auth fakeAuth;
+  final user = MockUser();
+  final userCred = MockUserCredential();
+
   final authWithSuccessRes = Auth(
     options: AuthOptions(apiKey: 'test', projectId: ''),
     client: MockClient(_mockSuccessRequests),
@@ -73,8 +80,28 @@ void main() {
   late StreamQueue<User?> onIdTokenChanged;
 
   setUp(() {
+    realAuth = Auth(
+      options: AuthOptions(
+        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+        projectId: 'react-native-firebase-testing',
+      ),
+    );
+
     onAuthStateChanged = StreamQueue(authWithSuccessRes.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(authWithSuccessRes.onIdTokenChanged);
+  });
+
+  setUp(() {
+    fakeAuth = MockAuth();
+
+    when(fakeAuth.onAuthStateChanged)
+        .thenAnswer((_) => Stream.fromIterable([user]));
+    when(fakeAuth.onIdTokenChanged)
+        .thenAnswer((_) => Stream.fromIterable([user]));
+    when(fakeAuth.signInAnonymously())
+        .thenAnswer((_) => Future<UserCredential>.value(userCred));
+    when(userCred.user).thenReturn(user);
+    when(fakeAuth.currentUser).thenReturn(user);
   });
 
   setUpAll(() {
@@ -86,7 +113,9 @@ void main() {
   group('Email and password ', () {
     test('sign-in updates currentUser and events.', () async {
       final credential = await authWithSuccessRes.signInWithEmailAndPassword(
-          mockEmail, mockPassword);
+        mockEmail,
+        mockPassword,
+      );
 
       expect(credential, isA<UserCredential>());
       expect(credential.user!.email, equals(mockEmail));
@@ -138,7 +167,7 @@ void main() {
 
   group('Password reset ', () {
     test('verify.', () async {
-      await auth.sendPasswordResetEmail('mais@invertase.io');
+      await realAuth.sendPasswordResetEmail('mais@invertase.io');
 
       //expect(providersList, ['password']);
     });
@@ -148,37 +177,56 @@ void main() {
 
   group('Use emulator ', () {
     test('throw.', () {
-      expect(auth.useEmulator(), throwsA(isA<AuthException>()));
+      expect(realAuth.useEmulator(), throwsA(isA<AuthException>()));
     });
 
     test('update requester.', () async {
-      expect(await auth.useEmulator(), isA<Map>());
+      expect(await realAuth.useEmulator(), isA<Map>());
     });
   });
 
   group('IdToken ', () {
     test('user have IdToken and refreshToken.', () async {
-      final userCred = await auth.signInAnonymously();
-      expect(userCred.user!.getIdToken(), isNotEmpty);
-      expect(userCred.user!.refreshToken, isNotEmpty);
+      when(user.refreshToken).thenReturn('refreshToken');
+      when(user.getIdToken()).thenAnswer((_) async => 'token');
+
+      expect(await fakeAuth.currentUser!.getIdToken(), isA<String>());
+      expect(fakeAuth.currentUser!.refreshToken, isA<String>());
+
+      verify(user.getIdToken());
+      verify(user.refreshToken);
     });
 
     test('force refresh.', () async {
-      await auth.useEmulator();
-      final userCred = await auth.signInAnonymously();
-      final token = await auth.refreshIdToken(userCred.user!.refreshToken!);
-      expect(token, isNot(equals(userCred.user!.getIdToken())));
-    });
-    test('refresh once expired.', () async {
-      final userCred = await auth.signInAnonymously();
-      final token = await userCred.user!.getIdToken();
+      when(user.getIdToken()).thenAnswer((_) async => 'token');
+      when(user.getIdToken(true)).thenAnswer((_) async => 'token_refreshed');
 
-      expect(token, isNot(equals(userCred.user!.getIdToken())));
+      final userCred = await fakeAuth.signInAnonymously();
+      final oldToken = await userCred.user!.getIdToken();
+      final token = await fakeAuth.currentUser!.getIdToken(true);
+
+      expect(token, isNot(equals(oldToken)));
     });
-    test('getIdToken equals idToken.', () async {
-      final userCred = await auth.signInAnonymously();
-      final token = await userCred.user!.getIdToken();
-      expect(token, equals(userCred.user!.getIdToken()));
+
+    test("getIdToken doesn't force refresh.", () async {
+      when(user.getIdToken()).thenAnswer((_) async => 'token');
+
+      await fakeAuth.signInAnonymously();
+      final token = await fakeAuth.currentUser!.getIdToken();
+
+      expect(token, equals(await fakeAuth.currentUser!.getIdToken()));
+    });
+    test('event recieved once force refreshed.', () async {
+      when(user.getIdToken()).thenAnswer((_) async => 'token');
+      when(user.getIdToken(true)).thenAnswer((_) async => 'token_refreshed');
+
+      final userCred = await fakeAuth.signInAnonymously();
+      final oldToken = await userCred.user!.getIdToken();
+
+      expect(
+        await (await fakeAuth.onIdTokenChanged.last)!.getIdToken(true),
+        isNot(equals(oldToken)),
+      );
     });
   });
 }
