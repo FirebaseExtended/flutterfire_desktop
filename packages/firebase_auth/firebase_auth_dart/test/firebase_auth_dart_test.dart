@@ -207,8 +207,8 @@ void main() {
   group('IdToken ', () {
     test('get IdResultToken', () async {
       final cred = await realAuth.createUserWithEmailAndPassword(
-        'mais@invertase.io',
-        '123qwe',
+        mockEmail,
+        mockPassword,
       );
       final token = await cred.user!.getIdTokenResult();
       expect(token, isA<IdTokenResult>());
