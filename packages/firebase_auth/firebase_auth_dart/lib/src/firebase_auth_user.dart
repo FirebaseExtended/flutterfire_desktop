@@ -1,13 +1,15 @@
+// ignore_for_file: require_trailing_commas
+
 part of firebase_auth_dart;
 
 /// User object wrapping the responses from identity toolkit.
 class User {
   /// Return a dart user object from Google's identity toolkit response.
-  User(this._user, this._auth) : _idToken = IdToken(_user, _auth);
+  User(this._user, this._auth) : _idToken = _user['idToken'];
 
   final Auth _auth;
   final Map<String, dynamic> _user;
-  final IdToken _idToken;
+  String _idToken;
 
   /// Returns a JWT refresh token for the user.
   ///
@@ -27,11 +29,30 @@ class User {
   /// of token expiration.
   Future<String?> getIdToken([bool forceRefresh = false]) async {
     try {
-      await _idToken.refreshIdToken(forceRefresh);
+      if (forceRefresh) {
+        _idToken = (await _auth.refreshIdToken())!;
+        _auth._idTokenChangedController.add(this);
+      }
 
-      _auth._idTokenChangedController.add(this);
+      return _idToken;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-      return _idToken.token;
+  /// Returns a [IdTokenResult] containing the users JSON Web Token (JWT) and
+  /// other metadata.
+  ///
+  /// If [forceRefresh] is `true`, the token returned will be refresh regardless
+  /// of token expiration.
+  Future<IdTokenResult> getIdTokenResult([bool forceRefresh = false]) async {
+    try {
+      if (forceRefresh) {
+        _idToken = (await _auth.refreshIdToken())!;
+        _auth._idTokenChangedController.add(this);
+      }
+
+      return IdTokenResult(_idToken.decodeJWT);
     } catch (e) {
       rethrow;
     }
@@ -63,7 +84,7 @@ class User {
 
   /// A Map representation of this instance.
   Map<String, dynamic> toMap() => {
-        'idToken': _idToken.token,
+        'idToken': _idToken,
         'uid': uid,
         'email': email,
         'displayName': displayName,

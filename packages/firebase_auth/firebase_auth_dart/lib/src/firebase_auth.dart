@@ -15,6 +15,7 @@ class AuthOptions {
   final String apiKey;
 
   /// The Id of GCP or Firebase project.
+  ///
   final String projectId;
 }
 
@@ -69,6 +70,13 @@ class Auth {
     return _idTokenChangedController.stream;
   }
 
+  /// Helper method to update currentUser and events.
+  void _updateCurrentUserAndEvents(User? user) {
+    currentUser = user;
+    _changeController.add(user);
+    _idTokenChangedController.add(user);
+  }
+
   /// Sign in a user using email and password.
   ///
   /// Throws [AuthException] with following possible codes:
@@ -87,9 +95,7 @@ class Auth {
       // Map the json response to an actual user.
       final user = User(_response.toJson(), this);
 
-      currentUser = user;
-      _changeController.add(user);
-      _idTokenChangedController.add(user);
+      _updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
 
@@ -132,10 +138,7 @@ class Auth {
       );
 
       final user = User(_response.toJson(), this);
-
-      currentUser = user;
-      _changeController.add(user);
-      _idTokenChangedController.add(user);
+      _updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
 
@@ -285,11 +288,7 @@ class Auth {
       final _data = _response.toJson();
 
       final user = User(_data, this);
-
-      currentUser = user;
-      _changeController.add(user);
-      _idTokenChangedController.add(user);
-
+      _updateCurrentUserAndEvents(user);
       final providerId = AuthProvider.anonymous.providerId;
 
       return UserCredential(
@@ -317,14 +316,48 @@ class Auth {
   Future<void> signOut() async {
     try {
       // TODO: figure out the correct sign-out flow
-      currentUser = null;
-      _changeController.add(null);
-      _idTokenChangedController.add(null);
+      _updateCurrentUserAndEvents(null);
     } catch (exception) {
       log('$exception', name: 'DartAuth/signOut');
 
       rethrow;
     }
+  }
+
+  /// Refresh a user ID token using the refreshToken,
+  /// will refresh even if the token hasn't expired.
+  ///
+  Future<String?> refreshIdToken() async {
+    try {
+      return await _exchangeRefreshWithIdToken(
+        currentUser!.refreshToken,
+        options.apiKey,
+      );
+    } on HttpException catch (_) {
+      rethrow;
+    } catch (exception) {
+      rethrow;
+    }
+  }
+
+  Future<String?> _exchangeRefreshWithIdToken(
+    String? refreshToken,
+    String apiKey,
+  ) async {
+    final _response = await http.post(
+      Uri.parse(
+        'https://securetoken.googleapis.com/v1/token?key=$apiKey',
+      ),
+      body: {
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken,
+      },
+      headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
+    );
+
+    final Map<String, dynamic> _data = json.decode(_response.body);
+
+    return _data['access_token'];
   }
 
   /// Use the emulator to perform all requests,

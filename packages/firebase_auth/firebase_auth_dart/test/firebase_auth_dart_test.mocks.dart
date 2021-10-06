@@ -16,9 +16,11 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 
-class _FakeAuthOptions_0 extends _i1.Fake implements _i2.AuthOptions {}
+class _FakeIdTokenResult_0 extends _i1.Fake implements _i2.IdTokenResult {}
 
-class _FakeUserCredential_1 extends _i1.Fake implements _i2.UserCredential {}
+class _FakeAuthOptions_1 extends _i1.Fake implements _i2.AuthOptions {}
+
+class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
 
 /// A class which mocks [User].
 ///
@@ -35,6 +37,13 @@ class MockUser extends _i1.Mock implements _i2.User {
   _i3.Future<String?> getIdToken([bool? forceRefresh = false]) =>
       (super.noSuchMethod(Invocation.method(#getIdToken, [forceRefresh]),
           returnValue: Future<String?>.value()) as _i3.Future<String?>);
+  @override
+  _i3.Future<_i2.IdTokenResult> getIdTokenResult(
+          [bool? forceRefresh = false]) =>
+      (super.noSuchMethod(Invocation.method(#getIdTokenResult, [forceRefresh]),
+              returnValue:
+                  Future<_i2.IdTokenResult>.value(_FakeIdTokenResult_0()))
+          as _i3.Future<_i2.IdTokenResult>);
   @override
   Map<String, dynamic> toMap() =>
       (super.noSuchMethod(Invocation.method(#toMap, []),
@@ -54,7 +63,7 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
   @override
   _i2.AuthOptions get options =>
       (super.noSuchMethod(Invocation.getter(#options),
-          returnValue: _FakeAuthOptions_0()) as _i2.AuthOptions);
+          returnValue: _FakeAuthOptions_1()) as _i2.AuthOptions);
   @override
   set currentUser(_i2.User? _currentUser) =>
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
@@ -73,7 +82,7 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
       (super.noSuchMethod(
               Invocation.method(#signInWithEmailAndPassword, [email, password]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i3.Future<_i2.UserCredential>);
   @override
   _i3.Future<_i2.UserCredential> createUserWithEmailAndPassword(
@@ -81,7 +90,7 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
       (super.noSuchMethod(
           Invocation.method(#createUserWithEmailAndPassword, [email, password]),
           returnValue:
-              Future<_i2.UserCredential>.value(_FakeUserCredential_1())) as _i3
+              Future<_i2.UserCredential>.value(_FakeUserCredential_2())) as _i3
           .Future<_i2.UserCredential>);
   @override
   _i3.Future<List<String>> fetchSignInMethodsForEmail(String? email) => (super
@@ -107,13 +116,17 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
   _i3.Future<_i2.UserCredential> signInAnonymously() =>
       (super.noSuchMethod(Invocation.method(#signInAnonymously, []),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i3.Future<_i2.UserCredential>);
   @override
   _i3.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i3.Future<void>);
+  @override
+  _i3.Future<String?> refreshIdToken() =>
+      (super.noSuchMethod(Invocation.method(#refreshIdToken, []),
+          returnValue: Future<String?>.value()) as _i3.Future<String?>);
   @override
   _i3.Future<Map<dynamic, dynamic>> useEmulator(
           {String? host = r'localhost', int? port = 9099}) =>

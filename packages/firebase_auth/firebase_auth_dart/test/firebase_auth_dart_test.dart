@@ -1,10 +1,12 @@
+// ignore_for_file: require_trailing_commas
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -15,8 +17,8 @@ import 'firebase_auth_dart_test.mocks.dart';
 const mockEmail = 'test@test.com';
 const mockPassword = 'password';
 
-Response errorResponse(String code) {
-  return Response(
+http.Response errorResponse(String code) {
+  return http.Response(
     json.encode({
       'error': {'code': 404, 'message': code}
     }),
@@ -25,11 +27,12 @@ Response errorResponse(String code) {
   );
 }
 
-Response successResponse(String body) {
-  return Response(body, 200, headers: {'content-type': 'application/json'});
+http.Response successResponse(String body) {
+  return http.Response(body, 200,
+      headers: {'content-type': 'application/json'});
 }
 
-Future<Response> _mockSuccessRequests(Request req) async {
+Future<http.Response> _mockSuccessRequests(http.Request req) async {
   String body;
 
   if (req.url.path.contains('verifyPassword')) {
@@ -44,19 +47,19 @@ Future<Response> _mockSuccessRequests(Request req) async {
           .toJson(),
     );
   } else {
-    return Response('Error: Unknown endpoint', 404);
+    return http.Response('Error: Unknown endpoint', 404);
   }
 
   return successResponse(body);
 }
 
-Future<Response> _mockFailedRequests(Request req) async {
+Future<http.Response> _mockFailedRequests(http.Request req) async {
   if (req.url.path.contains('verifyPassword')) {
     return errorResponse(ErrorCode.emailNotFound);
   } else if (req.url.path.contains('createAuthUri')) {
     return errorResponse(ErrorCode.invalidIdentifier);
   } else {
-    return Response('Error: Unknown endpoint', 404);
+    return http.Response('Error: Unknown endpoint', 404);
   }
 }
 
@@ -79,7 +82,18 @@ void main() {
   late StreamQueue<User?> onAuthStateChanged;
   late StreamQueue<User?> onIdTokenChanged;
 
-  setUp(() {
+  /// Deletes all users from the Auth emulator.
+  Future<void> emulatorClearAllUsers() async {
+    await http.delete(
+      Uri.parse(
+          'http://localhost:9099/emulator/v1/projects/react-native-firebase-testing/accounts'),
+      headers: {
+        'Authorization': 'Bearer owner',
+      },
+    );
+  }
+
+  setUpAll(() async {
     realAuth = Auth(
       options: AuthOptions(
         apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
@@ -87,6 +101,11 @@ void main() {
       ),
     );
 
+    await realAuth.useEmulator();
+    await emulatorClearAllUsers();
+  });
+
+  setUp(() async {
     onAuthStateChanged = StreamQueue(authWithSuccessRes.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(authWithSuccessRes.onIdTokenChanged);
   });
@@ -186,6 +205,14 @@ void main() {
   });
 
   group('IdToken ', () {
+    test('get IdResultToken', () async {
+      final cred = await realAuth.createUserWithEmailAndPassword(
+        'mais@invertase.io',
+        '123qwe',
+      );
+      final token = await cred.user!.getIdTokenResult();
+      expect(token, isA<IdTokenResult>());
+    });
     test('user have IdToken and refreshToken.', () async {
       when(user.refreshToken).thenReturn('refreshToken');
       when(user.getIdToken()).thenAnswer((_) async => 'token');
