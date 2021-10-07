@@ -15,10 +15,10 @@ import 'package:meta/meta.dart';
 import 'src/utils/jwt.dart';
 
 part 'src/firebase_auth.dart';
-part 'src/firebase_auth_user.dart';
-part 'src/firebase_auth_providers.dart';
-part 'src/firebase_auth_exception.dart';
-part 'src/firebase_auth_credential.dart';
-part 'src/firebase_auth_user_credential.dart';
-part 'src/firebase_auth_additional_user_info.dart';
-part 'src/firebase_auth_id_token_result.dart';
+part 'src/user.dart';
+part 'src/auth_providers.dart';
+part 'src/auth_exception.dart';
+part 'src/auth_credential.dart';
+part 'src/user_credential.dart';
+part 'src/additional_user_info.dart';
+part 'src/id_token_result.dart';

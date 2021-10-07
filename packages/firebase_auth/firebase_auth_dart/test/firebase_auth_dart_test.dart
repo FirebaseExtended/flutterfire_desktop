@@ -205,7 +205,7 @@ void main() {
   });
 
   group('IdToken ', () {
-    test('get IdResultToken', () async {
+    test('getIdTokenResult()', () async {
       final cred = await realAuth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
@@ -223,7 +223,6 @@ void main() {
       verify(user.getIdToken());
       verify(user.refreshToken);
     });
-
     test('force refresh.', () async {
       when(user.getIdToken()).thenAnswer((_) async => 'token');
       when(user.getIdToken(true)).thenAnswer((_) async => 'token_refreshed');
@@ -234,7 +233,6 @@ void main() {
 
       expect(token, isNot(equals(oldToken)));
     });
-
     test("getIdToken doesn't force refresh.", () async {
       when(user.getIdToken()).thenAnswer((_) async => 'token');
 
