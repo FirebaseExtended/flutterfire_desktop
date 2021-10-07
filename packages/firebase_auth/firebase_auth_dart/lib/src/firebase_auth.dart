@@ -2,58 +2,32 @@
 
 part of firebase_auth_dart;
 
-/// The options used for all requests made by [Auth] instance.
-class AuthOptions {
-  // ignore: public_member_api_docs
-  AuthOptions({
-    required this.apiKey,
-    required this.projectId,
-  });
-
-  /// The API key used for all requests made by [Auth] instance.
-  ///
-  final String apiKey;
-
-  /// The Id of GCP or Firebase project.
-  ///
-  final String projectId;
-}
-
 /// Pure Dart service wrapper around the Identity Platform REST API.
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class Auth {
   // ignore: public_member_api_docs
-  Auth({required this.options, http.Client? client})
+  Auth({required APIOptions options})
       : assert(
           options.apiKey.isNotEmpty,
           'API key must not be empty, please provide a valid API key, '
           'or a dummy one if you are using the emulator.',
-        ) {
-    final _client = client ?? clientViaApiKey(options.apiKey);
-
-    // Use auth emulator if available
-
-    _identityToolkit = IdentityToolkitApi(_client).relyingparty;
-
+        ),
+        _api = API(options) {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
   }
 
-  /// The settings this instance is configured with.
-  final AuthOptions options;
-
-  /// The currently signed in user for this instance.
-  User? currentUser;
-
-  /// The indentity toolkit API instance used to make all requests.
-  late RelyingpartyResource _identityToolkit;
+  final API _api;
 
   // ignore: close_sinks
   late StreamController<User?> _changeController;
 
   // ignore: close_sinks
   late StreamController<User?> _idTokenChangedController;
+
+  /// The currently signed in user for this instance.
+  User? currentUser;
 
   /// Sends events when the users sign-in state changes.
   ///
@@ -80,20 +54,14 @@ class Auth {
   /// Sign in a user using email and password.
   ///
   /// Throws [AuthException] with following possible codes:
-  ///
+  /// TODO: write the codes
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
     try {
-      final _response = await _identityToolkit.verifyPassword(
-        IdentitytoolkitRelyingpartyVerifyPasswordRequest(
-          returnSecureToken: true,
-          password: password,
-          email: email,
-        ),
-      );
+      final _userMap = await _api.signInWithEmailAndPassword(email, password);
 
       // Map the json response to an actual user.
-      final user = User(_response.toJson(), this);
+      final user = User(_userMap, this);
 
       _updateCurrentUserAndEvents(user);
 
@@ -108,15 +76,8 @@ class Auth {
         ),
         additionalUserInfo: AdditionalUserInfo(isNewUser: false),
       );
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth');
-
-      rethrow;
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
@@ -130,14 +91,10 @@ class Auth {
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
-      final _response = await _identityToolkit.signupNewUser(
-        IdentitytoolkitRelyingpartySignupNewUserRequest(
-          email: email,
-          password: password,
-        ),
-      );
+      final _response =
+          await _api.createUserWithEmailAndPassword(email, password);
 
-      final user = User(_response.toJson(), this);
+      final user = User(_response, this);
       _updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
@@ -150,15 +107,8 @@ class Auth {
         ),
         additionalUserInfo: AdditionalUserInfo(isNewUser: true),
       );
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/signUpWithEmailAndPassword');
-
-      rethrow;
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
@@ -169,23 +119,11 @@ class Auth {
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      final _response = await _identityToolkit.createAuthUri(
-        IdentitytoolkitRelyingpartyCreateAuthUriRequest(
-          identifier: email,
-          continueUri: 'http://localhost:8080/app',
-        ),
-      );
+      final _providers = await _api.fetchSignInMethodsForEmail(email);
 
-      return _response.allProviders ?? [];
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/fetchSignInMethodsForEmail');
-
-      rethrow;
+      return _providers;
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
@@ -193,59 +131,33 @@ class Auth {
   ///
   /// Throws [AuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  Future<String?> sendPasswordResetEmail(String email) async {
+  Future sendPasswordResetEmail(String email) async {
     try {
-      final _response = await _identityToolkit.getOobConfirmationCode(
-        Relyingparty(
-          email: email,
-          requestType: 'PASSWORD_RESET',
-          // have to be sent, otherwise the user won't be redirected to the app.
-          // continueUrl: ,
-        ),
-      );
-
-      return _response.email;
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/sendPasswordResetEmail');
-
-      rethrow;
+      await _api.sendPasswordResetEmail(email);
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
-  /// Verify password reset code and updates the password if all went good.
-  /// `oldPassword` is optional, as this can be used to reset a password
-  /// in case the user forgot the old one.
+  /// Reset user password.
+  ///
+  /// Requires tht the user has recently been authenticated,
+  /// check [User.reauthenticateWithCredential].
   ///
   /// Throws [AuthException] with following possible codes:
   /// - `OPERATION_NOT_ALLOWED`: Password sign-in is disabled for this project.
-  /// - `EXPIRED_OOB_CODE`: The action code has expired.
-  /// - `INVALID_OOB_CODE`: The action code is invalid. This can happen if the
-  ///    code is malformed, expired, or has already been used.
   /// - `USER_DISABLED`: The user account has been disabled by an administrator.
-  Future<String> resetUserPassword(
-      {String? newPassword, String? oldPassword}) async {
+  /// TODO: make sure codes are correct
+  Future resetUserPassword({String? newPassword, String? oldPassword}) async {
     try {
-      final _response = await _identityToolkit.setAccountInfo(
-        IdentitytoolkitRelyingpartySetAccountInfoRequest(
-          idToken: '',
-        ),
-      );
-
-      return _response.email!;
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/resetPassword');
-
-      rethrow;
+      if (currentUser != null) {
+        final token = await currentUser!.getIdToken();
+        await _api.resetUserPassword(token!);
+      } else {
+        throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+      }
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
@@ -253,39 +165,22 @@ class Auth {
   ///
   /// Throws [AuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  Future<String?> sendSignInLinkToEmail(String email) async {
+  Future sendSignInLinkToEmail(String email) async {
     try {
-      final _response = await _identityToolkit.getOobConfirmationCode(
-        Relyingparty(
-          email: email,
-          requestType: 'EMAIL_SIGNIN',
-          // have to be sent, otherwise the user won't be redirected to the app.
-          // continueUrl: ,
-        ),
-      );
-
-      return _response.email;
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/sendSignInLinkToEmail');
-
-      rethrow;
+      await _api.sendSignInLinkToEmail(email);
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
   /// Sign in anonymous users.
   ///
+  /// TODO: describe exceptions
   Future<UserCredential> signInAnonymously() async {
     try {
-      final _response = await _identityToolkit.signupNewUser(
-        IdentitytoolkitRelyingpartySignupNewUserRequest(),
-      );
+      final _response = await _api.signInAnonymously();
 
-      final _data = _response.toJson();
+      final _data = _response;
 
       final user = User(_data, this);
       _updateCurrentUserAndEvents(user);
@@ -299,15 +194,8 @@ class Auth {
         ),
         additionalUserInfo: AdditionalUserInfo(isNewUser: true),
       );
-    } on DetailedApiRequestError catch (exception) {
-      final authException = AuthException.fromErrorCode(exception.message);
-      log('$authException', name: 'DartAuth/${authException.code}');
-
-      throw authException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/signInAnonymously');
-
-      rethrow;
+    } catch (e) {
+      throw _getException(e);
     }
   }
 
@@ -329,35 +217,16 @@ class Auth {
   ///
   Future<String?> refreshIdToken() async {
     try {
-      return await _exchangeRefreshWithIdToken(
-        currentUser!.refreshToken,
-        options.apiKey,
-      );
+      if (currentUser != null) {
+        return await _api.refreshIdToken(currentUser!.refreshToken!);
+      } else {
+        throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+      }
     } on HttpException catch (_) {
       rethrow;
     } catch (exception) {
       rethrow;
     }
-  }
-
-  Future<String?> _exchangeRefreshWithIdToken(
-    String? refreshToken,
-    String apiKey,
-  ) async {
-    final _response = await http.post(
-      Uri.parse(
-        'https://securetoken.googleapis.com/v1/token?key=$apiKey',
-      ),
-      body: {
-        'grant_type': 'refresh_token',
-        'refresh_token': refreshToken,
-      },
-      headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
-    );
-
-    final Map<String, dynamic> _data = json.decode(_response.body);
-
-    return _data['access_token'];
   }
 
   /// Use the emulator to perform all requests,
@@ -368,45 +237,27 @@ class Auth {
   /// see:
   /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
   Future<Map> useEmulator({String host = 'localhost', int port = 9099}) async {
-    // 1. Get the emulator project configs, it must be initialized first.
-    // http://localhost:9099/emulator/v1/projects/{project-id}/config
-    final localEmulator = Uri(
-      scheme: 'http',
-      host: host,
-      port: port,
-      path: '/emulator/v1/projects/${options.projectId}/config',
-    );
-
-    http.Response response;
-
     try {
-      response = await http.get(localEmulator);
-    } on SocketException catch (exception) {
-      final socketException = SocketException(
-        'Error happened while trying to connect to the local emulator, '
-        'make sure you have it running, and you provided the correct port.',
-        port: port,
-        osError: exception.osError,
-        address: exception.address,
-      );
-
-      log(socketException.message, name: 'DartAuth/useEmulator');
-
-      throw socketException;
-    } catch (exception) {
-      log('$exception', name: 'DartAuth/useEmulator');
-      rethrow;
+      return await _api.useEmulator(host, port);
+    } catch (e) {
+      throw _getException(e);
     }
+  }
 
-    final Map emulatorProjectConfig = json.decode(response.body);
+  Exception _getException(Object e) {
+    if (e is DetailedApiRequestError) {
+      final authException = AuthException.fromErrorCode(e.message);
+      log('$authException', name: 'firebase_auth_dart/${authException.code}');
 
-    // 3. Update the requester to use emulator
-    final rootUrl = 'http://$host:$port/www.googleapis.com/';
-    _identityToolkit = IdentityToolkitApi(
-      clientViaApiKey(options.apiKey),
-      rootUrl: rootUrl,
-    ).relyingparty;
+      return authException;
+    } else if (e is Exception) {
+      log('$e', name: 'firebase_auth_dart');
 
-    return emulatorProjectConfig;
+      return e;
+    } else {
+      log('$e', name: 'firebase_auth_dart');
+
+      return Exception(e);
+    }
   }
 }

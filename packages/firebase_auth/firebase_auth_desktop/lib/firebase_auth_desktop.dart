@@ -16,8 +16,10 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDesktop] classs.
   FirebaseAuthDesktop({required FirebaseApp app})
       : _auth = auth_dart.Auth(
-          options: auth_dart.AuthOptions(
-              apiKey: app.options.apiKey, projectId: app.options.projectId),
+          options: auth_dart.APIOptions(
+            apiKey: app.options.apiKey,
+            projectId: app.options.projectId,
+          ),
         ),
         super(appInstance: app) {
     // Create a app instance broadcast stream for both delegate listener events

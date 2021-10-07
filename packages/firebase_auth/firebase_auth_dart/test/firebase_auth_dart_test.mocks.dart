@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart' as _i1;
 
 class _FakeIdTokenResult_0 extends _i1.Fake implements _i2.IdTokenResult {}
 
-class _FakeAuthOptions_1 extends _i1.Fake implements _i2.AuthOptions {}
+class _FakeAuthOptions_1 extends _i1.Fake implements _i2.APIOptions {}
 
 class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
 
@@ -61,9 +61,8 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
   }
 
   @override
-  _i2.AuthOptions get options =>
-      (super.noSuchMethod(Invocation.getter(#options),
-          returnValue: _FakeAuthOptions_1()) as _i2.AuthOptions);
+  _i2.APIOptions get options => (super.noSuchMethod(Invocation.getter(#options),
+      returnValue: _FakeAuthOptions_1()) as _i2.APIOptions);
   @override
   set currentUser(_i2.User? _currentUser) =>
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),

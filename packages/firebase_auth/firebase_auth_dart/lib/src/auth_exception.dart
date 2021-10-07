@@ -25,6 +25,9 @@ class ErrorCode {
 
   /// Thrown if the identifier provided to `createAuthUri` is invalid.
   static const invalidIdentifier = 'INVALID_IDENTIFIER';
+
+  /// Thrown when the operation requires a user to be signed in.
+  static const userNotSignedIn = 'NOT_SIGNED_IN';
 }
 
 /// And exception wrapping error codes from the IP API.
@@ -62,6 +65,8 @@ class AuthException implements Exception {
         return AuthException('Email address is badly formatted.', code);
       case ErrorCode.invalidIdentifier:
         return AuthException('Invalid identifier, either empty or null.', code);
+      case ErrorCode.userNotSignedIn:
+        return AuthException('There is no user currently signed in.', code);
       default:
         return AuthException('Unknown error happened.', 'UNKNOWN');
     }

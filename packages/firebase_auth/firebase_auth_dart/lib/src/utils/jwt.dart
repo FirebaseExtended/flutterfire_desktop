@@ -2,6 +2,10 @@ import 'dart:convert';
 
 ///
 extension DecodeJWT on String {
+  DateTime get expirationTime {
+    return DateTime.fromMillisecondsSinceEpoch(decodeJWT['exp']);
+  }
+
   ///
   Map<String, dynamic> get decodeJWT {
     final parts = split('.');

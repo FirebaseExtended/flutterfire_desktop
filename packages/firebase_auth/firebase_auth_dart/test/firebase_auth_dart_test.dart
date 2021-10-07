@@ -71,12 +71,18 @@ void main() {
   final userCred = MockUserCredential();
 
   final authWithSuccessRes = Auth(
-    options: AuthOptions(apiKey: 'test', projectId: ''),
-    client: MockClient(_mockSuccessRequests),
+    options: APIOptions(
+      apiKey: 'test',
+      projectId: '',
+      client: MockClient(_mockSuccessRequests),
+    ),
   );
   final authWithFailedRes = Auth(
-    options: AuthOptions(apiKey: 'test', projectId: ''),
-    client: MockClient(_mockFailedRequests),
+    options: APIOptions(
+      apiKey: 'test',
+      projectId: '',
+      client: MockClient(_mockFailedRequests),
+    ),
   );
 
   late StreamQueue<User?> onAuthStateChanged;
@@ -95,7 +101,7 @@ void main() {
 
   setUpAll(() async {
     realAuth = Auth(
-      options: AuthOptions(
+      options: APIOptions(
         apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
         projectId: 'react-native-firebase-testing',
       ),

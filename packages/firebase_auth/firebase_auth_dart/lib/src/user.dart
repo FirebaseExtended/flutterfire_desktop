@@ -9,7 +9,7 @@ class User {
 
   final Auth _auth;
   final Map<String, dynamic> _user;
-  String _idToken;
+  final String _idToken;
 
   /// Returns a JWT refresh token for the user.
   ///
@@ -28,16 +28,9 @@ class User {
   /// If [forceRefresh] is `true`, the token returned will be refresh regardless
   /// of token expiration.
   Future<String?> getIdToken([bool forceRefresh = false]) async {
-    try {
-      if (forceRefresh) {
-        _idToken = (await _auth.refreshIdToken())!;
-        _auth._idTokenChangedController.add(this);
-      }
+    await _refreshIdToken(forceRefresh);
 
-      return _idToken;
-    } catch (e) {
-      rethrow;
-    }
+    return _idToken;
   }
 
   /// Returns a [IdTokenResult] containing the users JSON Web Token (JWT) and
@@ -46,15 +39,15 @@ class User {
   /// If [forceRefresh] is `true`, the token returned will be refresh regardless
   /// of token expiration.
   Future<IdTokenResult> getIdTokenResult([bool forceRefresh = false]) async {
-    try {
-      if (forceRefresh) {
-        _idToken = (await _auth.refreshIdToken())!;
-        _auth._idTokenChangedController.add(this);
-      }
+    await _refreshIdToken(forceRefresh);
 
-      return IdTokenResult(_idToken.decodeJWT);
-    } catch (e) {
-      rethrow;
+    return IdTokenResult(_idToken.decodeJWT);
+  }
+
+  Future _refreshIdToken(bool forceRefresh) async {
+    if (forceRefresh || _idToken.expirationTime.isBefore(DateTime.now())) {
+      _user['idToken'] = await _auth.refreshIdToken();
+      _auth._idTokenChangedController.add(this);
     }
   }
 
@@ -81,6 +74,8 @@ class User {
   String? get photoURL {
     return _user['photoURL'];
   }
+
+  void reauthenticateWithCredential(AuthCredential credential) {}
 
   /// A Map representation of this instance.
   Map<String, dynamic> toMap() => {

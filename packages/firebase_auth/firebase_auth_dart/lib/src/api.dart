@@ -1,0 +1,202 @@
+// ignore_for_file: require_trailing_commas
+
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:googleapis/identitytoolkit/v3.dart';
+import 'package:googleapis_auth/auth_io.dart';
+import 'package:http/http.dart' as http;
+
+import '../firebase_auth.dart';
+
+/// The options used for all requests made by [Auth] instance.
+class APIOptions {
+  // ignore: public_member_api_docs
+  APIOptions({
+    required this.apiKey,
+    required this.projectId,
+    this.client,
+  });
+
+  /// The API key used for all requests made by [Auth] instance.
+  final String apiKey;
+
+  /// The Id of GCP or Firebase project.
+  final String projectId;
+
+  /// The http client used to make all requests.
+  final http.Client? client;
+}
+
+/// Service layer to perform all requests with the underlying Identity Toolkit API.
+class API {
+  // ignore: public_member_api_docs
+  API(this._apiOptions) {
+    _client = _apiOptions.client ?? clientViaApiKey(_apiOptions.apiKey);
+    _identityToolkit = IdentityToolkitApi(_client).relyingparty;
+  }
+
+  late final APIOptions _apiOptions;
+  late http.Client _client;
+  late RelyingpartyResource _identityToolkit;
+
+  /// TODO: write endpoint details
+  Future<Map<String, dynamic>> signInWithEmailAndPassword(
+      String email, String password) async {
+    final _response = await _identityToolkit.verifyPassword(
+      IdentitytoolkitRelyingpartyVerifyPasswordRequest(
+        returnSecureToken: true,
+        password: password,
+        email: email,
+      ),
+    );
+
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+  Future<Map<String, dynamic>> createUserWithEmailAndPassword(
+      String email, String password) async {
+    final _response = await _identityToolkit.signupNewUser(
+      IdentitytoolkitRelyingpartySignupNewUserRequest(
+        email: email,
+        password: password,
+      ),
+    );
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+
+  Future<Map<String, dynamic>> signInAnonymously() async {
+    final _response = await _identityToolkit.signupNewUser(
+      IdentitytoolkitRelyingpartySignupNewUserRequest(),
+    );
+
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+  Future<List<String>> fetchSignInMethodsForEmail(String email) async {
+    final _response = await _identityToolkit.createAuthUri(
+      IdentitytoolkitRelyingpartyCreateAuthUriRequest(
+        identifier: email,
+        // TODO hmm?
+        //continueUri: 'http://localhost:8080/app',
+      ),
+    );
+
+    return _response.allProviders ?? [];
+  }
+
+  /// TODO: write endpoint details
+  Future sendPasswordResetEmail(String email) async {
+    await _identityToolkit.getOobConfirmationCode(
+      Relyingparty(
+        email: email,
+        requestType: 'PASSWORD_RESET',
+        // TODO have to be sent, otherwise the user won't be redirected to the app.
+        // continueUrl: ,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future resetUserPassword(String idToken, {String? newPassword}) async {
+    await _identityToolkit.setAccountInfo(
+      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        password: newPassword,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future sendSignInLinkToEmail(String email) async {
+    await _identityToolkit.getOobConfirmationCode(
+      Relyingparty(
+        email: email,
+        requestType: 'EMAIL_SIGNIN',
+        // have to be sent, otherwise the user won't be redirected to the app.
+        // continueUrl: ,
+      ),
+    );
+  }
+
+  /// Refresh a user ID token using the refreshToken,
+  /// will refresh even if the token hasn't expired.
+  ///
+  Future<String?> refreshIdToken(String refreshToken) async {
+    try {
+      return await _exchangeRefreshWithIdToken(
+        refreshToken,
+        _apiOptions.apiKey,
+      );
+    } on HttpException catch (_) {
+      rethrow;
+    } catch (exception) {
+      rethrow;
+    }
+  }
+
+  Future<String?> _exchangeRefreshWithIdToken(
+    String? refreshToken,
+    String apiKey,
+  ) async {
+    final _response = await http.post(
+      Uri.parse(
+        'https://securetoken.googleapis.com/v1/token?key=$apiKey',
+      ),
+      body: {
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken,
+      },
+      headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
+    );
+
+    final Map<String, dynamic> _data = json.decode(_response.body);
+
+    return _data['access_token'];
+  }
+
+  /// TODO: write endpoint details
+  Future<Map> useEmulator(String host, int port) async {
+    // 1. Get the emulator project configs, it must be initialized first.
+    // http://localhost:9099/emulator/v1/projects/{project-id}/config
+    final localEmulator = Uri(
+      scheme: 'http',
+      host: host,
+      port: port,
+      path: '/emulator/v1/projects/${_apiOptions.projectId}/config',
+    );
+
+    http.Response response;
+
+    try {
+      response = await http.get(localEmulator);
+    } on SocketException catch (e) {
+      final socketException = SocketException(
+        'Error happened while trying to connect to the local emulator, '
+        'make sure you have it running, and you provided the correct port.',
+        port: port,
+        osError: e.osError,
+        address: e.address,
+      );
+
+      throw socketException;
+    } catch (e) {
+      rethrow;
+    }
+
+    final Map emulatorProjectConfig = json.decode(response.body);
+
+    // 3. Update the requester to use emulator
+    final rootUrl = 'http://$host:$port/www.googleapis.com/';
+    _identityToolkit = IdentityToolkitApi(
+      clientViaApiKey(_apiOptions.apiKey),
+      rootUrl: rootUrl,
+    ).relyingparty;
+
+    return emulatorProjectConfig;
+  }
+}
