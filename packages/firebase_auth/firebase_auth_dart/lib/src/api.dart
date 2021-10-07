@@ -160,6 +160,16 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<void> delete(String idToken, String uid) async {
+    await _identityToolkit.deleteAccount(
+      IdentitytoolkitRelyingpartyDeleteAccountRequest(
+        idToken: idToken,
+        localId: uid,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
   Future<Map> useEmulator(String host, int port) async {
     // 1. Get the emulator project configs, it must be initialized first.
     // http://localhost:9099/emulator/v1/projects/{project-id}/config

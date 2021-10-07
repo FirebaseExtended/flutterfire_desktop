@@ -19,6 +19,23 @@ class User {
     return _user['refreshToken'];
   }
 
+  /// Deletes and signs out the user.
+  ///
+  /// **Important**: this is a security-sensitive operation that requires the
+  /// user to have recently signed in. If this requirement isn't met, ask the
+  /// user to authenticate again and then call [User.reauthenticateWithCredential].
+  ///
+  /// A [AuthException] maybe thrown with the following error code:
+  ///
+  Future<void> delete() async {
+    try {
+      await _auth._api.delete(_idToken, uid);
+      await _auth.signOut();
+    } catch (e) {
+      throw _auth._getException(e);
+    }
+  }
+
   /// Returns a JSON Web Token (JWT) used to identify the user to a Firebase
   /// service.
   ///

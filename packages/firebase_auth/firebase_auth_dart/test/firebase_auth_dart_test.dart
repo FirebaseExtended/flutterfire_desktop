@@ -260,4 +260,24 @@ void main() {
       );
     });
   });
+
+  group('User ', () {
+    test('delete()', () async {
+      final cred = await realAuth.createUserWithEmailAndPassword(
+        mockEmail,
+        mockPassword,
+      );
+
+      await cred.user!.delete();
+
+      expect(realAuth.currentUser, isNull);
+      expect(
+        realAuth.signInWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        ),
+        throwsA(isA<AuthException>()),
+      );
+    });
+  });
 }
