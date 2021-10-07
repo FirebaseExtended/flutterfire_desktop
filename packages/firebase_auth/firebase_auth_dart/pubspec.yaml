@@ -11,7 +11,7 @@ dependencies:
   googleapis: ^5.0.1
   googleapis_auth: ^1.1.0
   http: ^0.13.3
-  meta: ^1.7.0
+  meta: ^1.3.0
 
 dev_dependencies:
   async: ^2.8.2

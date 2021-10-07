@@ -262,7 +262,7 @@ void main() {
   });
 
   group('User ', () {
-    test('delete()', () async {
+    test('delete() current user', () async {
       final cred = await realAuth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
@@ -272,11 +272,21 @@ void main() {
 
       expect(realAuth.currentUser, isNull);
       expect(
+        cred.user!.delete(),
+        throwsA(
+          isA<AuthException>()
+              .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
+        ),
+      );
+      expect(
         realAuth.signInWithEmailAndPassword(
           mockEmail,
           mockPassword,
         ),
-        throwsA(isA<AuthException>()),
+        throwsA(
+          isA<AuthException>()
+              .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
+        ),
       );
     });
   });

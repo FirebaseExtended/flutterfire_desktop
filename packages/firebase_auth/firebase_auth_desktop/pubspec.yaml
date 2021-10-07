@@ -9,7 +9,10 @@ environment:
 
 dependencies:
   firebase_auth_dart:
-    path: ../firebase_auth_dart
+    git:
+      url: ssh://git@github.com/invertase/flutterfire_dart
+      path: packages/firebase_auth/firebase_auth_dart
+      ref: main
   firebase_auth_platform_interface: ^6.1.1
   firebase_core:
   flutter:
