@@ -265,7 +265,7 @@ void main() {
   });
 
   group('User ', () {
-    test('delete() current user', () async {
+    test('delete()', () async {
       final cred = await realAuth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
@@ -298,9 +298,15 @@ void main() {
         mockPassword,
       );
 
+      final oldToken = realAuth.currentUser!.uid;
+
       await cred.user!.updateEmail('test+1@test.com');
 
       expect(realAuth.currentUser!.email, equals('test+1@test.com'));
+
+      // Access token is updated
+      expect(await realAuth.currentUser!.getIdToken(), isNot(equals(oldToken)));
+
       expect(
         realAuth.signInWithEmailAndPassword(
           mockEmail,
@@ -317,11 +323,17 @@ void main() {
         mockEmail,
         mockPassword,
       );
+
+      final oldToken = realAuth.currentUser!.uid;
+
       await realAuth.currentUser!.updateDisplayName(displayName);
       await realAuth.currentUser!.updatePhotoURL(photoURL);
 
       expect(realAuth.currentUser!.displayName, equals(displayName));
       expect(realAuth.currentUser!.photoURL, equals(photoURL));
+
+      // Access token is updated
+      expect(await realAuth.currentUser!.getIdToken(), isNot(equals(oldToken)));
     });
   });
 }
