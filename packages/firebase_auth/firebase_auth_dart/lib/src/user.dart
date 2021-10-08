@@ -32,7 +32,7 @@ class User {
       await _auth._api.delete(_idToken, uid);
       await _auth.signOut();
     } catch (e) {
-      throw _auth._getException(e);
+      throw _auth.getException(e);
     }
   }
 
@@ -80,6 +80,21 @@ class User {
     return _user['email'];
   }
 
+  /// Returns whether the users email address has been verified.
+  ///
+  /// To send a verification email, see [sendEmailVerification].
+  ///
+  /// Once verified, call [reload] to ensure the latest user information is
+  /// retrieved from Firebase.
+  bool get emailVerified {
+    return _user['emailVerified'];
+  }
+
+  /// Returns whether the user is a anonymous.
+  bool get isAnonymous {
+    return _user['isAnonymous'];
+  }
+
   /// The users display name.
   ///
   /// Will be `null` if signing in anonymously or via password authentication.
@@ -89,10 +104,74 @@ class User {
 
   /// The photo URL of a user, could be `null`.
   String? get photoURL {
-    return _user['photoURL'];
+    return _user['photoUrl'];
   }
 
-  void reauthenticateWithCredential(AuthCredential credential) {}
+  /// Re-authenticates a user using a fresh credential.
+  ///
+  /// Use before operations such as [User.updatePassword] that require tokens
+  /// from recent sign-in attempts.
+  ///
+  /// A [AuthException] maybe thrown with the following error code:
+  ///
+  void reauthenticateWithCredential(AuthCredential credential) {
+    throw UnimplementedError('updateEmail() is not implemented');
+  }
+
+  /// Refreshes the current user, if signed in.
+  Future<void> reload() async {
+    _assertSignedIn(_auth);
+
+    _user.addAll(await _auth.reloadCurrentUser(_idToken));
+    _auth.updateCurrentUserAndEvents(_auth.currentUser);
+  }
+
+  /// Updates the user's email address.
+  ///
+  /// An email will be sent to the original email address (if it was set) that
+  /// allows to revoke the email address change, in order to protect them from
+  /// account hijacking.
+  ///
+  /// **Important**: this is a security sensitive operation that requires the
+  /// user to have recently signed in. If this requirement isn't met, ask the
+  /// user to authenticate again and then call [User.reauthenticateWithCredential].
+  ///
+  /// A [AuthException] maybe thrown with the following error code:
+  ///
+  Future<void> updateEmail(String newEmail) async {
+    _assertSignedIn(_auth);
+
+    await _auth.updateEmail(newEmail, _idToken);
+    await reload();
+  }
+
+  /// Updates the user's password.
+  ///
+  /// **Important**: this is a security sensitive operation that requires the
+  ///   user to have recently signed in. If this requirement isn't met, ask the
+  ///   user to authenticate again and then call [User.reauthenticateWithCredential].
+  ///
+  /// A [AuthException] maybe thrown with the following error code:
+  ///
+  Future<void> updatePassword(String newPassword) async {
+    throw UnimplementedError('updatePassword() is not implemented');
+  }
+
+  /// Update the user name.
+  Future<void> updateDisplayName(String displayName) async {
+    _assertSignedIn(_auth);
+
+    await _auth.updateProfile({'displayName': displayName}, _idToken);
+    await reload();
+  }
+
+  /// Update the user's profile picture.
+  Future<void> updatePhotoURL(String photoURL) async {
+    _assertSignedIn(_auth);
+
+    await _auth.updateProfile({'photoURL': photoURL}, _idToken);
+    await reload();
+  }
 
   /// A Map representation of this instance.
   Map<String, dynamic> toMap() => {
@@ -102,4 +181,13 @@ class User {
         'displayName': displayName,
         'photoURL': photoURL,
       };
+}
+
+@protected
+void _assertSignedIn(Auth instance) {
+  if (instance.currentUser != null) {
+    return;
+  } else {
+    throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+  }
 }

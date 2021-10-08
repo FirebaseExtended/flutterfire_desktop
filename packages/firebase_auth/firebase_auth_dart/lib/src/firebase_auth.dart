@@ -45,7 +45,8 @@ class Auth {
   }
 
   /// Helper method to update currentUser and events.
-  void _updateCurrentUserAndEvents(User? user) {
+  @protected
+  void updateCurrentUserAndEvents(User? user) {
     currentUser = user;
     _changeController.add(user);
     _idTokenChangedController.add(user);
@@ -63,7 +64,7 @@ class Auth {
       // Map the json response to an actual user.
       final user = User(_userMap, this);
 
-      _updateCurrentUserAndEvents(user);
+      updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
 
@@ -77,7 +78,7 @@ class Auth {
         additionalUserInfo: AdditionalUserInfo(isNewUser: false),
       );
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
@@ -95,7 +96,7 @@ class Auth {
           await _api.createUserWithEmailAndPassword(email, password);
 
       final user = User(_response, this);
-      _updateCurrentUserAndEvents(user);
+      updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
 
@@ -108,7 +109,7 @@ class Auth {
         additionalUserInfo: AdditionalUserInfo(isNewUser: true),
       );
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
@@ -123,19 +124,20 @@ class Auth {
 
       return _providers;
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
   /// Send a password reset email.
   ///
   /// Throws [AuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `EMAIL_EXISTS`: The email address is already in use by another account.
+  /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
   Future sendPasswordResetEmail(String email) async {
     try {
       await _api.sendPasswordResetEmail(email);
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
@@ -157,7 +159,7 @@ class Auth {
         throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
       }
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
@@ -169,7 +171,7 @@ class Auth {
     try {
       await _api.sendSignInLinkToEmail(email);
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
@@ -183,7 +185,7 @@ class Auth {
       final _data = _response;
 
       final user = User(_data, this);
-      _updateCurrentUserAndEvents(user);
+      updateCurrentUserAndEvents(user);
       final providerId = AuthProvider.anonymous.providerId;
 
       return UserCredential(
@@ -195,7 +197,47 @@ class Auth {
         additionalUserInfo: AdditionalUserInfo(isNewUser: true),
       );
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
+    }
+  }
+
+  /// Update user's email.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  @protected
+  Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
+    try {
+      final userMap = await _api.reloadCurrentUser(idToken);
+      return userMap;
+    } catch (e) {
+      throw getException(e);
+    }
+  }
+
+  /// Update user's email.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  @protected
+  Future updateEmail(String email, String idToken) async {
+    try {
+      await _api.updateEmail(email, idToken, currentUser!.uid);
+    } catch (e) {
+      throw getException(e);
+    }
+  }
+
+  /// Update user's photoURL.
+  ///
+  /// Throws [AuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  @protected
+  Future updateProfile(Map<String, dynamic> newProfile, String idToken) async {
+    try {
+      await _api.updateProfile(newProfile, idToken, currentUser!.uid);
+    } catch (e) {
+      throw getException(e);
     }
   }
 
@@ -204,7 +246,7 @@ class Auth {
   Future<void> signOut() async {
     try {
       // TODO: figure out the correct sign-out flow
-      _updateCurrentUserAndEvents(null);
+      updateCurrentUserAndEvents(null);
     } catch (exception) {
       log('$exception', name: 'DartAuth/signOut');
 
@@ -214,7 +256,7 @@ class Auth {
 
   /// Refresh a user ID token using the refreshToken,
   /// will refresh even if the token hasn't expired.
-  ///
+  @protected
   Future<String?> refreshIdToken() async {
     try {
       if (currentUser != null) {
@@ -240,11 +282,12 @@ class Auth {
     try {
       return await _api.useEmulator(host, port);
     } catch (e) {
-      throw _getException(e);
+      throw getException(e);
     }
   }
 
-  Exception _getException(Object e) {
+  @protected
+  Exception getException(Object e) {
     if (e is DetailedApiRequestError) {
       final authException = AuthException.fromErrorCode(e.message);
       log('$authException', name: 'firebase_auth_dart/${authException.code}');

@@ -16,6 +16,9 @@ import 'firebase_auth_dart_test.mocks.dart';
 
 const mockEmail = 'test@test.com';
 const mockPassword = 'password';
+const photoURL =
+    'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
+const displayName = 'Invertase';
 
 http.Response errorResponse(String code) {
   return http.Response(
@@ -288,6 +291,37 @@ void main() {
               .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
         ),
       );
+    });
+    test('updateEmail()', () async {
+      final cred = await realAuth.createUserWithEmailAndPassword(
+        mockEmail,
+        mockPassword,
+      );
+
+      await cred.user!.updateEmail('test+1@test.com');
+
+      expect(realAuth.currentUser!.email, equals('test+1@test.com'));
+      expect(
+        realAuth.signInWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        ),
+        throwsA(
+          isA<AuthException>()
+              .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
+        ),
+      );
+    });
+    test('updateDisplayName() & updatePhotoURL()', () async {
+      await realAuth.createUserWithEmailAndPassword(
+        mockEmail,
+        mockPassword,
+      );
+      await realAuth.currentUser!.updateDisplayName(displayName);
+      await realAuth.currentUser!.updatePhotoURL(photoURL);
+
+      expect(realAuth.currentUser!.displayName, equals(displayName));
+      expect(realAuth.currentUser!.photoURL, equals(photoURL));
     });
   });
 }

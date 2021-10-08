@@ -123,6 +123,42 @@ class API {
     );
   }
 
+  /// TODO: write endpoint details
+  Future<Map<String, dynamic>> updateEmail(
+      String newEmail, String idToken, String uid) async {
+    final _response = await _identityToolkit.setAccountInfo(
+      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        email: newEmail,
+        idToken: idToken,
+        localId: uid,
+      ),
+    );
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+  Future<Map<String, dynamic>> updateProfile(
+      Map<String, dynamic> newProfile, String idToken, String uid) async {
+    final _response = await _identityToolkit.setAccountInfo(
+      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        displayName: newProfile['displayName'],
+        photoUrl: newProfile['photoURL'],
+        idToken: idToken,
+        localId: uid,
+      ),
+    );
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+  Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
+    final _response = await _identityToolkit.getAccountInfo(
+      IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
+    );
+
+    return _response.toJson()['users'][0];
+  }
+
   /// Refresh a user ID token using the refreshToken,
   /// will refresh even if the token hasn't expired.
   ///
