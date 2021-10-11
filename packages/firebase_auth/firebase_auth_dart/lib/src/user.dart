@@ -137,12 +137,33 @@ class User {
   /// user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
   /// A [AuthException] maybe thrown with the following error code:
-  ///
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<void> updateEmail(String newEmail) async {
     _assertSignedIn(_auth);
 
-    await _auth.updateEmail(newEmail, _idToken);
-    await reload();
+    try {
+      await _auth._api.updateEmail(newEmail, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
+  }
+
+  /// Sends a verification email to a user.
+  ///
+  /// The verification process is completed by calling [applyActionCode].
+  ///
+  /// A [AuthException] maybe thrown with the following error code:
+  /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
+  /// - `USER_NOT_FOUND`: no user record corresponding to this identifier. The user may have been deleted.
+  Future<void> sendEmailVerification() async {
+    _assertSignedIn(_auth);
+
+    try {
+      await _auth._api.sendEmailVerification(_idToken);
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
   /// Updates the user's password.

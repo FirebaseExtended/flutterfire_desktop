@@ -159,6 +159,15 @@ class API {
     return _response.toJson()['users'][0];
   }
 
+  /// TODO: write endpoint details
+  Future<String?> sendEmailVerification(String idToken) async {
+    final _response = await _identityToolkit.getOobConfirmationCode(
+      Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
+    );
+
+    return _response.email;
+  }
+
   /// Refresh a user ID token using the refreshToken,
   /// will refresh even if the token hasn't expired.
   ///

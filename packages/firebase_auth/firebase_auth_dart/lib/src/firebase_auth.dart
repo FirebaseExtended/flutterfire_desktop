@@ -215,19 +215,6 @@ class Auth {
     }
   }
 
-  /// Update user's email.
-  ///
-  /// Throws [AuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  @protected
-  Future updateEmail(String email, String idToken) async {
-    try {
-      await _api.updateEmail(email, idToken, currentUser!.uid);
-    } catch (e) {
-      throw getException(e);
-    }
-  }
-
   /// Update user's photoURL.
   ///
   /// Throws [AuthException] with following possible codes:

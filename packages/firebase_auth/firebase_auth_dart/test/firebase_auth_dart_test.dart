@@ -335,5 +335,14 @@ void main() {
       // Access token is updated
       expect(await realAuth.currentUser!.getIdToken(), isNot(equals(oldToken)));
     });
+    test('sendEmailVerification()', () async {
+      when(fakeAuth.currentUser).thenReturn(user);
+      when(user.sendEmailVerification()).thenAnswer((_) async {});
+
+      await fakeAuth.signInAnonymously();
+      await fakeAuth.currentUser!.sendEmailVerification();
+
+      verify(user.sendEmailVerification());
+    });
   });
 }
