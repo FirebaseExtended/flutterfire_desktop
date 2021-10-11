@@ -120,7 +120,7 @@ class User {
 
   /// Refreshes the current user, if signed in.
   Future<void> reload() async {
-    _assertSignedIn(_auth);
+    _assertSignedOut(_auth);
 
     _user.addAll(await _auth.reloadCurrentUser(_idToken));
     _auth.updateCurrentUserAndEvents(_auth.currentUser);
@@ -139,7 +139,7 @@ class User {
   /// A [AuthException] maybe thrown with the following error code:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<void> updateEmail(String newEmail) async {
-    _assertSignedIn(_auth);
+    _assertSignedOut(_auth);
 
     try {
       await _auth._api.updateEmail(newEmail, _idToken, uid);
@@ -157,7 +157,7 @@ class User {
   /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
   /// - `USER_NOT_FOUND`: no user record corresponding to this identifier. The user may have been deleted.
   Future<void> sendEmailVerification() async {
-    _assertSignedIn(_auth);
+    _assertSignedOut(_auth);
 
     try {
       await _auth._api.sendEmailVerification(_idToken);
@@ -180,7 +180,7 @@ class User {
 
   /// Update the user name.
   Future<void> updateDisplayName(String displayName) async {
-    _assertSignedIn(_auth);
+    _assertSignedOut(_auth);
 
     await _auth.updateProfile({'displayName': displayName}, _idToken);
     await reload();
@@ -188,7 +188,7 @@ class User {
 
   /// Update the user's profile picture.
   Future<void> updatePhotoURL(String photoURL) async {
-    _assertSignedIn(_auth);
+    _assertSignedOut(_auth);
 
     await _auth.updateProfile({'photoURL': photoURL}, _idToken);
     await reload();
@@ -204,9 +204,20 @@ class User {
       };
 }
 
+/// Throws if any auth method is called with no user signed in.
+@protected
+void _assertSignedOut(Auth instance) {
+  if (instance.currentUser != null) {
+    return;
+  } else {
+    throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+  }
+}
+
+/// Throws if any auth method is called with current user.
 @protected
 void _assertSignedIn(Auth instance) {
-  if (instance.currentUser != null) {
+  if (instance.currentUser == null) {
     return;
   } else {
     throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);

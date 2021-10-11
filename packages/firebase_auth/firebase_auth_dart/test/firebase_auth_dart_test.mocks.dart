@@ -188,7 +188,7 @@ class MockAuth extends _i1.Mock implements _i2.Auth {
       (super.noSuchMethod(Invocation.method(#refreshIdToken, []),
           returnValue: Future<String?>.value()) as _i3.Future<String?>);
   @override
-  _i3.Future<Map<dynamic, dynamic>> useEmulator(
+  _i3.Future<Map<dynamic, dynamic>> useAuthEmulator(
           {String? host = r'localhost', int? port = 9099}) =>
       (super.noSuchMethod(
               Invocation.method(#useEmulator, [], {#host: host, #port: port}),

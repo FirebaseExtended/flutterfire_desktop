@@ -110,13 +110,11 @@ void main() {
       ),
     );
 
-    await realAuth.useEmulator();
+    await realAuth.useAuthEmulator();
     await emulatorClearAllUsers();
-  });
 
-  setUp(() async {
-    onAuthStateChanged = StreamQueue(authWithSuccessRes.onAuthStateChanged);
-    onIdTokenChanged = StreamQueue(authWithSuccessRes.onIdTokenChanged);
+    onAuthStateChanged = StreamQueue(realAuth.onAuthStateChanged);
+    onIdTokenChanged = StreamQueue(realAuth.onIdTokenChanged);
   });
 
   setUp(() {
@@ -140,7 +138,7 @@ void main() {
 
   group('Email and password ', () {
     test('sign-in updates currentUser and events.', () async {
-      final credential = await authWithSuccessRes.signInWithEmailAndPassword(
+      final credential = await realAuth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
@@ -150,30 +148,71 @@ void main() {
       expect(await onAuthStateChanged.next, isA<User>());
       expect(await onIdTokenChanged.next, isA<User>());
     });
-    test('sign-out updates currentUser and events.', () async {
-      await authWithSuccessRes.signOut();
 
-      expect(authWithSuccessRes.currentUser, isNull);
-      expect(await onAuthStateChanged.next, isNull);
-      expect(await onIdTokenChanged.next, isNull);
-    });
-    test('should throw.', () {
+    test('should throw.', () async {
+      await emulatorClearAllUsers();
       expect(
-        () => authWithFailedRes.signInWithEmailAndPassword(
-            mockEmail, mockPassword),
+        () => realAuth.signInWithEmailAndPassword(mockEmail, mockPassword),
         throwsA(isA<AuthException>()
             .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
       );
     });
 
     test('sign-up updates currentUser and events.', () async {
-      final credential = await authWithSuccessRes
-          .createUserWithEmailAndPassword(mockEmail, mockPassword);
+      final credential = await realAuth.createUserWithEmailAndPassword(
+          mockEmail, mockPassword);
 
       expect(credential, isA<UserCredential>());
       expect(credential.user!.email, equals(mockEmail));
       expect(await onAuthStateChanged.next, isA<User>());
       expect(await onIdTokenChanged.next, isA<User>());
+    });
+    test('sign-out updates currentUser and events.', () async {
+      await realAuth.signInWithEmailAndPassword(mockEmail, mockPassword);
+      await onAuthStateChanged.next;
+      await onIdTokenChanged.next;
+
+      await realAuth.signOut();
+
+      expect(realAuth.currentUser, isNull);
+      expect(await onAuthStateChanged.next, isNull);
+      expect(await onIdTokenChanged.next, isNull);
+    });
+  });
+
+  group('Anonymous ', () {
+    test('sign-up.', () async {
+      final credential = await realAuth.signInAnonymously();
+      expect(credential.user!.isAnonymous, true);
+      expect(credential.credential!.providerId, 'anonymous');
+    });
+    test(
+      'sign-up return current user if already sign-in anonymously.',
+      () async {
+        final credential = await realAuth.signInAnonymously();
+
+        expect(credential.user!.isAnonymous, true);
+        expect(credential.credential!.providerId, 'anonymous');
+
+        expect(credential.user, equals(realAuth.currentUser));
+      },
+    );
+    test('sign-up updates currentUser and events.', () async {
+      final credential = await realAuth.signInAnonymously();
+
+      expect(credential, isA<UserCredential>());
+      expect(credential.user!.email, isNull);
+      expect(await onAuthStateChanged.next, isA<User>());
+      expect(await onIdTokenChanged.next, isA<User>());
+    });
+    test('sign-out.', () async {
+      await realAuth.signInAnonymously();
+
+      await realAuth.signOut();
+
+      expect(realAuth.currentUser, isNull);
+      expect(await onAuthStateChanged.next, isNull);
+      expect(await onIdTokenChanged.next, isNull);
     });
   });
 
@@ -193,23 +232,23 @@ void main() {
     });
   });
 
-  group('Password reset ', () {
-    test('verify.', () async {
-      await realAuth.sendPasswordResetEmail('mais@invertase.io');
+  // group('Password reset ', () {
+  //   test('verify.', () async {
+  //     await realAuth.sendPasswordResetEmail('mais@invertase.io');
 
-      //expect(providersList, ['password']);
-    });
+  //     //expect(providersList, ['password']);
+  //   });
 
-    test('confirm.', () {});
-  });
+  //   test('confirm.', () {});
+  // });
 
   group('Use emulator ', () {
-    test('throw.', () {
-      expect(realAuth.useEmulator(), throwsA(isA<AuthException>()));
-    });
-
     test('update requester.', () async {
-      expect(await realAuth.useEmulator(), isA<Map>());
+      expect(
+        await realAuth.useAuthEmulator(),
+        isA<Map>().having((p0) => p0.containsKey('signIn'),
+            'returns project emulator config', true),
+      );
     });
   });
 

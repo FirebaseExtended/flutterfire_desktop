@@ -177,16 +177,32 @@ class Auth {
 
   /// Sign in anonymous users.
   ///
+  /// If there's a user already sign-in anonymously, will be returned.
+  ///
   /// TODO: describe exceptions
   Future<UserCredential> signInAnonymously() async {
+    final providerId = AuthProvider.anonymous.providerId;
+
     try {
+      if (currentUser?.isAnonymous ?? false) {
+        return UserCredential(
+          user: currentUser,
+          credential: AuthCredential(
+            providerId: providerId,
+            signInMethod: providerId,
+          ),
+          additionalUserInfo: AdditionalUserInfo(isNewUser: false),
+        );
+      }
+
       final _response = await _api.signInAnonymously();
 
       final _data = _response;
 
+      _data['isAnonymous'] = true;
+
       final user = User(_data, this);
       updateCurrentUserAndEvents(user);
-      final providerId = AuthProvider.anonymous.providerId;
 
       return UserCredential(
         user: user,
@@ -232,7 +248,6 @@ class Auth {
   ///
   Future<void> signOut() async {
     try {
-      // TODO: figure out the correct sign-out flow
       updateCurrentUserAndEvents(null);
     } catch (exception) {
       log('$exception', name: 'DartAuth/signOut');
@@ -265,7 +280,8 @@ class Auth {
   /// the mthod will throw if there's no running emulator,
   /// see:
   /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
-  Future<Map> useEmulator({String host = 'localhost', int port = 9099}) async {
+  Future<Map> useAuthEmulator(
+      {String host = 'localhost', int port = 9099}) async {
     try {
       return await _api.useEmulator(host, port);
     } catch (e) {
