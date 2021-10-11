@@ -182,9 +182,15 @@ void main() {
 
   group('Anonymous ', () {
     test('sign-up.', () async {
-      final credential = await realAuth.signInAnonymously();
-      expect(credential.user!.isAnonymous, true);
-      expect(credential.credential!.providerId, 'anonymous');
+      await realAuth.signInAnonymously();
+
+      expect(realAuth.currentUser!.isAnonymous, true);
+      expect(realAuth.currentUser!.email, isNull);
+      expect((await realAuth.currentUser!.getIdTokenResult()).signInProvider,
+          'anonymous');
+
+      expect(await onAuthStateChanged.next, isA<User>());
+      expect(await onIdTokenChanged.next, isA<User>());
     });
     test(
       'sign-up return current user if already sign-in anonymously.',
@@ -197,22 +203,13 @@ void main() {
         expect(credential.user, equals(realAuth.currentUser));
       },
     );
-    test('sign-up updates currentUser and events.', () async {
-      final credential = await realAuth.signInAnonymously();
-
-      expect(credential, isA<UserCredential>());
-      expect(credential.user!.email, isNull);
-      expect(await onAuthStateChanged.next, isA<User>());
-      expect(await onIdTokenChanged.next, isA<User>());
-    });
     test('sign-out.', () async {
       await realAuth.signInAnonymously();
-
       await realAuth.signOut();
 
       expect(realAuth.currentUser, isNull);
       expect(await onAuthStateChanged.next, isNull);
-      expect(await onIdTokenChanged.next, isNull);
+      // expect(await onIdTokenChanged.next, isNull);
     });
   });
 
@@ -243,7 +240,7 @@ void main() {
   // });
 
   group('Use emulator ', () {
-    test('update requester.', () async {
+    test('returns project config.', () async {
       expect(
         await realAuth.useAuthEmulator(),
         isA<Map>().having((p0) => p0.containsKey('signIn'),
@@ -253,6 +250,9 @@ void main() {
   });
 
   group('IdToken ', () {
+    setUp(() async {
+      await emulatorClearAllUsers();
+    });
     test('getIdTokenResult()', () async {
       final cred = await realAuth.createUserWithEmailAndPassword(
         mockEmail,

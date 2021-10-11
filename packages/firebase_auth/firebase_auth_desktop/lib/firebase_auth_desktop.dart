@@ -307,7 +307,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> useAuthEmulator(String host, int port) async {
     try {
-      await _auth!.useEmulator();
+      await _auth!.useAuthEmulator();
 
       return;
     } catch (exception) {
