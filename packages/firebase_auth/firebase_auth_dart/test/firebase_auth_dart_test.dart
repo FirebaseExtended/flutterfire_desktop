@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
+import 'package:firebase_auth_dart/src/utils/persistence.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -382,6 +383,34 @@ void main() {
       await fakeAuth.currentUser!.sendEmailVerification();
 
       verify(user.sendEmailVerification());
+    });
+  });
+
+  group('StorageBox ', () {
+    test('store.', () async {
+      final box = StorageBox('box');
+      await box.putValue('token', '12354654');
+
+      expect(await box.getValue('token'), '12354654');
+    });
+    test('get.', () async {
+      final box = StorageBox('box');
+
+      expect(await box.getValue('token'), '12354654');
+    });
+    test('get a key that does not exist.', () async {
+      final box = StorageBox('box');
+      expect(
+        box.getValue('random_key'),
+        throwsA(isA<StorageBoxException>()),
+      );
+    });
+    test('get a key from a box that does not exist.', () async {
+      final box = StorageBox('box_');
+      expect(
+        box.getValue('token'),
+        throwsA(isA<StorageBoxException>()),
+      );
     });
   });
 }
