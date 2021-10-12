@@ -1,9 +1,11 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:convert';
 
 ///
 extension DecodeJWT on String {
   DateTime get expirationTime {
-    return DateTime.fromMillisecondsSinceEpoch(decodeJWT['exp']);
+    return DateTime.fromMillisecondsSinceEpoch(decodeJWT['exp'] * 1000);
   }
 
   ///
