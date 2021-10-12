@@ -8,7 +8,7 @@ import 'dart:io';
 /// with a name, then use the methods provided for that box,
 /// if the box doesn't exist, it will be created, if it exists
 /// data will be written to the existing one.
-class StorageBox {
+class StorageBox<T extends Object> {
   // ignore: public_member_api_docs
   StorageBox(this.name);
 
@@ -16,11 +16,15 @@ class StorageBox {
   final String name;
 
   final _home =
-      (Platform.environment['HOME'] ?? Platform.environment['APPDATA'])!;
+      (Platform.environment['HOME'] ?? Platform.environment['LOCALAPPDATA'])!;
 
   File get _file => File('$_home/$name.json');
 
-  Future<void> putValue(String key, String value) async {
+  Future<void> putValue(String key, T? value) async {
+    if (!_file.existsSync()) {
+      await _file.create();
+    }
+
     final content = await _file.readAsString();
     final contentMap = {};
 
@@ -29,7 +33,11 @@ class StorageBox {
       contentMap.addAll(jsonFromString);
     }
 
-    contentMap[key] = value;
+    if (value != null) {
+      contentMap[key] = value;
+    } else {
+      contentMap.remove(key);
+    }
 
     final file = await _file.open(mode: FileMode.writeOnly);
 
@@ -38,7 +46,7 @@ class StorageBox {
     await file.close();
   }
 
-  Future<String> getValue(String key) async {
+  Future<T> getValue(String key) async {
     try {
       final content = await _file.readAsString();
 
