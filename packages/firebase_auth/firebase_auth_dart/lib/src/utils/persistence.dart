@@ -20,6 +20,8 @@ class StorageBox<T extends Object> {
 
   File get _file => File('$_home/$name.json');
 
+  /// Store the key-value pair in the box with [name], if key already
+  /// exists the value will be overwritten.
   Future<void> putValue(String key, T? value) async {
     if (!_file.existsSync()) {
       await _file.create();
@@ -41,11 +43,16 @@ class StorageBox<T extends Object> {
 
     final file = await _file.open(mode: FileMode.writeOnly);
 
-    await file.writeString(jsonEncode(contentMap));
-
+    if (contentMap.isNotEmpty) {
+      await file.writeString(jsonEncode(contentMap));
+    } else {
+      await _file.delete();
+    }
     await file.close();
   }
 
+  /// Get the value for a specific key, if no such key exists, or no such box with [name]
+  /// [StorageBoxException] will be thrown.
   Future<T> getValue(String key) async {
     try {
       final content = await _file.readAsString();
