@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
-import 'package:firebase_auth_dart/src/utils/persistence.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -94,6 +93,7 @@ void main() {
 
   /// Deletes all users from the Auth emulator.
   Future<void> emulatorClearAllUsers() async {
+    //await realAuth.signOut();
     await http.delete(
       Uri.parse(
           'http://localhost:9099/emulator/v1/projects/react-native-firebase-testing/accounts'),
@@ -117,7 +117,6 @@ void main() {
     onAuthStateChanged = StreamQueue(realAuth.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(realAuth.onIdTokenChanged);
   });
-
   setUp(() {
     fakeAuth = MockAuth();
 
@@ -210,7 +209,7 @@ void main() {
 
       expect(realAuth.currentUser, isNull);
       expect(await onAuthStateChanged.next, isNull);
-      // expect(await onIdTokenChanged.next, isNull);
+      expect(await onIdTokenChanged.next, isNull);
     });
   });
 
@@ -229,16 +228,6 @@ void main() {
       );
     });
   });
-
-  // group('Password reset ', () {
-  //   test('verify.', () async {
-  //     await realAuth.sendPasswordResetEmail('mais@invertase.io');
-
-  //     //expect(providersList, ['password']);
-  //   });
-
-  //   test('confirm.', () {});
-  // });
 
   group('Use emulator ', () {
     test('returns project config.', () async {
@@ -387,16 +376,16 @@ void main() {
   });
 
   group('StorageBox ', () {
-    test('store.', () async {
+    test('put a new value.', () async {
       final box = StorageBox('box');
-      await box.putValue('token', '12354654');
+      await box.putValue('token', '123');
 
-      expect(await box.getValue('token'), '12354654');
+      expect(await box.getValue('token'), '123');
     });
-    test('get.', () async {
+    test('get existing value.', () async {
       final box = StorageBox('box');
 
-      expect(await box.getValue('token'), '12354654');
+      expect(await box.getValue('token'), '123');
     });
     test('get a key that does not exist.', () async {
       final box = StorageBox('box');
@@ -408,7 +397,7 @@ void main() {
     test('get a key from a box that does not exist.', () async {
       final box = StorageBox('box_');
       expect(
-        box.getValue('token'),
+        () => box.getValue('token'),
         throwsA(isA<StorageBoxException>()),
       );
     });
