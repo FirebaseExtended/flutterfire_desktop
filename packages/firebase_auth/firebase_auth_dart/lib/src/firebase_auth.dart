@@ -16,6 +16,19 @@ class Auth {
         _api = API(options) {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
+
+    _readLocalUser();
+  }
+
+  /// read current user from local storage.
+  Future _readLocalUser() async {
+    try {
+      final localUser = await StorageBox('user').getValue('currentUser');
+
+      currentUser = User(localUser as Map<String, dynamic>, this);
+    } catch (e) {
+      currentUser = null;
+    }
   }
 
   final API _api;
@@ -47,7 +60,13 @@ class Auth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
+    if (user != null) {
+      StorageBox('user').putValue('currentUser', user.toMap());
+    } else {
+      StorageBox('user').putValue('currentUser', null);
+    }
     currentUser = user;
+
     _changeController.add(user);
     _idTokenChangedController.add(user);
   }
@@ -184,7 +203,7 @@ class Auth {
     final providerId = AuthProvider.anonymous.providerId;
 
     try {
-      if (currentUser?.isAnonymous ?? false) {
+      if (currentUser != null && currentUser!.isAnonymous) {
         return UserCredential(
           user: currentUser,
           credential: AuthCredential(

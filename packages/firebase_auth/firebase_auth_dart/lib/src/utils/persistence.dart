@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
+part of firebase_auth_dart;
 
 /// A storage box is a container for key-value pairs of data
 /// which exists in one box with specific name.
