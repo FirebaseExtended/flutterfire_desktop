@@ -66,21 +66,21 @@ Future<http.Response> _mockFailedRequests(http.Request req) async {
   }
 }
 
-@GenerateMocks([User, Auth, UserCredential])
+@GenerateMocks([User, FirebaseAuth, UserCredential])
 void main() {
-  late Auth realAuth;
-  late Auth fakeAuth;
+  late FirebaseAuth realAuth;
+  late FirebaseAuth fakeAuth;
   final user = MockUser();
   final userCred = MockUserCredential();
 
-  final authWithSuccessRes = Auth(
+  final authWithSuccessRes = FirebaseAuth(
     options: APIOptions(
       apiKey: 'test',
       projectId: '',
       client: MockClient(_mockSuccessRequests),
     ),
   );
-  final authWithFailedRes = Auth(
+  final authWithFailedRes = FirebaseAuth(
     options: APIOptions(
       apiKey: 'test',
       projectId: '',
@@ -104,7 +104,7 @@ void main() {
   }
 
   setUpAll(() async {
-    realAuth = Auth(
+    realAuth = FirebaseAuth(
       options: APIOptions(
         apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
         projectId: 'react-native-firebase-testing',
@@ -147,6 +147,8 @@ void main() {
       expect(credential.user!.email, equals(mockEmail));
       expect(await onAuthStateChanged.next, isA<User>());
       expect(await onIdTokenChanged.next, isA<User>());
+
+      await realAuth.signOut();
     });
 
     test('should throw.', () async {
@@ -157,20 +159,8 @@ void main() {
             .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
       );
     });
-
-    test('sign-up updates currentUser and events.', () async {
-      final credential = await realAuth.createUserWithEmailAndPassword(
-          mockEmail, mockPassword);
-
-      expect(credential, isA<UserCredential>());
-      expect(credential.user!.email, equals(mockEmail));
-      expect(await onAuthStateChanged.next, isA<User>());
-      expect(await onIdTokenChanged.next, isA<User>());
-    });
-    test('sign-out updates currentUser and events.', () async {
-      await realAuth.signInWithEmailAndPassword(mockEmail, mockPassword);
-      await onAuthStateChanged.next;
-      await onIdTokenChanged.next;
+    test('sign-out.', () async {
+      await realAuth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
       await realAuth.signOut();
 
@@ -378,19 +368,19 @@ void main() {
   group('StorageBox ', () {
     test('put a new value.', () async {
       final box = StorageBox('box');
-      await box.putValue('token', '123');
+      await box.putValue('token1', '123');
 
-      expect(await box.getValue('token'), '123');
+      expect(box.getValue('token'), '123');
     });
     test('get existing value.', () async {
       final box = StorageBox('box');
 
-      expect(await box.getValue('token'), '123');
+      expect(box.getValue('token'), '123');
     });
     test('get a key that does not exist.', () async {
       final box = StorageBox('box');
       expect(
-        box.getValue('random_key'),
+        () => box.getValue('random_key'),
         throwsA(isA<StorageBoxException>()),
       );
     });

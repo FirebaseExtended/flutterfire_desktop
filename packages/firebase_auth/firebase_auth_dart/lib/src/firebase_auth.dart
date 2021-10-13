@@ -5,9 +5,9 @@ part of firebase_auth_dart;
 /// Pure Dart service wrapper around the Identity Platform REST API.
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
-class Auth {
+class FirebaseAuth {
   // ignore: public_member_api_docs
-  Auth({required APIOptions options})
+  FirebaseAuth({required APIOptions options})
       : assert(
           options.apiKey.isNotEmpty,
           'API key must not be empty, please provide a valid API key, '
@@ -17,21 +17,20 @@ class Auth {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
 
-    _readLocalUser();
-  }
-
-  /// read current user from local storage.
-  Future _readLocalUser() async {
-    try {
-      final localUser = await StorageBox('user').getValue('currentUser');
-
-      currentUser = User(localUser as Map<String, dynamic>, this);
-    } catch (e) {
-      currentUser = null;
+    if (_localUser() != null) {
+      currentUser = User(_localUser()!, this);
     }
   }
 
-  final API _api;
+  Map<String, dynamic>? _localUser() {
+    try {
+      return StorageBox('user').getValue('currentUser') as Map<String, dynamic>;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  late final API _api;
 
   // ignore: close_sinks
   late StreamController<User?> _changeController;
@@ -61,9 +60,9 @@ class Auth {
   @protected
   void updateCurrentUserAndEvents(User? user) {
     if (user != null) {
-      StorageBox('user').putValue('currentUser', user.toMap());
+      StorageBox('.user').putValue('currentUser', user.toMap());
     } else {
-      StorageBox('user').putValue('currentUser', null);
+      StorageBox('.user').putValue('currentUser', null);
     }
     currentUser = user;
 

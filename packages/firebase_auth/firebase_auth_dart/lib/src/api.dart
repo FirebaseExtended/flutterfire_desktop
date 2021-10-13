@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 import '../firebase_auth.dart';
 
-/// The options used for all requests made by [Auth] instance.
+/// The options used for all requests made by [FirebaseAuth] instance.
 class APIOptions {
   // ignore: public_member_api_docs
   APIOptions({
@@ -18,7 +18,7 @@ class APIOptions {
     this.client,
   });
 
-  /// The API key used for all requests made by [Auth] instance.
+  /// The API key used for all requests made by [FirebaseAuth] instance.
   final String apiKey;
 
   /// The Id of GCP or Firebase project.

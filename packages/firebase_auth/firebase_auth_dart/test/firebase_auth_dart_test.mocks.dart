@@ -103,7 +103,7 @@ class MockUser extends _i1.Mock implements _i2.User {
 /// A class which mocks [Auth].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuth extends _i1.Mock implements _i2.Auth {
+class MockAuth extends _i1.Mock implements _i2.FirebaseAuth {
   MockAuth() {
     _i1.throwOnMissingStub(this);
   }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:googleapis/androidpublisher/v3.dart';
 import 'package:googleapis/identitytoolkit/v3.dart'
