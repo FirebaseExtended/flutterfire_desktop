@@ -54,6 +54,11 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       : _auth = null,
         super(appInstance: null);
 
+  /// Called by PluginRegistry to register this plugin as the implementation for Desktop
+  static void registerWith() {
+    FirebaseAuthPlatform.instance = FirebaseAuthDesktop.instance;
+  }
+
   /// Stub initializer to allow creating an instance without
   /// registering delegates or listeners.
   ///

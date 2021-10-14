@@ -7,6 +7,7 @@ part 'firebase_app_dart.dart';
 /// A Dart only implementation of FirebaseCore for managing Firebase app
 /// instances.
 class FirebaseCoreDart extends FirebasePlatform {
+  /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
     FirebasePlatform.instance = FirebaseCoreDart();
   }
