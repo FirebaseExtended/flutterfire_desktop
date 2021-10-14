@@ -25,7 +25,7 @@ dependencies:
     git: 
       url: git://github.com/pr-Mais/flutterfire
       path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-core-dart"
+      ref: "@mais/firebase-dart"
   flutter:
     sdk: flutter
 
