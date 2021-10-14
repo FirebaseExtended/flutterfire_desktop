@@ -1,6 +1,5 @@
-
-name: firebase_core_dart
-description: TODO
+name: firebase_core_desktop
+description: Desktop implementation of firebase_core
 homepage: https://firebase.flutter.dev
 repository: https://github.com/invertase/flutterfire_dart
 version: 0.1.0
@@ -30,12 +29,12 @@ flutter:
     implements: firebase_core
     platforms:
       linux:
-        dartPluginClass: FirebaseCoreDart
+        dartPluginClass: FirebaseCoreDesktop
         pluginClass: none
       windows:
-        dartPluginClass: FirebaseCoreDart
+        dartPluginClass: FirebaseCoreDesktop
         pluginClass: none
       # testing, later will be removed
       macos:
-        dartPluginClass: FirebaseCoreDart
+        dartPluginClass: FirebaseCoreDesktop
         pluginClass: none

@@ -1,15 +1,15 @@
-library firebase_core_dart;
+library firebase_core_desktop;
 
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 
-part 'firebase_app_dart.dart';
+part 'firebase_app_desktop.dart';
 
 /// A Dart only implementation of FirebaseCore for managing Firebase app
 /// instances.
-class FirebaseCoreDart extends FirebasePlatform {
+class FirebaseCoreDesktop extends FirebasePlatform {
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
-    FirebasePlatform.instance = FirebaseCoreDart();
+    FirebasePlatform.instance = FirebaseCoreDesktop();
   }
 
   final Map<String, FirebaseAppPlatform> _apps =
