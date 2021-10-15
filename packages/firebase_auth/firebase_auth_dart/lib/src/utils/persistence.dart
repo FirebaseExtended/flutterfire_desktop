@@ -16,14 +16,18 @@ class StorageBox<T extends Object> {
 
   final _home =
       (Platform.environment['HOME'] ?? Platform.environment['APPDATA'])!;
-  File get _getFile =>  File('$_home${Platform.pathSeparator}$name.json');
+  File get _getFile => File(
+      '$_home${Platform.pathSeparator}.firebase-auth${Platform.pathSeparator}$name.json');
 
   late RandomAccessFile _file;
 
   /// Store the key-value pair in the box with [name], if key already
   /// exists the value will be overwritten.
-  Future<void> putValue(String key, T? value) async {
-    final contentMap = Map.from(await _readFile(FileMode.append));
+  void putValue(String key, T? value) {
+    if (!_getFile.existsSync()) {
+      _getFile.createSync(recursive: true);
+    }
+    final contentMap = Map.from(_readFile(FileMode.append));
 
     if (value != null) {
       contentMap[key] = value;
@@ -31,12 +35,8 @@ class StorageBox<T extends Object> {
       contentMap.remove(key);
     }
 
-    if (contentMap.isNotEmpty) {
-      _file = await _getFile.open(mode: FileMode.writeOnly);
-      await _file.writeString(jsonEncode(contentMap));
-    } else {
-      await _getFile.delete();
-    }
+    _file = _getFile.openSync(mode: FileMode.writeOnly);
+    _file.writeStringSync(jsonEncode(contentMap));
   }
 
   /// Get the value for a specific key, if no such key exists, or no such box with [name]
@@ -56,14 +56,14 @@ class StorageBox<T extends Object> {
     }
   }
 
-  Future<Map<String, dynamic>> _readFile(FileMode mode) async {
-    _file = await _getFile.open(mode: mode);
-    final length = await _file.length();
-    _file = await _file.setPosition(0);
+  Map<String, dynamic> _readFile(FileMode mode) {
+    _file = _getFile.openSync(mode: mode);
+    final length = _file.lengthSync();
+    _file.setPositionSync(0);
 
     final buffer = Uint8List(length);
-    await _file.readInto(buffer);
-    await _file.close();
+    _file.readIntoSync(buffer);
+    _file.closeSync();
 
     final contentText = utf8.decode(buffer);
 
