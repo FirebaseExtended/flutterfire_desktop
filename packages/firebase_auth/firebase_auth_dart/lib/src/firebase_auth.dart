@@ -24,7 +24,7 @@ class FirebaseAuth {
 
   Map<String, dynamic>? _localUser() {
     try {
-      return StorageBox('.user').getValue('currentUser')
+      return StorageBox.instanceOf('.user').getValue('currentUser')
           as Map<String, dynamic>;
     } catch (e) {
       return null;
@@ -61,9 +61,9 @@ class FirebaseAuth {
   @protected
   void updateCurrentUserAndEvents(User? user) {
     if (user != null) {
-      StorageBox('.user').putValue('currentUser', user.toMap());
+      StorageBox.instanceOf('.user').putValue('currentUser', user.toMap());
     } else {
-      StorageBox('.user').putValue('currentUser', null);
+      StorageBox.instanceOf('.user').putValue('currentUser', null);
     }
     currentUser = user;
 

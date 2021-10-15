@@ -9,25 +9,39 @@ part of firebase_auth_dart;
 /// data will be written to the existing one.
 class StorageBox<T extends Object> {
   // ignore: public_member_api_docs
-  StorageBox(this.name);
+  StorageBox._(this._name);
+
+  /// Get a [StorageBox] instance for a given name.
+  static StorageBox instanceOf([String name = 'user']) {
+    if (!_instances.containsKey(name)) {
+      _instances.addAll({name: StorageBox._(name)});
+    }
+    return _instances[name]!;
+  }
+
+  static final Map<String, StorageBox> _instances = {};
 
   /// The name of the box which you want to create or get.
-  final String name;
+  final String _name;
 
-  final _home =
-      (Platform.environment['HOME'] ?? Platform.environment['APPDATA'])!;
-  File get _getFile => File(
-      '$_home${Platform.pathSeparator}.firebase-auth${Platform.pathSeparator}$name.json');
+  File get _file {
+    /// `APPDATA` for windows, `HOME` for linux and mac
+    final _env = Platform.environment;
+    final _sep = Platform.pathSeparator;
 
-  late RandomAccessFile _file;
+    final _home = (_env['HOME'] ?? _env['APPDATA'])!;
+    final _path = '$_home$_sep.firebase-auth$_sep$_name.json';
 
-  /// Store the key-value pair in the box with [name], if key already
+    return File(_path);
+  }
+
+  /// Store the key-value pair in the box with [_name], if key already
   /// exists the value will be overwritten.
   void putValue(String key, T? value) {
-    if (!_getFile.existsSync()) {
-      _getFile.createSync(recursive: true);
+    if (!_file.existsSync()) {
+      _file.createSync(recursive: true);
     }
-    final contentMap = Map.from(_readFile(FileMode.append));
+    final contentMap = _readFile();
 
     if (value != null) {
       contentMap[key] = value;
@@ -35,15 +49,18 @@ class StorageBox<T extends Object> {
       contentMap.remove(key);
     }
 
-    _file = _getFile.openSync(mode: FileMode.writeOnly);
-    _file.writeStringSync(jsonEncode(contentMap));
+    if (contentMap.isEmpty) {
+      _file.deleteSync(recursive: true);
+    } else {
+      _file.writeAsStringSync(jsonEncode(contentMap));
+    }
   }
 
-  /// Get the value for a specific key, if no such key exists, or no such box with [name]
+  /// Get the value for a specific key, if no such key exists, or no such box with [_name]
   /// [StorageBoxException] will be thrown.
   T getValue(String key) {
     try {
-      final contentText = _getFile.readAsStringSync();
+      final contentText = _file.readAsStringSync();
       final Map<String, dynamic> content = jsonDecode(contentText);
 
       if (!content.containsKey(key)) {
@@ -52,20 +69,13 @@ class StorageBox<T extends Object> {
 
       return content[key];
     } on FileSystemException {
-      throw StorageBoxException('Box $name does not exist.');
+      throw StorageBoxException('Box $_name does not exist, '
+          'to create one, add some value using "putValue".');
     }
   }
 
-  Map<String, dynamic> _readFile(FileMode mode) {
-    _file = _getFile.openSync(mode: mode);
-    final length = _file.lengthSync();
-    _file.setPositionSync(0);
-
-    final buffer = Uint8List(length);
-    _file.readIntoSync(buffer);
-    _file.closeSync();
-
-    final contentText = utf8.decode(buffer);
+  Map<String, dynamic> _readFile() {
+    final contentText = _file.readAsStringSync();
 
     if (contentText.isEmpty) {
       return {};
