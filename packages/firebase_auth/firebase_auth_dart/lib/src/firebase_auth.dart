@@ -60,11 +60,7 @@ class FirebaseAuth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
-    if (user != null) {
-      StorageBox.instanceOf('.user').putValue('currentUser', user.toMap());
-    } else {
-      StorageBox.instanceOf('.user').putValue('currentUser', null);
-    }
+    StorageBox.instanceOf('.user').putValue('currentUser', user?.toMap());
     currentUser = user;
 
     _changeController.add(user);
