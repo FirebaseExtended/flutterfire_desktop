@@ -368,7 +368,7 @@ void main() {
   group('StorageBox ', () {
     test('put a new value.', () async {
       final box = StorageBox('box');
-      await box.putValue('token1', '123');
+      await box.putValue('token', '123');
 
       expect(box.getValue('token'), '123');
     });

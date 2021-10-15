@@ -15,8 +15,8 @@ class StorageBox<T extends Object> {
   final String name;
 
   final _home =
-      (Platform.environment['HOME'] ?? Platform.environment['LOCALAPPDATA'])!;
-  File get _getFile => File('$_home/$name.json');
+      (Platform.environment['HOME'] ?? Platform.environment['APPDATA'])!;
+  File get _getFile =>  File('$_home${Platform.pathSeparator}$name.json');
 
   late RandomAccessFile _file;
 
