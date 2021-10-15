@@ -2,13 +2,20 @@
 
 import 'dart:convert';
 
-///
+/// Multiplication factor to convert seconds to milliseconds, as time
+/// comes from Google's Identity Toolkit as seconds, multiply by this
+/// factor then use `fromMillisecondsSinceEpoch` to get a [DateTime] object.
+const secondToMilliesecondsFactor = 1000;
+
+/// A utility to decode JSON Web Tokens.
 extension DecodeJWT on String {
+  /// Get and converty the expiration time from seconds to [DateTime].
   DateTime get expirationTime {
-    return DateTime.fromMillisecondsSinceEpoch(decodeJWT['exp'] * 1000);
+    return DateTime.fromMillisecondsSinceEpoch(
+        decodeJWT['exp'] * secondToMilliesecondsFactor);
   }
 
-  ///
+  /// get a Map from a JWT.
   Map<String, dynamic> get decodeJWT {
     final parts = split('.');
     if (parts.length != 3) {

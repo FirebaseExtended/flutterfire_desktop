@@ -203,7 +203,7 @@ class FirebaseAuth {
     final providerId = AuthProvider.anonymous.providerId;
 
     try {
-      if (currentUser != null && currentUser!.isAnonymous) {
+      if (currentUser?.isAnonymous ?? false) {
         return UserCredential(
           user: currentUser,
           credential: AuthCredential(
