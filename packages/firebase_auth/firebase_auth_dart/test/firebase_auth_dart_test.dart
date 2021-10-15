@@ -366,25 +366,25 @@ void main() {
   });
 
   group('StorageBox ', () {
-    test('put a new value.', () async {
+    test('put a new value.', () {
       final box = StorageBox('box');
-      await box.putValue('token', '123');
+      box.putValue('token', '123');
 
       expect(box.getValue('token'), '123');
     });
-    test('get existing value.', () async {
+    test('get existing value.', () {
       final box = StorageBox('box');
 
       expect(box.getValue('token'), '123');
     });
-    test('get a key that does not exist.', () async {
+    test('get a key that does not exist.', () {
       final box = StorageBox('box');
       expect(
         () => box.getValue('random_key'),
         throwsA(isA<StorageBoxException>()),
       );
     });
-    test('get a key from a box that does not exist.', () async {
+    test('get a key from a box that does not exist.', () {
       final box = StorageBox('box_');
       expect(
         () => box.getValue('token'),
