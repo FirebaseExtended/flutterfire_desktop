@@ -24,7 +24,8 @@ class FirebaseAuth {
 
   Map<String, dynamic>? _localUser() {
     try {
-      return StorageBox('user').getValue('currentUser') as Map<String, dynamic>;
+      return StorageBox('.user').getValue('currentUser')
+          as Map<String, dynamic>;
     } catch (e) {
       return null;
     }
