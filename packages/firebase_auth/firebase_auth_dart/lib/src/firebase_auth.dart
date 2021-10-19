@@ -22,10 +22,11 @@ class FirebaseAuth {
     }
   }
 
+  final _userStorage = StorageBox.instanceOf('.user');
+
   Map<String, dynamic>? _localUser() {
     try {
-      return StorageBox.instanceOf('.user').getValue('currentUser')
-          as Map<String, dynamic>;
+      return _userStorage.getValue('currentUser') as Map<String, dynamic>;
     } catch (e) {
       return null;
     }
@@ -60,7 +61,7 @@ class FirebaseAuth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
-    StorageBox.instanceOf('.user').putValue('currentUser', user?.toMap());
+    _userStorage.putValue('currentUser', user?.toMap());
     currentUser = user;
 
     _changeController.add(user);
