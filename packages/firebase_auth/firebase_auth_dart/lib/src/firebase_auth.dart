@@ -7,13 +7,13 @@ part of firebase_auth_dart;
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class FirebaseAuth {
   // ignore: public_member_api_docs
-  FirebaseAuth({required APIOptions options})
+  FirebaseAuth({required FirebaseOptions options, http.Client? client})
       : assert(
           options.apiKey.isNotEmpty,
           'API key must not be empty, please provide a valid API key, '
           'or a dummy one if you are using the emulator.',
         ),
-        _api = API(options) {
+        _api = API(options, client: client) {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
 

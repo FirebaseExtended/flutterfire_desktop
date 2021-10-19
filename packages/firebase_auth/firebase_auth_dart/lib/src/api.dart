@@ -3,40 +3,20 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 
-import '../firebase_auth.dart';
-
-/// The options used for all requests made by [FirebaseAuth] instance.
-class APIOptions {
-  // ignore: public_member_api_docs
-  APIOptions({
-    required this.apiKey,
-    required this.projectId,
-    this.client,
-  });
-
-  /// The API key used for all requests made by [FirebaseAuth] instance.
-  final String apiKey;
-
-  /// The Id of GCP or Firebase project.
-  final String projectId;
-
-  /// The http client used to make all requests.
-  final http.Client? client;
-}
-
 /// Service layer to perform all requests with the underlying Identity Toolkit API.
 class API {
   // ignore: public_member_api_docs
-  API(this._apiOptions) {
-    _client = _apiOptions.client ?? clientViaApiKey(_apiOptions.apiKey);
+  API(this._options, {http.Client? client}) {
+    _client = client ?? clientViaApiKey(_options.apiKey);
     _identityToolkit = IdentityToolkitApi(_client).relyingparty;
   }
 
-  late final APIOptions _apiOptions;
+  late final FirebaseOptions _options;
   late http.Client _client;
   late RelyingpartyResource _identityToolkit;
 
@@ -175,7 +155,7 @@ class API {
     try {
       return await _exchangeRefreshWithIdToken(
         refreshToken,
-        _apiOptions.apiKey,
+        _options.apiKey,
       );
     } on HttpException catch (_) {
       rethrow;
@@ -222,7 +202,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/${_apiOptions.projectId}/config',
+      path: '/emulator/v1/projects/${_options.projectId}/config',
     );
 
     http.Response response;
@@ -248,7 +228,7 @@ class API {
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
     _identityToolkit = IdentityToolkitApi(
-      clientViaApiKey(_apiOptions.apiKey),
+      clientViaApiKey(_options.apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
 

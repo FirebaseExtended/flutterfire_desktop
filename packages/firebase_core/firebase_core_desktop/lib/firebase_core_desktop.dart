@@ -4,7 +4,7 @@ import 'package:firebase_core_platform_interface/firebase_core_platform_interfac
 
 part 'firebase_app_desktop.dart';
 
-/// A Dart only implementation of FirebaseCore for managing Firebase app
+/// Desktop implementation of FirebaseCore for managing Firebase app
 /// instances.
 class FirebaseCoreDesktop extends FirebasePlatform {
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop

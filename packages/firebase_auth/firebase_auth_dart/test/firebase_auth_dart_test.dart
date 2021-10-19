@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -73,19 +74,20 @@ void main() {
   final user = MockUser();
   final userCred = MockUserCredential();
 
+  const options = FirebaseOptions(
+    apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+    appId: 'react-native-firebase-testing',
+    messagingSenderId: '',
+    projectId: '',
+  );
+
   final authWithSuccessRes = FirebaseAuth(
-    options: APIOptions(
-      apiKey: 'test',
-      projectId: '',
-      client: MockClient(_mockSuccessRequests),
-    ),
+    options: options,
+    client: MockClient(_mockSuccessRequests),
   );
   final authWithFailedRes = FirebaseAuth(
-    options: APIOptions(
-      apiKey: 'test',
-      projectId: '',
-      client: MockClient(_mockFailedRequests),
-    ),
+    options: options,
+    client: MockClient(_mockFailedRequests),
   );
 
   late StreamQueue<User?> onAuthStateChanged;
@@ -104,12 +106,7 @@ void main() {
   }
 
   setUpAll(() async {
-    realAuth = FirebaseAuth(
-      options: APIOptions(
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-        projectId: 'react-native-firebase-testing',
-      ),
-    );
+    realAuth = FirebaseAuth(options: options);
 
     await realAuth.useAuthEmulator();
     await emulatorClearAllUsers();
@@ -117,6 +114,7 @@ void main() {
     onAuthStateChanged = StreamQueue(realAuth.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(realAuth.onIdTokenChanged);
   });
+
   setUp(() {
     fakeAuth = MockAuth();
 
