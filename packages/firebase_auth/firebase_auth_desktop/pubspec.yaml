@@ -1,5 +1,5 @@
 name: firebase_auth_desktop
-description: TODO
+description: Desktop implementation of firebase_auth
 homepage: https://firebase.flutter.dev
 repository: https://github.com/invertase/flutterfire_dart
 version: 0.1.0
@@ -12,7 +12,7 @@ dependencies:
     git:
       url: ssh://git@github.com/invertase/flutterfire_dart
       path: packages/firebase_auth/firebase_auth_dart
-      ref: main
+      ref: persistence
   firebase_auth_platform_interface: ^6.1.1
   firebase_core:
   flutter:
@@ -39,14 +39,15 @@ dependency_overrides:
 
 flutter:
   plugin:
+    implements: firebase_auth
     platforms:
       linux:
-        dartPluginClass: FirebaseAuthDart
+        dartPluginClass: FirebaseAuthDesktop
         pluginClass: none
       windows:
-        dartPluginClass: FirebaseAuthDart
+        dartPluginClass: FirebaseAuthDesktop
         pluginClass: none
       # testing, later will be removed
       macos:
-        dartPluginClass: FirebaseAuthDart
+        dartPluginClass: FirebaseAuthDesktop
         pluginClass: none

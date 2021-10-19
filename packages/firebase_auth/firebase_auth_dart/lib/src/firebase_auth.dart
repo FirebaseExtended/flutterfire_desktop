@@ -5,9 +5,9 @@ part of firebase_auth_dart;
 /// Pure Dart service wrapper around the Identity Platform REST API.
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
-class Auth {
+class FirebaseAuth {
   // ignore: public_member_api_docs
-  Auth({required APIOptions options})
+  FirebaseAuth({required APIOptions options})
       : assert(
           options.apiKey.isNotEmpty,
           'API key must not be empty, please provide a valid API key, '
@@ -16,9 +16,23 @@ class Auth {
         _api = API(options) {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
+
+    if (_localUser() != null) {
+      currentUser = User(_localUser()!, this);
+    }
   }
 
-  final API _api;
+  final _userStorage = StorageBox.instanceOf('.user');
+
+  Map<String, dynamic>? _localUser() {
+    try {
+      return _userStorage.getValue('currentUser') as Map<String, dynamic>;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  late final API _api;
 
   // ignore: close_sinks
   late StreamController<User?> _changeController;
@@ -47,7 +61,9 @@ class Auth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
+    _userStorage.putValue('currentUser', user?.toMap());
     currentUser = user;
+
     _changeController.add(user);
     _idTokenChangedController.add(user);
   }

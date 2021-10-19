@@ -7,7 +7,7 @@ class User {
   /// Return a dart user object from Google's identity toolkit response.
   User(this._user, this._auth) : _idToken = _user['idToken'];
 
-  final Auth _auth;
+  final FirebaseAuth _auth;
   final Map<String, dynamic> _user;
   final String _idToken;
 
@@ -87,12 +87,12 @@ class User {
   /// Once verified, call [reload] to ensure the latest user information is
   /// retrieved from Firebase.
   bool get emailVerified {
-    return _user['emailVerified'];
+    return _user['emailVerified'] ?? false;
   }
 
   /// Returns whether the user is a anonymous.
   bool get isAnonymous {
-    return _user['isAnonymous'];
+    return _user['isAnonymous'] ?? false;
   }
 
   /// The users display name.
@@ -196,9 +196,12 @@ class User {
 
   /// A Map representation of this instance.
   Map<String, dynamic> toMap() => {
+        'refreshToken': refreshToken,
         'idToken': _idToken,
-        'uid': uid,
+        'localId': uid,
         'email': email,
+        'emailVerified': emailVerified,
+        'isAnonymous': isAnonymous,
         'displayName': displayName,
         'photoURL': photoURL,
       };
@@ -206,7 +209,7 @@ class User {
 
 /// Throws if any auth method is called with no user signed in.
 @protected
-void _assertSignedOut(Auth instance) {
+void _assertSignedOut(FirebaseAuth instance) {
   if (instance.currentUser != null) {
     return;
   } else {
@@ -216,7 +219,7 @@ void _assertSignedOut(Auth instance) {
 
 /// Throws if any auth method is called with current user.
 @protected
-void _assertSignedIn(Auth instance) {
+void _assertSignedIn(FirebaseAuth instance) {
   if (instance.currentUser == null) {
     return;
   } else {

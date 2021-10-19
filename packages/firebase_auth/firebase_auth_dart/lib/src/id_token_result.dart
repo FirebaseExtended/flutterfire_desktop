@@ -14,17 +14,20 @@ class IdTokenResult {
   /// authenticated (signed in) and not the time the token was refreshed.
   DateTime? get authTime => _data['auth_time'] == null
       ? null
-      : DateTime.fromMillisecondsSinceEpoch(_data['auth_time']);
+      : DateTime.fromMillisecondsSinceEpoch(
+          _data['auth_time'] * secondToMilliesecondsFactor);
 
   /// The time when the ID token expires.
   DateTime? get expirationTime => _data['exp'] == null
       ? null
-      : DateTime.fromMillisecondsSinceEpoch(_data['exp']);
+      : DateTime.fromMillisecondsSinceEpoch(
+          _data['exp'] * secondToMilliesecondsFactor);
 
   /// The time when ID token was issued.
   DateTime? get issuedAtTime => _data['iat'] == null
       ? null
-      : DateTime.fromMillisecondsSinceEpoch(_data['iat']);
+      : DateTime.fromMillisecondsSinceEpoch(
+          _data['iat'] * secondToMilliesecondsFactor);
 
   /// The entire payload claims of the ID token including the standard reserved
   /// claims as well as the custom claims.

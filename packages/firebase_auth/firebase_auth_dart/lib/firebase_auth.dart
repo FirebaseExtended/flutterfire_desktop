@@ -4,9 +4,12 @@
 library firebase_auth_dart;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:googleapis/androidpublisher/v3.dart';
 import 'package:googleapis/identitytoolkit/v3.dart'
     show DetailedApiRequestError;
 import 'package:meta/meta.dart';
@@ -24,3 +27,4 @@ part 'src/firebase_auth.dart';
 part 'src/id_token_result.dart';
 part 'src/user.dart';
 part 'src/user_credential.dart';
+part 'src/utils/persistence.dart';

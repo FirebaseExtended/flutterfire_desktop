@@ -66,21 +66,21 @@ Future<http.Response> _mockFailedRequests(http.Request req) async {
   }
 }
 
-@GenerateMocks([User, Auth, UserCredential])
+@GenerateMocks([User, FirebaseAuth, UserCredential])
 void main() {
-  late Auth realAuth;
-  late Auth fakeAuth;
+  late FirebaseAuth realAuth;
+  late FirebaseAuth fakeAuth;
   final user = MockUser();
   final userCred = MockUserCredential();
 
-  final authWithSuccessRes = Auth(
+  final authWithSuccessRes = FirebaseAuth(
     options: APIOptions(
       apiKey: 'test',
       projectId: '',
       client: MockClient(_mockSuccessRequests),
     ),
   );
-  final authWithFailedRes = Auth(
+  final authWithFailedRes = FirebaseAuth(
     options: APIOptions(
       apiKey: 'test',
       projectId: '',
@@ -93,6 +93,7 @@ void main() {
 
   /// Deletes all users from the Auth emulator.
   Future<void> emulatorClearAllUsers() async {
+    //await realAuth.signOut();
     await http.delete(
       Uri.parse(
           'http://localhost:9099/emulator/v1/projects/react-native-firebase-testing/accounts'),
@@ -103,7 +104,7 @@ void main() {
   }
 
   setUpAll(() async {
-    realAuth = Auth(
+    realAuth = FirebaseAuth(
       options: APIOptions(
         apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
         projectId: 'react-native-firebase-testing',
@@ -116,7 +117,6 @@ void main() {
     onAuthStateChanged = StreamQueue(realAuth.onAuthStateChanged);
     onIdTokenChanged = StreamQueue(realAuth.onIdTokenChanged);
   });
-
   setUp(() {
     fakeAuth = MockAuth();
 
@@ -147,6 +147,8 @@ void main() {
       expect(credential.user!.email, equals(mockEmail));
       expect(await onAuthStateChanged.next, isA<User>());
       expect(await onIdTokenChanged.next, isA<User>());
+
+      await realAuth.signOut();
     });
 
     test('should throw.', () async {
@@ -157,20 +159,8 @@ void main() {
             .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
       );
     });
-
-    test('sign-up updates currentUser and events.', () async {
-      final credential = await realAuth.createUserWithEmailAndPassword(
-          mockEmail, mockPassword);
-
-      expect(credential, isA<UserCredential>());
-      expect(credential.user!.email, equals(mockEmail));
-      expect(await onAuthStateChanged.next, isA<User>());
-      expect(await onIdTokenChanged.next, isA<User>());
-    });
-    test('sign-out updates currentUser and events.', () async {
-      await realAuth.signInWithEmailAndPassword(mockEmail, mockPassword);
-      await onAuthStateChanged.next;
-      await onIdTokenChanged.next;
+    test('sign-out.', () async {
+      await realAuth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
       await realAuth.signOut();
 
@@ -209,7 +199,7 @@ void main() {
 
       expect(realAuth.currentUser, isNull);
       expect(await onAuthStateChanged.next, isNull);
-      // expect(await onIdTokenChanged.next, isNull);
+      expect(await onIdTokenChanged.next, isNull);
     });
   });
 
@@ -228,16 +218,6 @@ void main() {
       );
     });
   });
-
-  // group('Password reset ', () {
-  //   test('verify.', () async {
-  //     await realAuth.sendPasswordResetEmail('mais@invertase.io');
-
-  //     //expect(providersList, ['password']);
-  //   });
-
-  //   test('confirm.', () {});
-  // });
 
   group('Use emulator ', () {
     test('returns project config.', () async {
@@ -382,6 +362,37 @@ void main() {
       await fakeAuth.currentUser!.sendEmailVerification();
 
       verify(user.sendEmailVerification());
+    });
+  });
+
+  group('StorageBox ', () {
+    test('put a new value.', () {
+      final box = StorageBox.instanceOf('box');
+      box.putValue('key', '123');
+
+      expect(box.getValue('key'), '123');
+    });
+    test('put a null value does not add the value.', () {
+      final box = StorageBox.instanceOf('box');
+      box.putValue('key_2', null);
+      expect(
+        () => box.getValue('key_2'),
+        throwsA(isA<StorageBoxException>()),
+      );
+    });
+    test('get a key that does not exist.', () {
+      final box = StorageBox.instanceOf('box');
+      expect(
+        () => box.getValue('random_key'),
+        throwsA(isA<StorageBoxException>()),
+      );
+    });
+    test('get a key from a box that does not exist.', () {
+      final box = StorageBox.instanceOf('box_');
+      expect(
+        () => box.getValue('key'),
+        throwsA(isA<StorageBoxException>()),
+      );
     });
   });
 }

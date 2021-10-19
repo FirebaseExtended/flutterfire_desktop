@@ -1,0 +1,40 @@
+name: firebase_core_desktop
+description: Desktop implementation of firebase_core
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_dart
+version: 0.1.0
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"
+
+dependencies:
+  firebase_core:
+    git:
+      url: git://github.com/pr-Mais/flutterfire
+      path: packages/firebase_core/firebase_core
+      ref: "@mais/firebase-dart"
+  firebase_core_platform_interface: ^4.0.1
+  flutter:
+    sdk: flutter
+  meta: ^1.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  plugin:
+    implements: firebase_core
+    platforms:
+      linux:
+        dartPluginClass: FirebaseCoreDesktop
+        pluginClass: none
+      windows:
+        dartPluginClass: FirebaseCoreDesktop
+        pluginClass: none
+      # testing, later will be removed
+      macos:
+        dartPluginClass: FirebaseCoreDesktop
+        pluginClass: none
