@@ -7,13 +7,13 @@ part of firebase_auth_dart;
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class FirebaseAuth {
   // ignore: public_member_api_docs
-  FirebaseAuth({required FirebaseOptions options, http.Client? client})
+  FirebaseAuth(this._app, {http.Client? client})
       : assert(
-          options.apiKey.isNotEmpty,
+          _app.options.apiKey.isNotEmpty,
           'API key must not be empty, please provide a valid API key, '
           'or a dummy one if you are using the emulator.',
         ),
-        _api = API(options, client: client) {
+        _api = API(_app.options, client: client) {
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
 
@@ -22,11 +22,15 @@ class FirebaseAuth {
     }
   }
 
-  final _userStorage = StorageBox.instanceOf('.user');
+  final FirebaseApp _app;
+
+  StorageBox<Object> get _userStorage =>
+      StorageBox.instanceOf(_app.options.projectId);
 
   Map<String, dynamic>? _localUser() {
     try {
-      return _userStorage.getValue('currentUser') as Map<String, dynamic>;
+      return (_userStorage.getValue('${_app.options.apiKey}:${_app.name}')
+          as Map<String, dynamic>)['currentUser'];
     } catch (e) {
       return null;
     }
@@ -61,7 +65,10 @@ class FirebaseAuth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
-    _userStorage.putValue('currentUser', user?.toMap());
+    _userStorage.putValue(
+      '${_app.options.apiKey}:${_app.name}',
+      {'currentUser': user?.toMap()},
+    );
     currentUser = user;
 
     _changeController.add(user);

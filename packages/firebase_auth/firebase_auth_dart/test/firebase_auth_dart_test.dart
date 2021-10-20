@@ -74,25 +74,6 @@ void main() {
   final user = MockUser();
   final userCred = MockUserCredential();
 
-  const options = FirebaseOptions(
-    apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-    appId: 'react-native-firebase-testing',
-    messagingSenderId: '',
-    projectId: '',
-  );
-
-  final authWithSuccessRes = FirebaseAuth(
-    options: options,
-    client: MockClient(_mockSuccessRequests),
-  );
-  final authWithFailedRes = FirebaseAuth(
-    options: options,
-    client: MockClient(_mockFailedRequests),
-  );
-
-  late StreamQueue<User?> onAuthStateChanged;
-  late StreamQueue<User?> onIdTokenChanged;
-
   /// Deletes all users from the Auth emulator.
   Future<void> emulatorClearAllUsers() async {
     //await realAuth.signOut();
@@ -105,8 +86,31 @@ void main() {
     );
   }
 
+  late StreamQueue<User?> onAuthStateChanged;
+  late StreamQueue<User?> onIdTokenChanged;
+  late FirebaseAuth authWithSuccessRes;
+  late FirebaseAuth authWithFailedRes;
+
   setUpAll(() async {
-    realAuth = FirebaseAuth(options: options);
+    const options = FirebaseOptions(
+      appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
+      apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+      projectId: 'react-native-firebase-testing',
+      messagingSenderId: '448618578101',
+    );
+
+    final app = await Firebase.initializeApp(options: options);
+
+    authWithSuccessRes = FirebaseAuth(
+      app,
+      client: MockClient(_mockSuccessRequests),
+    );
+    authWithFailedRes = FirebaseAuth(
+      app,
+      client: MockClient(_mockFailedRequests),
+    );
+
+    realAuth = FirebaseAuth(app);
 
     await realAuth.useAuthEmulator();
     await emulatorClearAllUsers();
