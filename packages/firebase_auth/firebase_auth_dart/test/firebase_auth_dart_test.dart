@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth.dart';
-import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebase_core_dart/firebase_core.dart';
 import 'package:googleapis/identitytoolkit/v3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';

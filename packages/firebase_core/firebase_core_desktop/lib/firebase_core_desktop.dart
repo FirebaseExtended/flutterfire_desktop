@@ -1,16 +1,19 @@
 library firebase_core_desktop;
 
+import 'package:firebase_core_dart/firebase_core.dart' as core_dart;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 
 part 'firebase_app_desktop.dart';
 
 /// Desktop implementation of FirebaseCore for managing Firebase app
 /// instances.
-class FirebaseCoreDesktop extends FirebasePlatform {
+class FirebaseCore extends FirebasePlatform {
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
-    FirebasePlatform.instance = FirebaseCoreDesktop();
+    FirebasePlatform.instance = FirebaseCore();
   }
+
+  core_dart.FirebaseCore _core = core_dart.FirebaseCore();
 
   final Map<String, FirebaseAppPlatform> _apps =
       <String, FirebaseAppPlatform>{};
@@ -25,19 +28,13 @@ class FirebaseCoreDesktop extends FirebasePlatform {
     String? name,
     FirebaseOptions? options,
   }) async {
-    // TODO how should this be handled?
-    assert(options != null);
+    final _dartOptions = core_dart.FirebaseOptions.fromMap(options!.asMap);
+    final _dartApp = await _core.initializeApp(options: _dartOptions);
+    final FirebaseAppPlatform _app =
+        FirebaseApp._(this, _dartApp.name, options);
 
-    final _name = name ?? defaultFirebaseAppName;
-
-    if (_apps.containsKey(_name)) {
-      throw duplicateApp(_name);
-    }
-
-    final FirebaseAppPlatform _app = FirebaseAppDart._(this, _name, options!);
-
-    _apps[_name] = _app;
-    return _app;
+    _apps[_dartApp.name] = _app;
+    return FirebaseApp._(this, _dartApp.name, options);
   }
 
   @override

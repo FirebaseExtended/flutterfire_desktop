@@ -1,12 +1,6 @@
 // ignore_for_file: require_trailing_commas
 
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:googleapis/identitytoolkit/v3.dart';
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
+part of firebase_auth_dart;
 
 /// Service layer to perform all requests with the underlying Identity Toolkit API.
 class API {

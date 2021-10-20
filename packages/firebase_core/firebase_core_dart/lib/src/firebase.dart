@@ -1,14 +1,4 @@
-library firebase_core_dart;
-
-import 'dart:async';
-
-import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
-
-part 'firebase_app_dart.dart';
-part 'firebase_core_exceptions.dart';
-part 'firebase_exception.dart';
-part 'firebase_core_options.dart';
+part of firebase_core_dart;
 
 /// The default Firebase application name.
 const String defaultFirebaseAppName = '[DEFAULT]';

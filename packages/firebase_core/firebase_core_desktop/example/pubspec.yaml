@@ -29,6 +29,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+dependency_overrides:
+  firebase_core_desktop:
+    path: ../
 
 dev_dependencies:
   flutter_test:

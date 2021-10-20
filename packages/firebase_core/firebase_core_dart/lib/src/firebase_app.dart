@@ -9,6 +9,12 @@ class FirebaseApp {
   final FirebaseOptions _options;
   bool _isAutomaticDataCollectionEnabled = false;
 
+  /// The name of this [FirebaseApp].
+  String get name => _name;
+
+  /// The [FirebaseOptions] this app was created with.
+  FirebaseOptions get options => _options;
+
   Future<void> delete() async {
     _core._apps.remove(_name);
   }
@@ -26,4 +32,7 @@ class FirebaseApp {
   Future<void> setAutomaticResourceManagementEnabled(bool enabled) {
     return Future.value();
   }
+
+  @override
+  String toString() => '$FirebaseApp($name)';
 }
