@@ -3,6 +3,19 @@ part of firebase_core_dart;
 
 /// The options used to configure a Firebase app.
 ///
+/// The default app:
+/// ```dart
+/// await Firebase.initializeApp(
+///   options: const FirebaseOptions(
+///     apiKey: '...',
+///     appId: '...',
+///     messagingSenderId: '...',
+///     projectId: '...',
+///   )
+/// );
+/// ```
+///
+/// Secondary app:
 /// ```dart
 /// await Firebase.initializeApp(
 ///   name: 'SecondaryApp',
@@ -158,8 +171,12 @@ class FirebaseOptions {
   // Required from `fromMap` comparison
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! FirebaseOptions) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! FirebaseOptions) {
+      return false;
+    }
     return const MapEquality().equals(asMap, other.asMap);
   }
 

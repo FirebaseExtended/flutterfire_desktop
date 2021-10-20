@@ -13,8 +13,6 @@ class FirebaseCore extends FirebasePlatform {
     FirebasePlatform.instance = FirebaseCore();
   }
 
-  core_dart.FirebaseCore _core = core_dart.FirebaseCore();
-
   final Map<String, FirebaseAppPlatform> _apps =
       <String, FirebaseAppPlatform>{};
 
@@ -29,7 +27,8 @@ class FirebaseCore extends FirebasePlatform {
     FirebaseOptions? options,
   }) async {
     final _dartOptions = core_dart.FirebaseOptions.fromMap(options!.asMap);
-    final _dartApp = await _core.initializeApp(options: _dartOptions);
+    final _dartApp =
+        await core_dart.Firebase.initializeApp(options: _dartOptions);
     final FirebaseAppPlatform _app =
         FirebaseApp._(this, _dartApp.name, options);
 
