@@ -13,7 +13,7 @@ class Firebase {
   /// If no name is passed, the options will be considered as the DEFAULT app.
   static Future<FirebaseApp> initializeApp({
     String? name,
-    FirebaseOptions? options,
+    required FirebaseOptions? options,
   }) async {
     return _delegate._initializeApp(
       name: name,
@@ -26,12 +26,12 @@ class Firebase {
   /// If no name is provided, the default app instance is returned.
   /// Throws if the app does not exist.
   static FirebaseApp app([String name = defaultFirebaseAppName]) {
-    return _delegate._app(name);
+    return _delegate.app(name);
   }
 
   /// Returns a list of all [FirebaseApp] instances that have been created.
   List<FirebaseApp> get apps {
-    return _delegate._apps.values.toList(growable: false);
+    return _delegate.apps;
   }
 
   @override
