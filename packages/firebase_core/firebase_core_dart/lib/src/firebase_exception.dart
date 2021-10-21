@@ -1,4 +1,4 @@
-part of firebase_core_dart;
+import 'package:meta/meta.dart';
 
 /// A generic class which provides exceptions in a Firebase-friendly format
 /// to users.

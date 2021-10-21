@@ -5,7 +5,11 @@ class Firebase {
   // Ensures end-users cannot initialize the class.
   Firebase._();
 
-  static final _delegate = _FirebaseCoreDelegate();
+  @visibleForTesting
+  static FirebaseCoreDelegate? delegatePackingProperty;
+
+  static FirebaseCoreDelegate get _delegate =>
+      delegatePackingProperty ?? FirebaseCoreDelegate();
 
   /// Initializes a new [FirebaseApp] instance by [name] and [options] and returns
   /// the created app. This method should be called before any usage of FlutterFire plugins.
@@ -13,9 +17,9 @@ class Firebase {
   /// If no name is passed, the options will be considered as the DEFAULT app.
   static Future<FirebaseApp> initializeApp({
     String? name,
-    required FirebaseOptions? options,
+    required FirebaseOptions options,
   }) async {
-    return _delegate._initializeApp(
+    return _delegate.initializeApp(
       name: name,
       options: options,
     );
@@ -30,26 +34,7 @@ class Firebase {
   }
 
   /// Returns a list of all [FirebaseApp] instances that have been created.
-  List<FirebaseApp> get apps {
+  static List<FirebaseApp> get apps {
     return _delegate.apps;
   }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other is! Firebase) {
-      return false;
-    }
-    return other.hashCode == hashCode;
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => toString().hashCode;
-
-  @override
-  String toString() => '$Firebase';
 }
