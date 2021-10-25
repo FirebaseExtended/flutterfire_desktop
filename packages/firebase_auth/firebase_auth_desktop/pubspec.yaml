@@ -32,7 +32,4 @@ flutter:
       windows:
         dartPluginClass: FirebaseAuthDesktop
         pluginClass: none
-      # testing, later will be removed
-      macos:
-        dartPluginClass: FirebaseAuthDesktop
-        pluginClass: none
+

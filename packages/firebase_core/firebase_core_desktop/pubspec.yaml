@@ -32,7 +32,4 @@ flutter:
       windows:
         dartPluginClass: FirebaseCore
         pluginClass: none
-      # testing, later will be removed
-      macos:
-        dartPluginClass: FirebaseCore
-        pluginClass: none
+
