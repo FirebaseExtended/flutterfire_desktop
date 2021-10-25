@@ -6,14 +6,12 @@ part of firebase_auth_dart;
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class FirebaseAuth {
-  // ignore: public_member_api_docs
-  FirebaseAuth(this._app, {http.Client? client})
-      : assert(
-          _app.options.apiKey.isNotEmpty,
-          'API key must not be empty, please provide a valid API key, '
-          'or a dummy one if you are using the emulator.',
-        ),
-        _api = API(_app.options, client: client) {
+  FirebaseAuth._({required this.app}) {
+    _api = API(
+      app.options.apiKey,
+      app.options.projectId,
+    );
+
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
 
@@ -22,14 +20,39 @@ class FirebaseAuth {
     }
   }
 
-  final FirebaseApp _app;
+  /// Returns an instance using a specified [FirebaseApp].
+  factory FirebaseAuth.instanceFor({required FirebaseApp app}) {
+    return _firebaseAuthInstances.putIfAbsent(app.name, () {
+      return FirebaseAuth._(app: app);
+    });
+  }
+
+  // Cached instances of [FirebaseAuth].
+  static final Map<String, FirebaseAuth> _firebaseAuthInstances = {};
+
+  /// The [FirebaseApp] for this current Auth instance.
+  late FirebaseApp app;
+
+  /// Change the HTTP client for the purpose of testing.
+  @visibleForTesting
+  void setApiClient(http.Client client) {
+    _api._setApiClient(client);
+  }
+
+  /// Returns an instance using the default [FirebaseApp].
+  // ignore: prefer_constructors_over_static_methods
+  static FirebaseAuth get instance {
+    final defaultAppInstance = Firebase.app();
+
+    return FirebaseAuth.instanceFor(app: defaultAppInstance);
+  }
 
   StorageBox<Object> get _userStorage =>
-      StorageBox.instanceOf(_app.options.projectId);
+      StorageBox.instanceOf(app.options.projectId);
 
   Map<String, dynamic>? _localUser() {
     try {
-      return (_userStorage.getValue('${_app.options.apiKey}:${_app.name}')
+      return (_userStorage.getValue('${app.options.apiKey}:${app.name}')
           as Map<String, dynamic>)['currentUser'];
     } catch (e) {
       return null;
@@ -66,7 +89,7 @@ class FirebaseAuth {
   @protected
   void updateCurrentUserAndEvents(User? user) {
     _userStorage.putValue(
-      '${_app.options.apiKey}:${_app.name}',
+      '${app.options.apiKey}:${app.name}',
       {'currentUser': user?.toMap()},
     );
     currentUser = user;

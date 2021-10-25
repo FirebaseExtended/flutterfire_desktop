@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core_dart/firebase_core.dart' as core_dart;
 
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_user_credential.dart';
@@ -15,12 +16,7 @@ part 'src/firebase_auth_user_credential.dart';
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDesktop] classs.
   FirebaseAuthDesktop({required FirebaseApp app})
-      : _auth = auth_dart.FirebaseAuth(
-          options: auth_dart.APIOptions(
-            apiKey: app.options.apiKey,
-            projectId: app.options.projectId,
-          ),
-        ),
+      : _app = core_dart.Firebase.app(app.name),
         super(appInstance: app) {
     // Create a app instance broadcast stream for both delegate listener events
     _userChangesListeners[app.name] =
@@ -51,7 +47,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   FirebaseAuthDesktop._()
-      : _auth = null,
+      : _app = null,
         super(appInstance: null);
 
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
@@ -68,7 +64,9 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   /// Instance of auth from Identity Provider API service.
-  final auth_dart.FirebaseAuth? _auth;
+  auth_dart.FirebaseAuth? get _auth =>
+      _app == null ? null : auth_dart.FirebaseAuth.instanceFor(app: _app!);
+  final core_dart.FirebaseApp? _app;
 
   @override
   UserPlatform? get currentUser {

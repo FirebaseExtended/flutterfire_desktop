@@ -5,6 +5,10 @@ part of firebase_core_dart;
 /// An internal delegate to perform all Firebase core functionalities.
 @visibleForTesting
 class FirebaseCoreDelegate {
+  FirebaseCoreDelegate._();
+
+  static FirebaseCoreDelegate instance = FirebaseCoreDelegate._();
+
   final Map<String, FirebaseApp> _apps = <String, FirebaseApp>{};
 
   List<FirebaseApp> get apps {
@@ -19,8 +23,8 @@ class FirebaseCoreDelegate {
     /// passed, [defaultFirebaseAppName] will be used
     final _name = name ?? defaultFirebaseAppName;
 
-    if (_apps.containsKey(name)) {
-      throw duplicateApp(name!);
+    if (_apps.containsKey(_name)) {
+      throw duplicateApp(_name);
     }
 
     final _delegate = FirebaseAppDelegete(_name, options);

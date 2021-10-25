@@ -30,7 +30,7 @@ class StorageBox<T extends Object> {
     final _sep = Platform.pathSeparator;
 
     late String _home;
-    
+
     if (Platform.isLinux || Platform.isMacOS) _home = _env['HOME'] as String;
     if (Platform.isWindows) _home = _env['APPDATA'] as String;
     final _path = '$_home$_sep.firebase-auth$_sep$_name.json';

@@ -69,7 +69,7 @@ Future<http.Response> _mockFailedRequests(http.Request req) async {
 
 @GenerateMocks([User, FirebaseAuth, UserCredential])
 void main() {
-  late FirebaseAuth realAuth;
+  late FirebaseAuth auth;
   late FirebaseAuth fakeAuth;
   final user = MockUser();
   final userCred = MockUserCredential();
@@ -88,8 +88,6 @@ void main() {
 
   late StreamQueue<User?> onAuthStateChanged;
   late StreamQueue<User?> onIdTokenChanged;
-  late FirebaseAuth authWithSuccessRes;
-  late FirebaseAuth authWithFailedRes;
 
   setUpAll(() async {
     const options = FirebaseOptions(
@@ -99,24 +97,15 @@ void main() {
       messagingSenderId: '448618578101',
     );
 
-    final app = await Firebase.initializeApp(options: options);
+    await Firebase.initializeApp(options: options);
 
-    authWithSuccessRes = FirebaseAuth(
-      app,
-      client: MockClient(_mockSuccessRequests),
-    );
-    authWithFailedRes = FirebaseAuth(
-      app,
-      client: MockClient(_mockFailedRequests),
-    );
+    auth = FirebaseAuth.instance;
 
-    realAuth = FirebaseAuth(app);
-
-    await realAuth.useAuthEmulator();
+    await auth.useAuthEmulator();
     await emulatorClearAllUsers();
 
-    onAuthStateChanged = StreamQueue(realAuth.onAuthStateChanged);
-    onIdTokenChanged = StreamQueue(realAuth.onIdTokenChanged);
+    onAuthStateChanged = StreamQueue(auth.onAuthStateChanged);
+    onIdTokenChanged = StreamQueue(auth.onIdTokenChanged);
   });
 
   setUp(() {
@@ -140,7 +129,7 @@ void main() {
 
   group('Email and password ', () {
     test('sign-in updates currentUser and events.', () async {
-      final credential = await realAuth.createUserWithEmailAndPassword(
+      final credential = await auth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
@@ -150,23 +139,23 @@ void main() {
       expect(await onAuthStateChanged.next, isA<User>());
       expect(await onIdTokenChanged.next, isA<User>());
 
-      await realAuth.signOut();
+      await auth.signOut();
     });
 
     test('should throw.', () async {
       await emulatorClearAllUsers();
       expect(
-        () => realAuth.signInWithEmailAndPassword(mockEmail, mockPassword),
+        () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
         throwsA(isA<AuthException>()
             .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
       );
     });
     test('sign-out.', () async {
-      await realAuth.createUserWithEmailAndPassword(mockEmail, mockPassword);
+      await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
-      await realAuth.signOut();
+      await auth.signOut();
 
-      expect(realAuth.currentUser, isNull);
+      expect(auth.currentUser, isNull);
       expect(await onAuthStateChanged.next, isNull);
       expect(await onIdTokenChanged.next, isNull);
     });
@@ -174,11 +163,11 @@ void main() {
 
   group('Anonymous ', () {
     test('sign-up.', () async {
-      await realAuth.signInAnonymously();
+      await auth.signInAnonymously();
 
-      expect(realAuth.currentUser!.isAnonymous, true);
-      expect(realAuth.currentUser!.email, isNull);
-      expect((await realAuth.currentUser!.getIdTokenResult()).signInProvider,
+      expect(auth.currentUser!.isAnonymous, true);
+      expect(auth.currentUser!.email, isNull);
+      expect((await auth.currentUser!.getIdTokenResult()).signInProvider,
           'anonymous');
 
       expect(await onAuthStateChanged.next, isA<User>());
@@ -187,19 +176,19 @@ void main() {
     test(
       'sign-up return current user if already sign-in anonymously.',
       () async {
-        final credential = await realAuth.signInAnonymously();
+        final credential = await auth.signInAnonymously();
 
         expect(credential.user!.isAnonymous, true);
         expect(credential.credential!.providerId, 'anonymous');
 
-        expect(credential.user, equals(realAuth.currentUser));
+        expect(credential.user, equals(auth.currentUser));
       },
     );
     test('sign-out.', () async {
-      await realAuth.signInAnonymously();
-      await realAuth.signOut();
+      await auth.signInAnonymously();
+      await auth.signOut();
 
-      expect(realAuth.currentUser, isNull);
+      expect(auth.currentUser, isNull);
       expect(await onAuthStateChanged.next, isNull);
       expect(await onIdTokenChanged.next, isNull);
     });
@@ -207,16 +196,21 @@ void main() {
 
   group('Fetch providers list ', () {
     test('for email with pssaword provider.', () async {
-      final providersList =
-          await authWithSuccessRes.fetchSignInMethodsForEmail(mockEmail);
+      auth.setApiClient(MockClient(_mockSuccessRequests));
+
+      final providersList = await auth.fetchSignInMethodsForEmail(mockEmail);
 
       expect(providersList, ['password']);
     });
 
     test('for empty email throws.', () {
+      auth.setApiClient(MockClient(_mockFailedRequests));
       expect(
-        () => authWithFailedRes.fetchSignInMethodsForEmail(''),
-        throwsA(isA<AuthException>()),
+        () => auth.fetchSignInMethodsForEmail(''),
+        throwsA(
+          isA<AuthException>().having((p0) => p0.code,
+              'invalid identifier code', ErrorCode.invalidIdentifier),
+        ),
       );
     });
   });
@@ -224,7 +218,7 @@ void main() {
   group('Use emulator ', () {
     test('returns project config.', () async {
       expect(
-        await realAuth.useAuthEmulator(),
+        await auth.useAuthEmulator(),
         isA<Map>().having((p0) => p0.containsKey('signIn'),
             'returns project emulator config', true),
       );
@@ -236,7 +230,7 @@ void main() {
       await emulatorClearAllUsers();
     });
     test('getIdTokenResult()', () async {
-      final cred = await realAuth.createUserWithEmailAndPassword(
+      final cred = await auth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
@@ -287,14 +281,14 @@ void main() {
 
   group('User ', () {
     test('delete()', () async {
-      final cred = await realAuth.createUserWithEmailAndPassword(
+      final cred = await auth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
 
       await cred.user!.delete();
 
-      expect(realAuth.currentUser, isNull);
+      expect(auth.currentUser, isNull);
       expect(
         cred.user!.delete(),
         throwsA(
@@ -303,7 +297,7 @@ void main() {
         ),
       );
       expect(
-        realAuth.signInWithEmailAndPassword(
+        auth.signInWithEmailAndPassword(
           mockEmail,
           mockPassword,
         ),
@@ -314,22 +308,22 @@ void main() {
       );
     });
     test('updateEmail()', () async {
-      final cred = await realAuth.createUserWithEmailAndPassword(
+      final cred = await auth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
 
-      final oldToken = realAuth.currentUser!.uid;
+      final oldToken = auth.currentUser!.uid;
 
       await cred.user!.updateEmail('test+1@test.com');
 
-      expect(realAuth.currentUser!.email, equals('test+1@test.com'));
+      expect(auth.currentUser!.email, equals('test+1@test.com'));
 
       // Access token is updated
-      expect(await realAuth.currentUser!.getIdToken(), isNot(equals(oldToken)));
+      expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
 
       expect(
-        realAuth.signInWithEmailAndPassword(
+        auth.signInWithEmailAndPassword(
           mockEmail,
           mockPassword,
         ),
@@ -340,21 +334,21 @@ void main() {
       );
     });
     test('updateDisplayName() & updatePhotoURL()', () async {
-      await realAuth.createUserWithEmailAndPassword(
+      await auth.createUserWithEmailAndPassword(
         mockEmail,
         mockPassword,
       );
 
-      final oldToken = realAuth.currentUser!.uid;
+      final oldToken = auth.currentUser!.uid;
 
-      await realAuth.currentUser!.updateDisplayName(displayName);
-      await realAuth.currentUser!.updatePhotoURL(photoURL);
+      await auth.currentUser!.updateDisplayName(displayName);
+      await auth.currentUser!.updatePhotoURL(photoURL);
 
-      expect(realAuth.currentUser!.displayName, equals(displayName));
-      expect(realAuth.currentUser!.photoURL, equals(photoURL));
+      expect(auth.currentUser!.displayName, equals(displayName));
+      expect(auth.currentUser!.photoURL, equals(photoURL));
 
       // Access token is updated
-      expect(await realAuth.currentUser!.getIdToken(), isNot(equals(oldToken)));
+      expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
     });
     test('sendEmailVerification()', () async {
       when(fakeAuth.currentUser).thenReturn(user);
