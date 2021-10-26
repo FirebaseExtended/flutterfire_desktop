@@ -2,9 +2,7 @@
 
 part of firebase_auth_dart;
 
-/// Pure Dart service wrapper around the Identity Platform REST API.
-///
-/// https://cloud.google.com/identity-platform/docs/use-rest-api
+/// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
     _api = API(
@@ -100,7 +98,7 @@ class FirebaseAuth {
 
   /// Sign in a user using email and password.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// TODO: write the codes
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
@@ -130,7 +128,7 @@ class FirebaseAuth {
 
   /// Create new user using email and password.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `INVALID_EMAIL`
   /// - `EMAIL_EXISTS`
   /// - `OPERATION_NOT_ALLOWED`
@@ -161,7 +159,7 @@ class FirebaseAuth {
 
   /// Fetch the list of providers associated with a specified email.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `INVALID_EMAIL`: user doesn't exist
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
@@ -176,7 +174,7 @@ class FirebaseAuth {
 
   /// Send a password reset email.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `EMAIL_EXISTS`: The email address is already in use by another account.
   /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
   Future sendPasswordResetEmail(String email) async {
@@ -192,7 +190,7 @@ class FirebaseAuth {
   /// Requires tht the user has recently been authenticated,
   /// check [User.reauthenticateWithCredential].
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `OPERATION_NOT_ALLOWED`: Password sign-in is disabled for this project.
   /// - `USER_DISABLED`: The user account has been disabled by an administrator.
   /// TODO: make sure codes are correct
@@ -200,9 +198,9 @@ class FirebaseAuth {
     try {
       if (currentUser != null) {
         final token = await currentUser!.getIdToken();
-        await _api.resetUserPassword(token!);
+        await _api.resetUserPassword(token);
       } else {
-        throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+        throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
       }
     } catch (e) {
       throw getException(e);
@@ -211,7 +209,7 @@ class FirebaseAuth {
 
   /// Send a sign in link to email.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future sendSignInLinkToEmail(String email) async {
     try {
@@ -265,7 +263,7 @@ class FirebaseAuth {
 
   /// Update user's email.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   @protected
   Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
@@ -279,7 +277,7 @@ class FirebaseAuth {
 
   /// Update user's photoURL.
   ///
-  /// Throws [AuthException] with following possible codes:
+  /// Throws [FirebaseAuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   @protected
   Future updateProfile(Map<String, dynamic> newProfile, String idToken) async {
@@ -310,7 +308,7 @@ class FirebaseAuth {
       if (currentUser != null) {
         return await _api.refreshIdToken(currentUser!.refreshToken!);
       } else {
-        throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+        throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
       }
     } on HttpException catch (_) {
       rethrow;
@@ -339,7 +337,7 @@ class FirebaseAuth {
   @protected
   Exception getException(Object e) {
     if (e is DetailedApiRequestError) {
-      final authException = AuthException.fromErrorCode(e.message);
+      final authException = FirebaseAuthException.fromErrorCode(e.message!);
       log('$authException', name: 'firebase_auth_dart/${authException.code}');
 
       return authException;

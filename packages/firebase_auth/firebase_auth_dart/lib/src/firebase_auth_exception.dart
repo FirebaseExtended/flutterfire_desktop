@@ -37,81 +37,79 @@ class ErrorCode {
 }
 
 /// And exception wrapping error codes from the IP API.
-class AuthException implements Exception {
+class FirebaseAuthException extends FirebaseException implements Exception {
   // ignore: public_member_api_docs
-  AuthException([this.message = '', this.code]);
+  FirebaseAuthException({required String code, String message = ''})
+      : super(plugin: 'firebase_auth', code: code, message: message);
 
   /// Construct an exception based on the returned error code.
-  factory AuthException.fromErrorCode(String? code) {
+  factory FirebaseAuthException.fromErrorCode(String code) {
     switch (code) {
       case ErrorCode.emailNotFound:
-        return AuthException(
-          'There is no user record corresponding to this identifier.'
-          ' The user may have been deleted.',
-          code,
+        return FirebaseAuthException(
+          message: 'There is no user record corresponding to this identifier.'
+              ' The user may have been deleted.',
+          code: code,
         );
       case ErrorCode.invalidPassword:
-        return AuthException(
-          'The password is invalid or the user does not have a password.',
-          code,
+        return FirebaseAuthException(
+          message:
+              'The password is invalid or the user does not have a password.',
+          code: code,
         );
       case ErrorCode.userDisabled:
-        return AuthException(
-          'The user account has been disabled by an administrator.',
-          code,
+        return FirebaseAuthException(
+          message: 'The user account has been disabled by an administrator.',
+          code: code,
         );
       case ErrorCode.emailExists:
-        return AuthException(
-          'The email address is already in use by another account.',
-          code,
+        return FirebaseAuthException(
+          message: 'The email address is already in use by another account.',
+          code: code,
         );
       case ErrorCode.operationNotAllowed:
-        return AuthException(
-          'Password sign-in is disabled for this project.',
-          code,
+        return FirebaseAuthException(
+          message: 'Password sign-in is disabled for this project.',
+          code: code,
         );
       case ErrorCode.tooManyAttempts:
-        return AuthException(
-          'We have blocked all requests from this device'
-          ' due to unusual activity. Try again later.',
-          code,
+        return FirebaseAuthException(
+          message: 'We have blocked all requests from this device'
+              ' due to unusual activity. Try again later.',
+          code: code,
         );
       case ErrorCode.invalidEmail:
-        return AuthException(
-          'Email address is badly formatted.',
-          code,
+        return FirebaseAuthException(
+          message: 'Email address is badly formatted.',
+          code: code,
         );
       case ErrorCode.invalidIdentifier:
-        return AuthException(
-          'Invalid identifier, either empty or null.',
-          code,
+        return FirebaseAuthException(
+          message: 'Invalid identifier, either empty or null.',
+          code: code,
         );
       case ErrorCode.userNotSignedIn:
-        return AuthException(
-          'There is no user currently signed in.',
-          code,
+        return FirebaseAuthException(
+          message: 'There is no user currently signed in.',
+          code: code,
         );
       case ErrorCode.invalidIdToken:
-        return AuthException(
-          'The user is credential is no longer valid. The user must sign in again.',
-          code,
+        return FirebaseAuthException(
+          message:
+              'The user is credential is no longer valid. The user must sign in again.',
+          code: code,
         );
       case ErrorCode.userNotFound:
-        return AuthException(
-          'There is no user record corresponding to this identifier. The user may have been deleted.',
-          code,
+        return FirebaseAuthException(
+          message:
+              'There is no user record corresponding to this identifier. The user may have been deleted.',
+          code: code,
         );
       default:
-        return AuthException('Unknown error happened.', 'UNKNOWN');
+        return FirebaseAuthException(
+          message: 'Unknown error happened.',
+          code: 'UNKNOWN',
+        );
     }
   }
-
-  /// A message describing the error.
-  final String message;
-
-  // ignore: public_member_api_docs
-  final String? code;
-
-  @override
-  String toString() => code != null ? '$code: $message' : message;
 }

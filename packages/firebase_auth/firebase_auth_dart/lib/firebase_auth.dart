@@ -22,7 +22,7 @@ import 'src/utils/jwt.dart';
 part 'src/additional_user_info.dart';
 part 'src/api.dart';
 part 'src/auth_credential.dart';
-part 'src/auth_exception.dart';
+part 'src/firebase_auth_exception.dart';
 part 'src/auth_providers.dart';
 part 'src/firebase_auth.dart';
 part 'src/id_token_result.dart';

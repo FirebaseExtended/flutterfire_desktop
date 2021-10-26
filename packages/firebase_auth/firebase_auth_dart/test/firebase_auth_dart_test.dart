@@ -109,7 +109,7 @@ void main() {
   });
 
   setUp(() {
-    fakeAuth = MockAuth();
+    fakeAuth = MockFirebaseAuth();
 
     when(fakeAuth.onAuthStateChanged)
         .thenAnswer((_) => Stream.fromIterable([user]));
@@ -123,7 +123,7 @@ void main() {
 
   setUpAll(() {
     // Avoid HTTP error 400 mocked returns
-    // TODO(pr-Mais): once done create mock clients
+    // TODO(pr-mais): once done create mock clients
     HttpOverrides.global = null;
   });
 
@@ -146,7 +146,7 @@ void main() {
       await emulatorClearAllUsers();
       expect(
         () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
-        throwsA(isA<AuthException>()
+        throwsA(isA<FirebaseAuthException>()
             .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
       );
     });
@@ -208,7 +208,7 @@ void main() {
       expect(
         () => auth.fetchSignInMethodsForEmail(''),
         throwsA(
-          isA<AuthException>().having((p0) => p0.code,
+          isA<FirebaseAuthException>().having((p0) => p0.code,
               'invalid identifier code', ErrorCode.invalidIdentifier),
         ),
       );
@@ -292,7 +292,7 @@ void main() {
       expect(
         cred.user!.delete(),
         throwsA(
-          isA<AuthException>()
+          isA<FirebaseAuthException>()
               .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
         ),
       );
@@ -302,7 +302,7 @@ void main() {
           mockPassword,
         ),
         throwsA(
-          isA<AuthException>()
+          isA<FirebaseAuthException>()
               .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
         ),
       );
@@ -328,7 +328,7 @@ void main() {
           mockPassword,
         ),
         throwsA(
-          isA<AuthException>()
+          isA<FirebaseAuthException>()
               .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
         ),
       );
