@@ -1,17 +1,14 @@
 part of firebase_core_desktop;
 
 /// A Dart only implementation of a Firebase app instance.
-class FirebaseAppDart extends FirebaseAppPlatform {
-  FirebaseAppDart._(this._core, String name, FirebaseOptions options)
-      : super(name, options);
-
-  final FirebaseCoreDesktop _core;
+class FirebaseApp extends FirebaseAppPlatform {
+  FirebaseApp._(String name, FirebaseOptions options) : super(name, options);
 
   bool _isAutomaticDataCollectionEnabled = false;
 
   @override
   Future<void> delete() async {
-    _core._apps.remove(name);
+    await core_dart.Firebase.app(name).delete();
   }
 
   @override

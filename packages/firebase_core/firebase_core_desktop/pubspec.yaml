@@ -9,32 +9,27 @@ environment:
   flutter: ">=1.12.13+hotfix.5"
 
 dependencies:
-  firebase_core:
-    git:
-      url: git://github.com/pr-Mais/flutterfire
-      path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-dart"
+  firebase_core_dart: ^0.1.0
   firebase_core_platform_interface: ^4.0.1
   flutter:
     sdk: flutter
   meta: ^1.3.0
 
 dev_dependencies:
+  firebase_core:
   flutter_test:
     sdk: flutter
-
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.0
 
 flutter:
   plugin:
     implements: firebase_core
     platforms:
       linux:
-        dartPluginClass: FirebaseCoreDesktop
+        dartPluginClass: FirebaseCore
         pluginClass: none
       windows:
-        dartPluginClass: FirebaseCoreDesktop
+        dartPluginClass: FirebaseCore
         pluginClass: none
-      # testing, later will be removed
-      macos:
-        dartPluginClass: FirebaseCoreDesktop
-        pluginClass: none
+

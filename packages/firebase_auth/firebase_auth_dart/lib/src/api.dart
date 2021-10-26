@@ -1,44 +1,25 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:googleapis/identitytoolkit/v3.dart';
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
-
-import '../firebase_auth.dart';
-
-/// The options used for all requests made by [FirebaseAuth] instance.
-class APIOptions {
-  // ignore: public_member_api_docs
-  APIOptions({
-    required this.apiKey,
-    required this.projectId,
-    this.client,
-  });
-
-  /// The API key used for all requests made by [FirebaseAuth] instance.
-  final String apiKey;
-
-  /// The Id of GCP or Firebase project.
-  final String projectId;
-
-  /// The http client used to make all requests.
-  final http.Client? client;
-}
+part of firebase_auth_dart;
 
 /// Service layer to perform all requests with the underlying Identity Toolkit API.
 class API {
   // ignore: public_member_api_docs
-  API(this._apiOptions) {
-    _client = _apiOptions.client ?? clientViaApiKey(_apiOptions.apiKey);
+  API(this._apiKey, this._projectId, {http.Client? client}) {
+    _client = client ?? clientViaApiKey(_apiKey);
     _identityToolkit = IdentityToolkitApi(_client).relyingparty;
   }
 
-  late final APIOptions _apiOptions;
+  late final String _apiKey;
+  late final String _projectId;
+
   late http.Client _client;
   late RelyingpartyResource _identityToolkit;
+
+  void _setApiClient(http.Client client) {
+    _client = client;
+    _identityToolkit = IdentityToolkitApi(client).relyingparty;
+  }
 
   /// TODO: write endpoint details
   Future<Map<String, dynamic>> signInWithEmailAndPassword(
@@ -82,7 +63,7 @@ class API {
       IdentitytoolkitRelyingpartyCreateAuthUriRequest(
         identifier: email,
         // TODO hmm?
-        //continueUri: 'http://localhost:8080/app',
+        continueUri: 'http://localhost:8080/app',
       ),
     );
 
@@ -175,7 +156,7 @@ class API {
     try {
       return await _exchangeRefreshWithIdToken(
         refreshToken,
-        _apiOptions.apiKey,
+        _apiKey,
       );
     } on HttpException catch (_) {
       rethrow;
@@ -222,7 +203,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/${_apiOptions.projectId}/config',
+      path: '/emulator/v1/projects/$_projectId/config',
     );
 
     http.Response response;
@@ -248,7 +229,7 @@ class API {
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
     _identityToolkit = IdentityToolkitApi(
-      clientViaApiKey(_apiOptions.apiKey),
+      clientViaApiKey(_apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
 

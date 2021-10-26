@@ -1,4 +1,4 @@
-name: example
+name: firebase_core_desktop_example
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -22,13 +22,8 @@ environment:
 
 dependencies:
   firebase_core:
-    git: 
-      url: git://github.com/pr-Mais/flutterfire
-      path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-dart"
   flutter:
     sdk: flutter
-
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 part of firebase_auth_dart;
 
 /// A storage box is a container for key-value pairs of data
@@ -30,9 +32,17 @@ class StorageBox<T extends Object> {
     final _sep = Platform.pathSeparator;
 
     late String _home;
-    
-    if (Platform.isLinux || Platform.isMacOS) _home = _env['HOME'] as String;
-    if (Platform.isWindows) _home = _env['APPDATA'] as String;
+
+    if (Platform.isLinux || Platform.isMacOS) {
+      // ignore: cast_nullable_to_non_nullable
+      _home = _env['HOME'] as String;
+    }
+
+    if (Platform.isWindows) {
+      // ignore: cast_nullable_to_non_nullable
+      _home = _env['APPDATA'] as String;
+    }
+
     final _path = '$_home$_sep.firebase-auth$_sep$_name.json';
 
     return File(_path);

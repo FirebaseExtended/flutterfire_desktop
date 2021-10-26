@@ -1,7 +1,7 @@
 part of firebase_auth_dart;
 
 /// A UserCredential is returned from authentication requests such as
-/// [createUserWithEmailAndPassword].
+/// [`createUserWithEmailAndPassword`].
 class UserCredential {
   // ignore: public_member_api_docs
   UserCredential({

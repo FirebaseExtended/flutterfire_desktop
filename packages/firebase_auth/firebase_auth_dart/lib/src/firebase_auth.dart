@@ -6,14 +6,12 @@ part of firebase_auth_dart;
 ///
 /// https://cloud.google.com/identity-platform/docs/use-rest-api
 class FirebaseAuth {
-  // ignore: public_member_api_docs
-  FirebaseAuth({required APIOptions options})
-      : assert(
-          options.apiKey.isNotEmpty,
-          'API key must not be empty, please provide a valid API key, '
-          'or a dummy one if you are using the emulator.',
-        ),
-        _api = API(options) {
+  FirebaseAuth._({required this.app}) {
+    _api = API(
+      app.options.apiKey,
+      app.options.projectId,
+    );
+
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
 
@@ -22,11 +20,40 @@ class FirebaseAuth {
     }
   }
 
-  final _userStorage = StorageBox.instanceOf('.user');
+  /// Returns an instance using a specified [FirebaseApp].
+  factory FirebaseAuth.instanceFor({required FirebaseApp app}) {
+    return _firebaseAuthInstances.putIfAbsent(app.name, () {
+      return FirebaseAuth._(app: app);
+    });
+  }
+
+  // Cached instances of [FirebaseAuth].
+  static final Map<String, FirebaseAuth> _firebaseAuthInstances = {};
+
+  /// The [FirebaseApp] for this current Auth instance.
+  late FirebaseApp app;
+
+  /// Change the HTTP client for the purpose of testing.
+  @visibleForTesting
+  void setApiClient(http.Client client) {
+    _api._setApiClient(client);
+  }
+
+  /// Returns an instance using the default [FirebaseApp].
+  // ignore: prefer_constructors_over_static_methods
+  static FirebaseAuth get instance {
+    final defaultAppInstance = Firebase.app();
+
+    return FirebaseAuth.instanceFor(app: defaultAppInstance);
+  }
+
+  StorageBox<Object> get _userStorage =>
+      StorageBox.instanceOf(app.options.projectId);
 
   Map<String, dynamic>? _localUser() {
     try {
-      return _userStorage.getValue('currentUser') as Map<String, dynamic>;
+      return (_userStorage.getValue('${app.options.apiKey}:${app.name}')
+          as Map<String, dynamic>)['currentUser'];
     } catch (e) {
       return null;
     }
@@ -61,7 +88,10 @@ class FirebaseAuth {
   /// Helper method to update currentUser and events.
   @protected
   void updateCurrentUserAndEvents(User? user) {
-    _userStorage.putValue('currentUser', user?.toMap());
+    _userStorage.putValue(
+      '${app.options.apiKey}:${app.name}',
+      {'currentUser': user?.toMap()},
+    );
     currentUser = user;
 
     _changeController.add(user);
@@ -305,6 +335,7 @@ class FirebaseAuth {
     }
   }
 
+  ///
   @protected
   Exception getException(Object e) {
     if (e is DetailedApiRequestError) {

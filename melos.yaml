@@ -20,11 +20,11 @@ scripts:
 
   test:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=1 -- "dart pub run test --reporter expanded"
+    run: melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
     select-package:
       dir-exists:
         - "test/"
-        
+
   firebase:emulator:
       run: |
         cd .github/workflows/scripts && ./start-firebase-emulator.sh

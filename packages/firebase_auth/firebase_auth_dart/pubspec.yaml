@@ -8,6 +8,7 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
+  firebase_core_dart: ^0.1.0
   googleapis: ^5.0.1
   googleapis_auth: ^1.1.0
   http: ^0.13.3
@@ -15,6 +16,7 @@ dependencies:
 
 dev_dependencies:
   async: ^2.8.2
+  build_runner:
   mockito: ^5.0.16
   test: ^1.16.0
-  build_runner:
+

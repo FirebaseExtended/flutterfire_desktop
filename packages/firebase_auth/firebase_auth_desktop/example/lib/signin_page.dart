@@ -1,22 +1,27 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, library_private_types_in_public_api, use_build_context_synchronously, prefer_function_declarations_over_variables
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // @dart=2.9
 
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 /// Entrypoint example for various sign-in flows with Firebase.
 class SignInPage extends StatefulWidget {
+  // ignore: public_member_api_docs
+  SignInPage({Key key}) : super(key: key);
+
   /// The page title.
   final String title = 'Sign In & Out';
 
@@ -51,12 +56,13 @@ class _SignInPageState extends State<SignInPage> {
                   return;
                 }
 
-                await _signOut();
-
-                final uid = user.uid;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('$uid has successfully signed out.'),
-                ));
+                await _signOut().then((value) {
+                  final uid = user.uid;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('$uid has successfully signed out.')),
+                  );
+                });
               },
               child: const Text('Sign out'),
             );
@@ -462,14 +468,14 @@ class _EmailLinkSignInSectionState extends State<_EmailLinkSignInSection> {
               iOSBundleId: 'io.flutter.plugins.firebaseAuthExample',
               androidPackageName: 'io.flutter.plugins.firebaseauthexample'));
 
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('An email has been sent to $_userEmail'),
         ),
       );
     } catch (e) {
-      print(e);
-      Scaffold.of(context).showSnackBar(
+      log(e);
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Sending email failed'),
         ),
@@ -536,13 +542,13 @@ class _AnonymouslySignInSectionState extends State<_AnonymouslySignInSection> {
     try {
       final user = (await _auth.signInAnonymously()).user;
 
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Signed in Anonymously as user ${user.uid}'),
         ),
       );
     } catch (e) {
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to sign in Anonymously'),
         ),
@@ -697,7 +703,7 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
   }
 
   Future<void> _verifyWebPhoneNumber() async {
-    var confirmationResult =
+    final confirmationResult =
         await _auth.signInWithPhoneNumber(_phoneNumberController.text);
 
     webConfirmationResult = confirmationResult;
@@ -726,7 +732,7 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
       _message = '';
     });
 
-    PhoneVerificationCompleted verificationCompleted =
+    final verificationCompleted =
         (PhoneAuthCredential phoneAuthCredential) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       widget._scaffold.showSnackBar(SnackBar(
@@ -735,24 +741,21 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
       ));
     };
 
-    PhoneVerificationFailed verificationFailed =
-        (FirebaseAuthException authException) {
+    final verificationFailed = (FirebaseAuthException authException) {
       setState(() {
         _message =
             'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}';
       });
     };
 
-    PhoneCodeSent codeSent =
-        (String verificationId, [int forceResendingToken]) async {
+    final codeSent = (String verificationId, [int forceResendingToken]) async {
       widget._scaffold.showSnackBar(const SnackBar(
         content: Text('Please check your phone for the verification code.'),
       ));
       _verificationId = verificationId;
     };
 
-    PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
-        (String verificationId) {
+    final codeAutoRetrievalTimeout = (String verificationId) {
       _verificationId = verificationId;
     };
 
@@ -784,7 +787,7 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
         content: Text('Successfully signed in UID: ${user.uid}'),
       ));
     } catch (e) {
-      print(e);
+      log(e);
       widget._scaffold.showSnackBar(
         const SnackBar(
           content: Text('Failed to sign in'),
@@ -987,12 +990,12 @@ class _OtherProvidersSignInSectionState
 
       final user = userCredential.user;
 
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Sign In ${user.uid} with GitHub'),
       ));
     } catch (e) {
-      print(e);
-      Scaffold.of(context).showSnackBar(
+      log(e);
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to sign in with GitHub: $e'),
         ),
@@ -1008,14 +1011,14 @@ class _OtherProvidersSignInSectionState
       );
       final user = (await _auth.signInWithCredential(credential)).user;
 
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Sign In ${user.uid} with Facebook'),
         ),
       );
     } catch (e) {
-      print(e);
-      Scaffold.of(context).showSnackBar(
+      log(e);
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to sign in with Facebook: $e'),
         ),
@@ -1032,7 +1035,7 @@ class _OtherProvidersSignInSectionState
         final twitterProvider = TwitterAuthProvider();
         await _auth.signInWithPopup(twitterProvider);
       } else {
-        final AuthCredential credential = TwitterAuthProvider.credential(
+        final credential = TwitterAuthProvider.credential(
             accessToken: _tokenController.text,
             secret: _tokenSecretController.text);
         userCredential = await _auth.signInWithCredential(credential);
@@ -1040,12 +1043,12 @@ class _OtherProvidersSignInSectionState
 
       final user = userCredential.user;
 
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Sign In ${user.uid} with Twitter'),
       ));
     } catch (e) {
-      print(e);
-      Scaffold.of(context).showSnackBar(
+      log(e);
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to sign in with Twitter: $e'),
         ),
@@ -1076,8 +1079,8 @@ class _OtherProvidersSignInSectionState
         content: Text('Sign In ${user.uid} with Google'),
       ));
     } catch (e) {
-      print(e);
-      Scaffold.of(context).showSnackBar(
+      log(e);
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to sign in with Google: $e'),
         ),

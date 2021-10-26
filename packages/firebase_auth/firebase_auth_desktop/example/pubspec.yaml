@@ -1,4 +1,4 @@
-name: example
+name: firebase_auth_desktop_example
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -22,25 +22,11 @@ environment:
 
 dependencies:
   firebase_auth:
-    git: 
-      url: git://github.com/pr-Mais/flutterfire
-      path: packages/firebase_auth/firebase_auth
-      ref: "@mais/firebase-dart"
   flutter:
       sdk: flutter
   flutter_signin_button: ^1.0.0
   google_sign_in: ^5.0.0-nullsafety
 
-dependency_overrides:
-  firebase_auth_desktop:
-    path:
-      ../
-  firebase_core:
-    git:
-      url: git://github.com/pr-Mais/flutterfire
-      path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-dart"
-      
 dev_dependencies:
   flutter_test:
     sdk: flutter

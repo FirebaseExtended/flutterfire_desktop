@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 part of firebase_auth_desktop;
 
 /// Dart delegate implementation of [UserPlatform].
