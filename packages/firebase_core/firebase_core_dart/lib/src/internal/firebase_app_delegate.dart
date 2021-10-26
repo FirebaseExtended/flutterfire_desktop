@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../firebase_core.dart';
 import '../firebase_options.dart';
 
 /// The default Firebase application name.
 const String defaultFirebaseAppName = '[DEFAULT]';
 
-/// A class storing the name and options of a Firebase app.
+/// An internal delegate class storing the name and options of a Firebase app.
 class FirebaseAppDelegete {
   // ignore: public_member_api_docs
-  FirebaseAppDelegete(this.name, this.options);
+  FirebaseAppDelegete(this._firebase, this.name, this.options);
+
+  final FirebaseCoreDelegate _firebase;
 
   /// The name of this Firebase app.
   final String name;
@@ -18,38 +21,32 @@ class FirebaseAppDelegete {
   /// Returns the [FirebaseOptions] that this app was configured with.
   final FirebaseOptions options;
 
+  /// Returns whether automatic data collection enabled or disabled.
+  bool _isAutomaticDataCollectionEnabled = false;
+
   /// Returns whether this instance is the default Firebase app.
   // bool get _isDefault => name == defaultFirebaseAppName;
 
   /// Returns true if automatic data collection is enabled for this app.
-  bool get isAutomaticDataCollectionEnabled {
-    throw UnimplementedError(
-      'isAutomaticDataCollectionEnabled has not been implemented.',
-    );
-  }
+  bool get isAutomaticDataCollectionEnabled =>
+      _isAutomaticDataCollectionEnabled;
 
   /// Deletes the current FirebaseApp.
   Future<void> delete() async {
-    throw UnimplementedError(
-      'delete() has not been implemented.',
-    );
+    await _firebase.app(name).delete();
   }
 
   /// Sets whether automatic data collection is enabled or disabled for this app.
-  ///
-  /// It is possible to check whether data collection is currently enabled via
-  /// the [FirebaseAppDelegete.isAutomaticDataCollectionEnabled] property.
+  /// This has no affect on Desktop.
   Future<void> setAutomaticDataCollectionEnabled(bool enabled) async {
-    throw UnimplementedError(
-      'setAutomaticDataCollectionEnabled() has not been implemented.',
-    );
+    _isAutomaticDataCollectionEnabled = enabled;
+    return Future.value();
   }
 
   /// Sets whether automatic resource management is enabled or disabled for this app.
+  /// This has no affect on Desktop.
   Future<void> setAutomaticResourceManagementEnabled(bool enabled) async {
-    throw UnimplementedError(
-      'setAutomaticResourceManagementEnabled() has not been implemented.',
-    );
+    return Future.value();
   }
 
   @override

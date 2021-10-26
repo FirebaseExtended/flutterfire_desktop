@@ -8,7 +8,7 @@ import 'src/firebase_core_exceptions.dart';
 import 'src/firebase_options.dart';
 import 'src/internal/firebase_app_delegate.dart';
 
-export 'firebase_core.dart';
+export 'src/firebase_exception.dart';
 export 'src/firebase_options.dart';
 
 part 'src/firebase.dart';

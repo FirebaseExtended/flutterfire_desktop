@@ -13,35 +13,42 @@ class FirebaseCore extends FirebasePlatform {
     FirebasePlatform.instance = FirebaseCore();
   }
 
-  final Map<String, FirebaseAppPlatform> _apps =
-      <String, FirebaseAppPlatform>{};
-
-  @override
-  List<FirebaseAppPlatform> get apps {
-    return _apps.values.toList(growable: false);
+  FirebaseApp _mapDartToPlatfromApp(core_dart.FirebaseApp app) {
+    return FirebaseApp._(
+      app.name,
+      FirebaseOptions.fromMap(app.options.asMap),
+    );
   }
 
   @override
-  Future<FirebaseAppPlatform> initializeApp({
+  List<FirebaseApp> get apps {
+    return core_dart.Firebase.apps
+        .map(_mapDartToPlatfromApp)
+        .toList(growable: false);
+  }
+
+  @override
+  Future<FirebaseApp> initializeApp({
     String? name,
     FirebaseOptions? options,
   }) async {
+    assert(options != null);
+    // Initialize the app in firebase_core_dart
     final _dartOptions = core_dart.FirebaseOptions.fromMap(options!.asMap);
-    final _dartApp =
-        await core_dart.Firebase.initializeApp(options: _dartOptions);
-    final FirebaseAppPlatform _app =
-        FirebaseApp._(this, _dartApp.name, options);
+    final _dartApp = await core_dart.Firebase.initializeApp(
+      name: name,
+      options: _dartOptions,
+    );
 
-    _apps[_dartApp.name] = _app;
-    return FirebaseApp._(this, _dartApp.name, options);
+    return _mapDartToPlatfromApp(_dartApp);
   }
 
   @override
-  FirebaseAppPlatform app([String name = defaultFirebaseAppName]) {
-    if (_apps.containsKey(name)) {
-      return _apps[name]!;
+  FirebaseApp app([String name = defaultFirebaseAppName]) {
+    try {
+      return _mapDartToPlatfromApp(core_dart.Firebase.app(name));
+    } catch (_) {
+      throw noAppExists(name);
     }
-
-    throw noAppExists(name);
   }
 }

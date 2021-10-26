@@ -3,10 +3,11 @@
 part of firebase_core_dart;
 
 /// An internal delegate to perform all Firebase core functionalities.
-@visibleForTesting
+
 class FirebaseCoreDelegate {
   FirebaseCoreDelegate._();
 
+  @protected
   static FirebaseCoreDelegate instance = FirebaseCoreDelegate._();
 
   final Map<String, FirebaseApp> _apps = <String, FirebaseApp>{};
@@ -27,7 +28,7 @@ class FirebaseCoreDelegate {
       throw duplicateApp(_name);
     }
 
-    final _delegate = FirebaseAppDelegete(_name, options);
+    final _delegate = FirebaseAppDelegete(this, _name, options);
 
     _apps[_name] = FirebaseApp._(_delegate);
     return _apps[_name]!;
