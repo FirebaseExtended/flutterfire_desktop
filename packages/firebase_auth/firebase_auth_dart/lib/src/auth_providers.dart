@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 part of firebase_auth_dart;
 
 /// Representation of an authentication provider.
@@ -12,9 +14,7 @@ enum AuthProvider {
   custom
 }
 
-// ignore: public_member_api_docs
 extension ProviderID on AuthProvider {
-  // ignore: public_member_api_docs
   String get providerId {
     switch (this) {
       case AuthProvider.password:

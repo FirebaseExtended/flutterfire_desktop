@@ -2,6 +2,8 @@
 // in firebase_auth_dart/test/firebase_auth_dart_test.dart.
 // Do not manually edit this file.
 
+// ignore_for_file: require_trailing_commas, unnecessary_overrides
+
 import 'dart:async' as _i3;
 
 import 'package:firebase_auth_dart/firebase_auth.dart' as _i2;
@@ -96,8 +98,6 @@ class MockUser extends _i1.Mock implements _i2.User {
   Map<String, dynamic> toMap() =>
       (super.noSuchMethod(Invocation.method(#toMap, []),
           returnValue: <String, dynamic>{}) as Map<String, dynamic>);
-  @override
-  String toString() => super.toString();
 }
 
 /// A class which mocks [Auth].
@@ -189,7 +189,7 @@ class MockAuth extends _i1.Mock implements _i2.FirebaseAuth {
           returnValue: Future<String?>.value()) as _i3.Future<String?>);
   @override
   _i3.Future<Map<dynamic, dynamic>> useAuthEmulator(
-          {String? host = r'localhost', int? port = 9099}) =>
+          {String? host = 'localhost', int? port = 9099}) =>
       (super.noSuchMethod(
               Invocation.method(#useEmulator, [], {#host: host, #port: port}),
               returnValue:
@@ -199,8 +199,6 @@ class MockAuth extends _i1.Mock implements _i2.FirebaseAuth {
   Exception getException(Object? e) =>
       (super.noSuchMethod(Invocation.method(#getException, [e]),
           returnValue: _FakeException_2()) as Exception);
-  @override
-  String toString() => super.toString();
 }
 
 /// A class which mocks [UserCredential].

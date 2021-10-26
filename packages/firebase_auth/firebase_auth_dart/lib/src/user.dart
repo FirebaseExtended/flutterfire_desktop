@@ -151,7 +151,7 @@ class User {
 
   /// Sends a verification email to a user.
   ///
-  /// The verification process is completed by calling [applyActionCode].
+  /// The verification process is completed by calling `applyActionCode`.
   ///
   /// A [AuthException] maybe thrown with the following error code:
   /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
@@ -218,11 +218,11 @@ void _assertSignedOut(FirebaseAuth instance) {
 }
 
 /// Throws if any auth method is called with current user.
-@protected
-void _assertSignedIn(FirebaseAuth instance) {
-  if (instance.currentUser == null) {
-    return;
-  } else {
-    throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
-  }
-}
+// @protected
+// void _assertSignedIn(FirebaseAuth instance) {
+//   if (instance.currentUser == null) {
+//     return;
+//   } else {
+//     throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+//   }
+// }

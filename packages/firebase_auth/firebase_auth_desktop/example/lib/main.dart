@@ -1,4 +1,4 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, depend_on_referenced_packages, public_member_api_docs
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -34,6 +34,8 @@ Future<void> main() async {
 ///
 /// Returns a [MaterialApp].
 class AuthExampleApp extends StatelessWidget {
+  AuthExampleApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -48,6 +50,8 @@ class AuthExampleApp extends StatelessWidget {
 
 /// Provides a UI to select a authentication type page
 class AuthTypeSelector extends StatelessWidget {
+  AuthTypeSelector({Key key}) : super(key: key);
+
   // Navigates to a new page
   void _pushPage(BuildContext context, Widget page) {
     Navigator.of(context) /*!*/ .push(

@@ -1,5 +1,5 @@
-import 'internal/firebase_app_delegate.dart';
 import 'firebase_exception.dart';
+import 'internal/firebase_app_delegate.dart';
 
 /// Throws a consistent cross-platform error message when usage of an app occurs but
 /// no app has been created.

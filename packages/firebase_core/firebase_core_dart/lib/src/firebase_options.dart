@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use_from_same_package
+// ignore_for_file: deprecated_member_use_from_same_package, require_trailing_commas
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';

@@ -335,6 +335,7 @@ class FirebaseAuth {
     }
   }
 
+  ///
   @protected
   Exception getException(Object e) {
     if (e is DetailedApiRequestError) {

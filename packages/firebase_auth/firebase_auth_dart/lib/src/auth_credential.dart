@@ -21,7 +21,7 @@ class AuthCredential {
 
   /// The authentication sign in method for the credential. For example,
   /// 'password', or 'emailLink'. This corresponds to the sign-in method
-  /// identifier returned in [fetchSignInMethodsForEmail].
+  /// identifier returned in fetchSignInMethodsForEmail.
   final String signInMethod;
 
   /// Returns the current instance as a serialized [Map].

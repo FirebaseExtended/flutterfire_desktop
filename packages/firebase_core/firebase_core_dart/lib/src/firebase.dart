@@ -5,6 +5,7 @@ class Firebase {
   // Ensures end-users cannot initialize the class.
   Firebase._();
 
+  ///
   @visibleForTesting
   static FirebaseCoreDelegate? delegatePackingProperty;
 

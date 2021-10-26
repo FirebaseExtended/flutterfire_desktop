@@ -1,4 +1,4 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
 part of firebase_auth_dart;
 
@@ -203,7 +203,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/${_projectId}/config',
+      path: '/emulator/v1/projects/$_projectId/config',
     );
 
     http.Response response;

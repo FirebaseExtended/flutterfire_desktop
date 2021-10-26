@@ -41,7 +41,7 @@ class FirebaseException implements Exception {
   /// The optional code to accommodate the message.
   ///
   /// Allows users to identify the exception from a short code-name, for example
-  /// "no-app" is used when a user attempts to read a [FirebaseApp] which does
+  /// "no-app" is used when a user attempts to read a [`FirebaseApp`] which does
   /// not exist.
   final String code;
 

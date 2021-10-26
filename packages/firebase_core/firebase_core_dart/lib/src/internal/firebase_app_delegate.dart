@@ -8,8 +8,6 @@ import '../firebase_options.dart';
 const String defaultFirebaseAppName = '[DEFAULT]';
 
 /// A class storing the name and options of a Firebase app.
-///
-/// This is created as a result of calling [Firebase.initializeApp].
 class FirebaseAppDelegete {
   // ignore: public_member_api_docs
   FirebaseAppDelegete(this.name, this.options);
@@ -21,7 +19,7 @@ class FirebaseAppDelegete {
   final FirebaseOptions options;
 
   /// Returns whether this instance is the default Firebase app.
-  bool get _isDefault => name == defaultFirebaseAppName;
+  // bool get _isDefault => name == defaultFirebaseAppName;
 
   /// Returns true if automatic data collection is enabled for this app.
   bool get isAutomaticDataCollectionEnabled {
@@ -57,8 +55,12 @@ class FirebaseAppDelegete {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! FirebaseAppDelegete) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! FirebaseAppDelegete) {
+      return false;
+    }
     return other.name == name && other.options == options;
   }
 

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
+// ignore: depend_on_referenced_packages
 import 'package:firebase_core_dart/firebase_core.dart' as core_dart;
 
 part 'src/firebase_auth_user.dart';
@@ -78,9 +79,6 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
     return User(this, _auth!.currentUser!);
   }
-
-  @override
-  String? tenantId;
 
   static final Map<String, StreamController<UserPlatform?>>
       _userChangesListeners = <String, StreamController<UserPlatform?>>{};
