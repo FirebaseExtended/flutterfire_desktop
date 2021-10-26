@@ -44,6 +44,9 @@ jobs:
       - name: "Install Tools"
         run: |
           ./.github/workflows/scripts/install-tools.sh
+          sudo npm i -g firebase-tools
+      - name: Start Firebase Emulator
+        run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
       - name: "Run Tests"
         run: melos run test --no-select
 
@@ -59,4 +62,5 @@ jobs:
       - name: "Install Tools"
         run: .\.github\workflows\scripts\install-tools.bat
       - name: "Run Tests"
-        run: cmd /K melos run test --no-select
+        # TODO firebase emulator setup for windows CI, ignoring firebase_auth_dart tests until then
+        run: cmd /K melos exec --concurrency=1 --ignore="firebase_auth_dart" -- "flutter test --no-pub --reporter expanded"
