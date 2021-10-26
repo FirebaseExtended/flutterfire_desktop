@@ -10,38 +10,38 @@ class User extends UserPlatform {
   final auth_dart.User _user;
 
   @override
-  Future<void> delete() {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Future<void> delete() async {
+    await _user.delete();
   }
 
   @override
-  // TODO: implement displayName
-  String? get displayName => throw UnimplementedError();
+  String? get displayName => _user.displayName;
 
   @override
-  // TODO: implement email
   String? get email => _user.email;
 
   @override
-  // TODO: implement emailVerified
-  bool get emailVerified => throw UnimplementedError();
+  bool get emailVerified => _user.emailVerified;
 
   @override
   Future<String> getIdToken(bool forceRefresh) {
-    // TODO: implement getIdToken
-    throw UnimplementedError();
+    return _user.getIdToken(forceRefresh);
   }
 
   @override
-  Future<IdTokenResult> getIdTokenResult(bool forceRefresh) {
-    // TODO: implement getIdTokenResult
-    throw UnimplementedError();
+  Future<IdTokenResult> getIdTokenResult(bool forceRefresh) async {
+    try {
+      final idTokenResult = await _user.getIdTokenResult(forceRefresh);
+
+      return IdTokenResult(idTokenResult.toMap);
+    } catch (e) {
+      // TODO(pr-mais):
+      rethrow;
+    }
   }
 
   @override
-  // TODO: implement isAnonymous
-  bool get isAnonymous => false;
+  bool get isAnonymous => _user.isAnonymous;
 
   @override
   Future<UserCredentialPlatform> linkWithCredential(AuthCredential credential) {
@@ -71,8 +71,7 @@ class User extends UserPlatform {
   String? get phoneNumber => throw UnimplementedError();
 
   @override
-  // TODO: implement photoURL
-  String? get photoURL => null;
+  String? get photoURL => _user.photoURL;
 
   @override
   // TODO: implement providerData
@@ -106,7 +105,6 @@ class User extends UserPlatform {
   String? get tenantId => throw UnimplementedError();
 
   @override
-  // TODO: implement uid
   String get uid => _user.uid;
 
   @override
@@ -116,15 +114,23 @@ class User extends UserPlatform {
   }
 
   @override
-  Future<void> updateEmail(String newEmail) {
-    // TODO: implement updateEmail
-    throw UnimplementedError();
+  Future<void> updateEmail(String newEmail) async {
+    try {
+      await _user.updateEmail(newEmail);
+    } catch (e) {
+      // TODO(pr-mais):
+      rethrow;
+    }
   }
 
   @override
-  Future<void> updatePassword(String newPassword) {
-    // TODO: implement updatePassword
-    throw UnimplementedError();
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _user.updatePassword(newPassword);
+    } catch (e) {
+      // TODO(pr-mais):
+      rethrow;
+    }
   }
 
   @override

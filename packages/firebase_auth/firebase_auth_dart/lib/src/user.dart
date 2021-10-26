@@ -25,7 +25,7 @@ class User {
   /// user to have recently signed in. If this requirement isn't met, ask the
   /// user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
-  /// A [AuthException] maybe thrown with the following error code:
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
   ///
   Future<void> delete() async {
     try {
@@ -44,7 +44,7 @@ class User {
   ///
   /// If [forceRefresh] is `true`, the token returned will be refresh regardless
   /// of token expiration.
-  Future<String?> getIdToken([bool forceRefresh = false]) async {
+  Future<String> getIdToken([bool forceRefresh = false]) async {
     await _refreshIdToken(forceRefresh);
 
     return _idToken;
@@ -112,7 +112,7 @@ class User {
   /// Use before operations such as [User.updatePassword] that require tokens
   /// from recent sign-in attempts.
   ///
-  /// A [AuthException] maybe thrown with the following error code:
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
   ///
   void reauthenticateWithCredential(AuthCredential credential) {
     throw UnimplementedError('updateEmail() is not implemented');
@@ -136,7 +136,7 @@ class User {
   /// user to have recently signed in. If this requirement isn't met, ask the
   /// user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
-  /// A [AuthException] maybe thrown with the following error code:
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
   Future<void> updateEmail(String newEmail) async {
     _assertSignedOut(_auth);
@@ -153,7 +153,7 @@ class User {
   ///
   /// The verification process is completed by calling `applyActionCode`.
   ///
-  /// A [AuthException] maybe thrown with the following error code:
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
   /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
   /// - `USER_NOT_FOUND`: no user record corresponding to this identifier. The user may have been deleted.
   Future<void> sendEmailVerification() async {
@@ -172,7 +172,7 @@ class User {
   ///   user to have recently signed in. If this requirement isn't met, ask the
   ///   user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
-  /// A [AuthException] maybe thrown with the following error code:
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
   ///
   Future<void> updatePassword(String newPassword) async {
     throw UnimplementedError('updatePassword() is not implemented');
@@ -213,7 +213,7 @@ void _assertSignedOut(FirebaseAuth instance) {
   if (instance.currentUser != null) {
     return;
   } else {
-    throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+    throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
   }
 }
 

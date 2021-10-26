@@ -43,6 +43,18 @@ class IdTokenResult {
   /// The Firebase Auth ID token JWT string.
   String get token => _data['token'];
 
+  /// Map representation of [IdTokenResult]
+  Map<String, dynamic> get toMap {
+    return {
+      'authTimestamp': _data['auth_time'],
+      'claims': _data['claims'],
+      'expirationTimestamp': _data['exp'],
+      'issuedAtTimestamp': _data['iat'],
+      'signInProvider': _data['firebase']['sign_in_provider'],
+      'token': _data['token'],
+    };
+  }
+
   @override
   String toString() {
     return '$IdTokenResult(expirationTime: $expirationTime, issuedAtTime: $issuedAtTime, token: $token)';

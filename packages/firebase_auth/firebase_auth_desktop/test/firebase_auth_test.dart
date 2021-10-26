@@ -32,7 +32,7 @@ void main() {
   const kMockVerificationId = '12345';
   const kMockSmsCode = '123456';
   const kMockLanguage = 'en';
-  const kMockOobCode = 'oobcode';
+  //const kMockOobCode = 'oobcode';
   const kMockURL = 'http://www.example.com';
   const kMockHost = 'www.example.com';
   const kMockPort = 31337;
