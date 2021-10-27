@@ -1,17 +1,12 @@
-// ignore_for_file: require_trailing_commas, depend_on_referenced_packages, public_member_api_docs
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// @dart=2.9
+// ignore_for_file: depend_on_referenced_packages, public_member_api_docs
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_builder.dart';
 
-import '../register_page.dart';
-import '../signin_page.dart';
+import 'register_page.dart';
+import 'signin_page.dart';
 
 /// Initialize with a secondary app until dart-only initialization is merged.
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
@@ -34,7 +29,7 @@ Future<void> main() async {
 ///
 /// Returns a [MaterialApp].
 class AuthExampleApp extends StatelessWidget {
-  AuthExampleApp({Key key}) : super(key: key);
+  AuthExampleApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +45,7 @@ class AuthExampleApp extends StatelessWidget {
 
 /// Provides a UI to select a authentication type page
 class AuthTypeSelector extends StatelessWidget {
-  AuthTypeSelector({Key key}) : super(key: key);
+  AuthTypeSelector({Key? key}) : super(key: key);
 
   // Navigates to a new page
   void _pushPage(BuildContext context, Widget page) {
