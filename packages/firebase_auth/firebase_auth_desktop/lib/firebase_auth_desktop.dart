@@ -4,11 +4,10 @@ library firebase_auth_desktop;
 
 import 'dart:async';
 
-import 'package:firebase_auth_dart/firebase_auth.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-// ignore: depend_on_referenced_packages
-import 'package:firebase_core_dart/firebase_core.dart' as core_dart;
+import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart' as auth_dart;
+import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
 
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_user_credential.dart';

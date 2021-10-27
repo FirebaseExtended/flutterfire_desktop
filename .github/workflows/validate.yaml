@@ -62,5 +62,5 @@ jobs:
       - name: "Install Tools"
         run: .\.github\workflows\scripts\install-tools.bat
       - name: "Run Tests"
-        # TODO firebase emulator setup for windows CI, ignoring firebase_auth_dart tests until then
-        run: cmd /K melos exec --concurrency=1 --ignore="firebase_auth_dart" -- "flutter test --no-pub --reporter expanded"
+        # TODO firebase emulator setup for windows CI, ignoring flutterfire_auth_dart tests until then
+        run: cmd /K melos exec --concurrency=1 --ignore="flutterfire_auth_dart" -- "flutter test --no-pub --reporter expanded"

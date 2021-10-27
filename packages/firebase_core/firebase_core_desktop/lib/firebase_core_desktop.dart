@@ -1,6 +1,6 @@
 library firebase_core_desktop;
 
-import 'package:firebase_core_dart/firebase_core.dart' as core_dart;
+import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 
 part 'firebase_app_desktop.dart';
@@ -33,7 +33,7 @@ class FirebaseCore extends FirebasePlatform {
     FirebaseOptions? options,
   }) async {
     assert(options != null);
-    // Initialize the app in firebase_core_dart
+    // Initialize the app in flutterfire_core_dart
     final _dartOptions = core_dart.FirebaseOptions.fromMap(options!.asMap);
     final _dartApp = await core_dart.Firebase.initializeApp(
       name: name,

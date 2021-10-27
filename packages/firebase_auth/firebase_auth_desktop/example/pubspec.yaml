@@ -24,8 +24,24 @@ dependencies:
   firebase_auth:
   flutter:
       sdk: flutter
-  flutter_signin_button: ^1.0.0
+  flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.0-nullsafety
+
+dependency_overrides:
+  firebase_auth:
+    git:
+      url: https://github.com/pr-Mais/flutterfire.git
+      path: packages/firebase_auth/firebase_auth
+      ref: "@mais/firebase-dart"
+  firebase_auth_desktop:
+    path: ../
+  firebase_core:
+    git:
+      url: https://github.com/pr-Mais/flutterfire.git
+      path: packages/firebase_core/firebase_core
+      ref: "@mais/firebase-dart"
+  firebase_core_desktop:
+    path: ../
 
 dev_dependencies:
   flutter_test:

@@ -25,6 +25,15 @@ dependencies:
   flutter:
     sdk: flutter
 
+dependency_overrides:
+  firebase_core:
+    git:
+      url: https://github.com/pr-Mais/flutterfire.git
+      path: packages/firebase_core/firebase_core
+      ref: "@mais/firebase-dart"
+  firebase_core_desktop:
+    path: ../
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
