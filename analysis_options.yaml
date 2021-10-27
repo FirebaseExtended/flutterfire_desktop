@@ -1,5 +1,6 @@
 include: all_lint_rules.yaml
 analyzer:
+  exclude: [packages/**/**/test/**.mocks.dart]
   errors:
     included_file_warning: ignore
 linter:
