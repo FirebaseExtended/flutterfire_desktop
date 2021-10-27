@@ -67,8 +67,7 @@ class User extends UserPlatform {
   UserMetadata get metadata => throw UnimplementedError();
 
   @override
-  // TODO: implement phoneNumber
-  String? get phoneNumber => throw UnimplementedError();
+  String? get phoneNumber => _user.phoneNumber;
 
   @override
   String? get photoURL => _user.photoURL;
@@ -86,7 +85,7 @@ class User extends UserPlatform {
 
   @override
   // TODO: implement refreshToken
-  String? get refreshToken => throw UnimplementedError();
+  String? get refreshToken => _user.refreshToken;
 
   @override
   Future<void> reload() {
@@ -139,10 +138,20 @@ class User extends UserPlatform {
     throw UnimplementedError();
   }
 
+  /// Update the user name.
+  Future<void> updateDisplayName(String? displayName) {
+    return _user.updateDisplayName(displayName);
+  }
+
+  /// Update the user's profile picture.
+  Future<void> updatePhotoURL(String? photoURL) {
+    return _user.updatePhotoURL(photoURL);
+  }
+
+  /// Update the user's profile.
   @override
-  Future<void> updateProfile(Map<String, String?> profile) {
-    // TODO: implement updateProfile
-    throw UnimplementedError();
+  Future<void> updateProfile(Map<String, dynamic> newProfile) {
+    return _user.updateProfile(newProfile);
   }
 
   @override

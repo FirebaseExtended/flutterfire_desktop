@@ -2,7 +2,10 @@
 
 part of firebase_auth_dart;
 
-/// Service layer to perform all requests with the underlying Identity Toolkit API.
+/// Pure Dart service layer to perform all requests
+/// with the underlying Identity Toolkit API.
+///
+/// See: https://cloud.google.com/identity-platform/docs/use-rest-api
 class API {
   // ignore: public_member_api_docs
   API(this._apiKey, this._projectId, {http.Client? client}) {

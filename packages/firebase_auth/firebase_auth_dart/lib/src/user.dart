@@ -95,6 +95,14 @@ class User {
     return _user['isAnonymous'] ?? false;
   }
 
+  /// Returns the users phone number.
+  ///
+  /// This property will be `null` if the user has not signed in or been has
+  /// their phone number linked.
+  String? get phoneNumber {
+    return _user['phoneNumber'];
+  }
+
   /// The users display name.
   ///
   /// Will be `null` if signing in anonymously or via password authentication.
@@ -179,7 +187,7 @@ class User {
   }
 
   /// Update the user name.
-  Future<void> updateDisplayName(String displayName) async {
+  Future<void> updateDisplayName(String? displayName) async {
     _assertSignedOut(_auth);
 
     await _auth.updateProfile({'displayName': displayName}, _idToken);
@@ -187,10 +195,18 @@ class User {
   }
 
   /// Update the user's profile picture.
-  Future<void> updatePhotoURL(String photoURL) async {
+  Future<void> updatePhotoURL(String? photoURL) async {
     _assertSignedOut(_auth);
 
     await _auth.updateProfile({'photoURL': photoURL}, _idToken);
+    await reload();
+  }
+
+  /// Update the user's profile.
+  Future<void> updateProfile(Map<String, dynamic> newProfile) async {
+    _assertSignedOut(_auth);
+
+    await _auth.updateProfile(newProfile, _idToken);
     await reload();
   }
 

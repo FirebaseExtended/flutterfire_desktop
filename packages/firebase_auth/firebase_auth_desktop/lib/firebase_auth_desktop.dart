@@ -111,7 +111,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailAndPassword(email, password),
       );
     } catch (exception) {
-      // TODO(pr_Mais): throw FirebaseAuthException
+      // TODO(pr_mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -121,7 +121,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return await _auth!.fetchSignInMethodsForEmail(email);
     } catch (exception) {
-      // TODO(pr_Mais): throw FirebaseAuthException
+      // TODO(pr_mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -164,7 +164,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.createUserWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      // TODO(pr_Mais): throw FirebaseAuthException
+      // TODO(pr_mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -216,7 +216,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.sendSignInLinkToEmail(email);
     } catch (e) {
-      // TODO(pr_Mais): throw FirebaseAuthException
+      // TODO(pr_mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -252,7 +252,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInAnonymously(),
       );
     } catch (e) {
-      // TODO(pr_Mais): throw FirebaseAuthException
+      // TODO(pr_mais): throw FirebaseAuthException
       rethrow;
     }
   }
@@ -312,7 +312,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
       return;
     } catch (exception) {
-      // TODO(pr-Mais): throw [FirebaseAuthException]
+      // TODO(pr-mais): throw [FirebaseAuthException]
       rethrow;
     }
   }
