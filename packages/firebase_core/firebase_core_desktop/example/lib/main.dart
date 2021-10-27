@@ -1,10 +1,4 @@
-// ignore_for_file: require_trailing_commas
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 // ignore_for_file: public_member_api_docs
-
-// @dart=2.9
 
 import 'dart:async';
 import 'dart:developer';
@@ -14,7 +8,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   String get name => 'foo';
 
@@ -27,7 +21,6 @@ class MyApp extends StatelessWidget {
 
   Future<void> initializeDefault() async {
     final app = await Firebase.initializeApp(options: firebaseOptions);
-    assert(app != null);
     log('Initialized default app $app');
   }
 
@@ -37,7 +30,6 @@ class MyApp extends StatelessWidget {
       options: firebaseOptions,
     );
 
-    assert(app != null);
     log('Initialized $app');
   }
 
@@ -48,13 +40,13 @@ class MyApp extends StatelessWidget {
 
   void options() {
     final app = Firebase.app(name);
-    final options = app?.options;
+    final options = app.options;
     log('Current options for app $name: $options');
   }
 
   Future<void> delete() async {
     final app = Firebase.app(name);
-    await app?.delete();
+    await app.delete();
     log('App $name deleted');
   }
 
