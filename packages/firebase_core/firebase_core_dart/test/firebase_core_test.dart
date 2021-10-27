@@ -1,7 +1,6 @@
 // ignore_for_file: require_trailing_commas
 
 import 'package:firebase_core_dart/firebase_core.dart';
-import 'package:firebase_core_dart/src/internal/firebase_app_delegate.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

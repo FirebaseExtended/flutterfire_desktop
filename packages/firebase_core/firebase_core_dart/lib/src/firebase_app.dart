@@ -3,14 +3,14 @@ part of firebase_core_dart;
 /// A Dart only implementation of a Firebase app instance.
 class FirebaseApp {
   FirebaseApp._(this._delegate);
-  final FirebaseAppDelegete _delegate;
+  final _FirebaseAppDelegete _delegate;
 
   /// Deletes this app and frees up system resources.
   ///
   /// Once deleted, any plugin functionality using this app instance will throw
   /// an error.
-  Future<void> delete() async {
-    await _delegate.delete();
+  void delete() {
+    _delegate.delete();
   }
 
   /// The name of this [FirebaseApp].

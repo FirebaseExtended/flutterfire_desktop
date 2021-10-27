@@ -10,7 +10,7 @@ class Firebase {
   static FirebaseCoreDelegate? delegatePackingProperty;
 
   static FirebaseCoreDelegate get _delegate =>
-      delegatePackingProperty ?? FirebaseCoreDelegate.instance;
+      delegatePackingProperty ?? FirebaseCoreDelegate._instance;
 
   /// Initializes a new [FirebaseApp] instance by [name] and [options] and returns
   /// the created app. This method should be called before any usage of FlutterFire plugins.

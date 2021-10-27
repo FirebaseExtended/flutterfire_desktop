@@ -7,8 +7,9 @@ class FirebaseApp extends FirebaseAppPlatform {
   bool _isAutomaticDataCollectionEnabled = false;
 
   @override
-  Future<void> delete() async {
-    await core_dart.Firebase.app(name).delete();
+  Future<void> delete() {
+    core_dart.Firebase.app(name).delete();
+    return Future.value();
   }
 
   @override

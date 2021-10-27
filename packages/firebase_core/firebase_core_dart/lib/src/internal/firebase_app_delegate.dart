@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../firebase_core.dart';
-import '../firebase_options.dart';
+part of firebase_core_dart;
 
 /// The default Firebase application name.
 const String defaultFirebaseAppName = '[DEFAULT]';
 
 /// An internal delegate class storing the name and options of a Firebase app.
-class FirebaseAppDelegete {
+class _FirebaseAppDelegete {
   // ignore: public_member_api_docs
-  FirebaseAppDelegete(this._firebase, this.name, this.options);
+  _FirebaseAppDelegete(this._firebase, this.name, this.options);
 
   final FirebaseCoreDelegate _firebase;
 
@@ -32,8 +31,8 @@ class FirebaseAppDelegete {
       _isAutomaticDataCollectionEnabled;
 
   /// Deletes the current FirebaseApp.
-  Future<void> delete() async {
-    await _firebase.app(name).delete();
+  void delete() {
+    _firebase._apps.remove(name);
   }
 
   /// Sets whether automatic data collection is enabled or disabled for this app.
@@ -55,7 +54,7 @@ class FirebaseAppDelegete {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! FirebaseAppDelegete) {
+    if (other is! _FirebaseAppDelegete) {
       return false;
     }
     return other.name == name && other.options == options;
@@ -66,5 +65,5 @@ class FirebaseAppDelegete {
   int get hashCode => Object.hash(name, options);
 
   @override
-  String toString() => '$FirebaseAppDelegete($name)';
+  String toString() => '$_FirebaseAppDelegete($name)';
 }

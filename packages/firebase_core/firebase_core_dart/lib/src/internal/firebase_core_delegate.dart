@@ -7,8 +7,7 @@ part of firebase_core_dart;
 class FirebaseCoreDelegate {
   FirebaseCoreDelegate._();
 
-  @protected
-  static FirebaseCoreDelegate instance = FirebaseCoreDelegate._();
+  static final _instance = FirebaseCoreDelegate._();
 
   final Map<String, FirebaseApp> _apps = <String, FirebaseApp>{};
 
@@ -28,7 +27,7 @@ class FirebaseCoreDelegate {
       throw duplicateApp(_name);
     }
 
-    final _delegate = FirebaseAppDelegete(this, _name, options);
+    final _delegate = _FirebaseAppDelegete(this, _name, options);
 
     _apps[_name] = FirebaseApp._(_delegate);
     return _apps[_name]!;
