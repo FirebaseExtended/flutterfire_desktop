@@ -21,7 +21,7 @@ Future<void> main() async {
     final core = core_desktop.FirebaseCore();
     FirebasePlatform.instance = core;
     Firebase.delegatePackingProperty = core;
-    await Firebase.initializeApp(
+    final app = await Firebase.initializeApp(
       options: const FirebaseOptions(
         apiKey: '',
         appId: '',
@@ -29,7 +29,7 @@ Future<void> main() async {
         projectId: '',
       ),
     );
-    FirebaseFunctionsPlatform.instance = FirebaseFunctionsDesktop();
+    FirebaseFunctionsPlatform.instance = FirebaseFunctionsDesktop(app: app);
   });
 
   group('FirebaseFunctions', () {
