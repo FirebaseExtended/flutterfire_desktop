@@ -100,10 +100,11 @@ class HttpsCallable {
       );
 
   /// Calls the function with the given data.
-  Future<HttpsResult> call([dynamic data]) async {
+  Future<HttpsCallableResult<T>> call<T>([dynamic data]) async {
     assert(_debugIsValidParameterType(data), 'data must be json serialized');
     try {
       final encodedData = json.encode({'data': data});
+
       try {
         final result = await http.post(
           _url,
@@ -115,32 +116,43 @@ class HttpsCallable {
           },
         ).timeout(options.timeout);
         try {
-          final res = json.decode(result.body) as Map<String, dynamic>;
+          final res = json.decode(result.body.isEmpty ? '{}' : result.body)
+              as Map<String, dynamic>;
           if (res['result'] != null) {
-            return HttpsResult._(res['result']);
+            return HttpsCallableResult._(res['result']);
           }
-          return HttpsResult._(res['data']);
+          return HttpsCallableResult._(res['data']);
         } catch (e, st) {
           // TODO: Specific error for invalid json response
+          // ignore: avoid_print
+          print('$e, $st');
           rethrow;
         }
       } catch (e, st) {
         // TODO: Specific error for http error
+        // ignore: avoid_print
+        print('$e, $st');
         rethrow;
       }
     } catch (e, st) {
       // TODO: Specific error for invalid json input
+      // ignore: avoid_print
+      print('$e, $st');
       rethrow;
     }
   }
 }
 
-/// The result from calling a firebase function
-class HttpsResult {
-  HttpsResult._(this.data);
+/// The result of calling a HttpsCallable function.
+class HttpsCallableResult<T> {
+  HttpsCallableResult._(this._data);
 
-  /// The data returned from the firebase function
-  final dynamic data;
+  final T _data;
+
+  /// Returns the data that was returned from the Callable HTTPS trigger.
+  T get data {
+    return _data;
+  }
 }
 
 /// Options for configuring the behavior of a firebase cloud function

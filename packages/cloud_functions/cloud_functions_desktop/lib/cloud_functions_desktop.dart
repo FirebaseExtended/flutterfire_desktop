@@ -55,9 +55,29 @@ class HttpsCallableDesktop extends HttpsCallablePlatform {
 
   @override
   Future<dynamic> call([dynamic parameters]) async {
-    return functions_dart.FirebaseFunctions.instanceFor(
+    final functionInstance = functions_dart.FirebaseFunctions.instanceFor(
       app: (functions as FirebaseFunctionsDesktop)._app,
       region: functions.region,
-    ).httpsCallable(name).call(parameters);
+    );
+    if (origin != null) {
+      functionInstance.useFunctionsEmulator(
+        origin!.substring(
+          origin!.indexOf('://') + 3,
+          origin!.lastIndexOf(':'),
+        ),
+        int.parse(
+          origin!.substring(origin!.lastIndexOf(':') + 1),
+        ),
+      );
+    }
+    final result = await functionInstance
+        .httpsCallable(
+          name,
+          options: functions_dart.HttpsCallableOptions(
+            timeout: options.timeout,
+          ),
+        )
+        .call(parameters);
+    return result.data;
   }
 }
