@@ -338,7 +338,8 @@ class FirebaseAuth {
   Exception getException(Object e) {
     if (e is DetailedApiRequestError) {
       final authException = FirebaseAuthException.fromErrorCode(e.message!);
-      log('$authException', name: 'flutterfire_auth_dart/${authException.code}');
+      log('$authException',
+          name: 'flutterfire_auth_dart/${authException.code}');
 
       return authException;
     } else if (e is Exception) {

@@ -1,7 +1,7 @@
 library firebase_core_desktop;
 
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
+import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
 
 part 'firebase_app_desktop.dart';
 

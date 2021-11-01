@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, use_build_context_synchronously
+// ignore_for_file: public_member_api_docs, use_build_context_synchronously, avoid_print
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -148,18 +148,20 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                     ),
                   ),
                 ),
-            Text(widget.user == null
-                    ? 'Not signed in'
-                    : '${widget.user!.isAnonymous ? 'User is anonymous\n\n' : ''}'
-                        'Email: ${widget.user!.email} (verified: ${widget.user!.emailVerified})\n\n'
-                        'Phone number: ${widget.user!.phoneNumber}\n\n'
-                        'Name: ${widget.user!.displayName}\n\n\n'
-                        'ID: ${widget.user!.uid}\n\n'
-                        //'Tenant ID: ${widget.user!.tenantId}\n\n'
-                        'Refresh token: ${widget.user!.refreshToken}\n\n\n'
-                //'Created: ${widget.user!.metadata.creationTime.toString()}\n\n'
-                //'Last login: ${widget.user!.metadata.lastSignInTime}\n\n',
-                ),
+            Text(
+              widget.user == null
+                  ? 'Not signed in'
+                  : '${widget.user!.isAnonymous ? 'User is anonymous\n\n' : ''}'
+                      'Email: ${widget.user!.email} (verified: ${widget.user!.emailVerified})\n\n'
+                      'Phone number: ${widget.user!.phoneNumber}\n\n'
+                      'Name: ${widget.user!.displayName}\n\n\n'
+                      'ID: ${widget.user!.uid}\n\n'
+                      //'Tenant ID: ${widget.user!.tenantId}\n\n'
+                      'Refresh token: ${widget.user!.refreshToken}\n\n\n'
+              //'Created: ${widget.user!.metadata.creationTime.toString()}\n\n'
+              //'Last login: ${widget.user!.metadata.lastSignInTime}\n\n',
+              ,
+            ),
             // if (widget.user != null)
             //   Column(
             //     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -436,7 +438,9 @@ class _EmailLinkSignInSectionState extends State<_EmailLinkSignInSection> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: (String? value) {
-                  if (value!.isEmpty) return 'Please enter your email.';
+                  if (value!.isEmpty) {
+                    return 'Please enter your email.';
+                  }
                   return null;
                 },
               ),
@@ -509,8 +513,10 @@ class _AnonymouslySignInSectionState extends State<_AnonymouslySignInSection> {
           children: <Widget>[
             Container(
               alignment: Alignment.center,
-              child: const Text('Test sign in anonymously',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Test sign in anonymously',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             Container(
               padding: const EdgeInsets.only(top: 16),
@@ -546,7 +552,7 @@ class _AnonymouslySignInSectionState extends State<_AnonymouslySignInSection> {
   // Example code of how to sign in anonymously.
   Future<void> _signInAnonymously() async {
     try {
-      final User user = (await _auth.signInAnonymously()).user!;
+      final user = (await _auth.signInAnonymously()).user!;
       ScaffoldSnackbar.of(context)
           .show('Signed in Anonymously as user ${user.uid}');
     } catch (e) {
@@ -700,7 +706,7 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
   }
 
   Future<void> _verifyWebPhoneNumber() async {
-    ConfirmationResult confirmationResult =
+    final confirmationResult =
         await _auth.signInWithPhoneNumber(_phoneNumberController.text);
 
     webConfirmationResult = confirmationResult;
@@ -725,43 +731,48 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
       _message = '';
     });
 
-    PhoneVerificationCompleted verificationCompleted =
-        (PhoneAuthCredential phoneAuthCredential) async {
+    Future verificationCompleted(
+      PhoneAuthCredential phoneAuthCredential,
+    ) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       ScaffoldSnackbar.of(context).show(
-          'Phone number automatically verified and user signed in: $phoneAuthCredential');
-    };
+        'Phone number automatically verified and user signed in: $phoneAuthCredential',
+      );
+    }
 
-    PhoneVerificationFailed verificationFailed =
-        (FirebaseAuthException authException) {
+    void verificationFailed(FirebaseAuthException authException) {
       setState(() {
         _message =
             'Phone number verification failed. Code: ${authException.code}. '
             'Message: ${authException.message}';
       });
-    };
+    }
 
-    PhoneCodeSent codeSent =
-        (String verificationId, [int? forceResendingToken]) async {
+    Future<PhoneCodeSent?> codeSent(
+      String verificationId, [
+      int? forceResendingToken,
+    ]) async {
       ScaffoldSnackbar.of(context)
           .show('Please check your phone for the verification code.');
 
       _verificationId = verificationId;
-    };
+    }
 
-    PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
-        (String verificationId) {
+    PhoneCodeAutoRetrievalTimeout? codeAutoRetrievalTimeout(
+      String verificationId,
+    ) {
       _verificationId = verificationId;
-    };
+    }
 
     try {
       await _auth.verifyPhoneNumber(
-          phoneNumber: _phoneNumberController.text,
-          timeout: const Duration(seconds: 5),
-          verificationCompleted: verificationCompleted,
-          verificationFailed: verificationFailed,
-          codeSent: codeSent,
-          codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+        phoneNumber: _phoneNumberController.text,
+        timeout: const Duration(seconds: 5),
+        verificationCompleted: verificationCompleted,
+        verificationFailed: verificationFailed,
+        codeSent: codeSent,
+        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+      );
     } catch (e) {
       ScaffoldSnackbar.of(context).show('Failed to Verify Phone Number: $e');
     }
@@ -770,11 +781,11 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
   // Example code of how to sign in with phone.
   Future<void> _signInWithPhoneNumber() async {
     try {
-      final PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      final credential = PhoneAuthProvider.credential(
         verificationId: _verificationId,
         smsCode: _smsController.text,
       );
-      final User user = (await _auth.signInWithCredential(credential)).user!;
+      final user = (await _auth.signInWithCredential(credential)).user!;
       ScaffoldSnackbar.of(context)
           .show('Successfully signed in UID: ${user.uid}');
     } catch (e) {
@@ -811,18 +822,23 @@ class _OtherProvidersSignInSectionState
           children: <Widget>[
             Container(
               alignment: Alignment.center,
-              child: const Text('Social Authentication',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Social Authentication',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             Container(
               padding: const EdgeInsets.only(top: 16),
               alignment: Alignment.center,
               child: kIsWeb
                   ? const Text(
-                      'When using Flutter Web, API keys are configured through the Firebase Console. The below providers demonstrate how this works')
+                      'When using Flutter Web, API keys are configured through the '
+                      'Firebase Console. The below providers demonstrate how this works',
+                    )
                   : const Text(
                       'We do not provide an API to obtain the token for below providers apart from Google '
-                      'Please use a third party service to obtain token for other providers.'),
+                      'Please use a third party service to obtain token for other providers.',
+                    ),
             ),
             Container(
               padding: const EdgeInsets.only(top: 16),
@@ -873,7 +889,8 @@ class _OtherProvidersSignInSectionState
               child: TextField(
                 controller: _tokenSecretController,
                 decoration: const InputDecoration(
-                    labelText: "Enter provider's authTokenSecret"),
+                  labelText: "Enter provider's authTokenSecret",
+                ),
               ),
             ),
             Container(
@@ -957,7 +974,7 @@ class _OtherProvidersSignInSectionState
     try {
       UserCredential userCredential;
       if (kIsWeb) {
-        GithubAuthProvider githubProvider = GithubAuthProvider();
+        final githubProvider = GithubAuthProvider();
         userCredential = await _auth.signInWithPopup(githubProvider);
       } else {
         final AuthCredential credential = GithubAuthProvider.credential(
@@ -980,7 +997,7 @@ class _OtherProvidersSignInSectionState
       final AuthCredential credential = FacebookAuthProvider.credential(
         _tokenController.text,
       );
-      final User user = (await _auth.signInWithCredential(credential)).user!;
+      final user = (await _auth.signInWithCredential(credential)).user!;
       ScaffoldSnackbar.of(context).show('Sign In ${user.uid} with Facebook');
     } catch (e) {
       print(e);
@@ -994,12 +1011,13 @@ class _OtherProvidersSignInSectionState
       late UserCredential userCredential;
 
       if (kIsWeb) {
-        TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+        final twitterProvider = TwitterAuthProvider();
         await _auth.signInWithPopup(twitterProvider);
       } else {
         final AuthCredential credential = TwitterAuthProvider.credential(
-            accessToken: _tokenController.text,
-            secret: _tokenSecretController.text);
+          accessToken: _tokenController.text,
+          secret: _tokenSecretController.text,
+        );
         userCredential = await _auth.signInWithCredential(credential);
       }
 
