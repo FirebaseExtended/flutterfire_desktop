@@ -89,7 +89,8 @@ class HttpsCallable {
 
   /// Configuration options for timeout
   final HttpsCallableOptions options;
-  // Origin specifies a different origin in the case of emulators.
+
+  /// Origin specifies a different origin in the case of emulators.
   @visibleForTesting
   final String? origin;
 

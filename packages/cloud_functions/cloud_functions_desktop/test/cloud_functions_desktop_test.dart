@@ -13,8 +13,6 @@ import 'package:firebase_core_platform_interface/firebase_core_platform_interfac
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'data.dart' as data;
-
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
       apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
