@@ -113,8 +113,8 @@ class FirebaseAuth {
       final providerId = AuthProvider.password.providerId;
 
       // Make a credential object based on the current sign-in method.
-      return UserCredential(
-        user: user,
+      return UserCredential._(
+        auth: this,
         credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,
@@ -144,8 +144,8 @@ class FirebaseAuth {
 
       final providerId = AuthProvider.password.providerId;
 
-      return UserCredential(
-        user: user,
+      return UserCredential._(
+        auth: this,
         credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,
@@ -229,8 +229,8 @@ class FirebaseAuth {
 
     try {
       if (currentUser?.isAnonymous ?? false) {
-        return UserCredential(
-          user: currentUser,
+        return UserCredential._(
+          auth: this,
           credential: AuthCredential(
             providerId: providerId,
             signInMethod: providerId,
@@ -248,8 +248,8 @@ class FirebaseAuth {
       final user = User(_data, this);
       updateCurrentUserAndEvents(user);
 
-      return UserCredential(
-        user: user,
+      return UserCredential._(
+        auth: this,
         credential: AuthCredential(
           providerId: providerId,
           signInMethod: providerId,

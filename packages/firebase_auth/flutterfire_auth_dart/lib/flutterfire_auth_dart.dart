@@ -9,11 +9,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
-import 'package:googleapis/androidpublisher/v3.dart';
 import 'package:googleapis/identitytoolkit/v3.dart'
     show DetailedApiRequestError;
 import 'package:googleapis/identitytoolkit/v3.dart';
-import 'package:googleapis_auth/auth_io.dart';
+import 'package:googleapis_auth/auth_io.dart'
+    if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
@@ -27,5 +28,6 @@ part 'src/auth_providers.dart';
 part 'src/firebase_auth.dart';
 part 'src/id_token_result.dart';
 part 'src/user.dart';
+part 'src/user_metadata.dart';
 part 'src/user_credential.dart';
 part 'src/utils/persistence.dart';

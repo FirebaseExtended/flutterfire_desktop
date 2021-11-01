@@ -11,12 +11,69 @@ class User {
   final Map<String, dynamic> _user;
   final String _idToken;
 
+  /// The users display name.
+  ///
+  /// Will be `null` if signing in anonymously or via password authentication.
+  String? get displayName {
+    return _user['displayName'];
+  }
+
+  /// The users email address.
+  ///
+  /// Will be `null` if signing in anonymously.
+  String? get email {
+    return _user['email'];
+  }
+
+  /// Returns whether the users email address has been verified.
+  ///
+  /// To send a verification email, see [sendEmailVerification].
+  ///
+  /// Once verified, call [reload] to ensure the latest user information is
+  /// retrieved from Firebase.
+  bool get emailVerified {
+    return _user['emailVerified'] ?? false;
+  }
+
+  /// Returns whether the user is a anonymous.
+  bool get isAnonymous {
+    return _user['isAnonymous'] ?? false;
+  }
+
+  /// Returns additional metadata about the user, such as their creation time.
+  UserMetadata? get metadata {
+    return _user['metadata'];
+  }
+
+  /// Returns the users phone number.
+  ///
+  /// This property will be `null` if the user has not signed in or been has
+  /// their phone number linked.
+  String? get phoneNumber {
+    return _user['phoneNumber'];
+  }
+
+  /// The photo URL of a user, could be `null`.
+  String? get photoURL {
+    return _user['photoUrl'];
+  }
+
+  /// Returns a list of user information for each linked provider.
+  List<UserInfo> get providerData {
+    return _user[''];
+  }
+
   /// Returns a JWT refresh token for the user.
   ///
   /// This property maybe `null` or empty if the underlying platform does not
   /// support providing refresh tokens.
   String? get refreshToken {
     return _user['refreshToken'];
+  }
+
+  /// The unique id of a user.
+  String get uid {
+    return _user['localId'];
   }
 
   /// Deletes and signs out the user.
@@ -68,51 +125,13 @@ class User {
     }
   }
 
-  /// The unique id of a user.
-  String get uid {
-    return _user['localId'];
-  }
-
-  /// The users email address.
+  /// Links the user account with the given credentials.
   ///
-  /// Will be `null` if signing in anonymously.
-  String? get email {
-    return _user['email'];
-  }
-
-  /// Returns whether the users email address has been verified.
-  ///
-  /// To send a verification email, see [sendEmailVerification].
-  ///
-  /// Once verified, call [reload] to ensure the latest user information is
-  /// retrieved from Firebase.
-  bool get emailVerified {
-    return _user['emailVerified'] ?? false;
-  }
-
-  /// Returns whether the user is a anonymous.
-  bool get isAnonymous {
-    return _user['isAnonymous'] ?? false;
-  }
-
-  /// Returns the users phone number.
-  ///
-  /// This property will be `null` if the user has not signed in or been has
-  /// their phone number linked.
-  String? get phoneNumber {
-    return _user['phoneNumber'];
-  }
-
-  /// The users display name.
-  ///
-  /// Will be `null` if signing in anonymously or via password authentication.
-  String? get displayName {
-    return _user['displayName'];
-  }
-
-  /// The photo URL of a user, could be `null`.
-  String? get photoURL {
-    return _user['photoUrl'];
+  Future<UserCredential> linkWithCredential(AuthCredential credential) async {
+    return UserCredential._(
+      auth: _auth,
+      //await _auth._api.linkWithCredential(credential),
+    );
   }
 
   /// Re-authenticates a user using a fresh credential.

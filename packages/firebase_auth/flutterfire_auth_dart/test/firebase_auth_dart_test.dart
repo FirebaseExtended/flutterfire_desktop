@@ -286,11 +286,13 @@ void main() {
         mockPassword,
       );
 
-      await cred.user!.delete();
+      final user = cred.user;
+
+      await user?.delete();
 
       expect(auth.currentUser, isNull);
       expect(
-        cred.user!.delete(),
+        user?.delete(),
         throwsA(
           isA<FirebaseAuthException>()
               .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
