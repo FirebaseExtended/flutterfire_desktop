@@ -16,6 +16,7 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
       projectId: 'react-native-firebase-testing',
       messagingSenderId: '448618578101',
     );
+// TODO: Use mocks for these tests, and create separate integration tests in the desktop package
 Future<void> main() async {
   setUpAll(() async {
     await Firebase.initializeApp(

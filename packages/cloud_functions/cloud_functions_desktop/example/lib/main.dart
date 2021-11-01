@@ -9,6 +9,7 @@ import 'dart:core';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+// TODO: Endorse this plugin
 import 'package:firebase_core_desktop/firebase_core_desktop.dart'
     as core_desktop;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';

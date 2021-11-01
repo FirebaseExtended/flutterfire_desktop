@@ -111,6 +111,7 @@ class HttpsCallable {
           body: encodedData,
           headers: {
             'Content-Type': 'application/json'
+            // TODO: Authorization headers
             // 'Authorization': 'Bearer $authToken',
             // 'Firebase'
           },
