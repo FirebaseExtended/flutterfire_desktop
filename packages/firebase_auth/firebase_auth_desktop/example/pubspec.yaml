@@ -30,16 +30,16 @@ dependencies:
 dependency_overrides:
   firebase_auth:
     git:
-      url: https://github.com/pr-Mais/flutterfire.git
+      url: https://github.com/FirebaseExtended/flutterfire.git
       path: packages/firebase_auth/firebase_auth
-      ref: "@mais/firebase-dart"
+      ref: "desktop/linux_windows"
   firebase_auth_desktop:
     path: ../
   firebase_core:
     git:
-      url: https://github.com/pr-Mais/flutterfire.git
+      url: https://github.com/FirebaseExtended/flutterfire.git
       path: packages/firebase_core/firebase_core
-      ref: "@mais/firebase-dart"
+      ref: "desktop/linux_windows"
   firebase_core_desktop:
     path: ../
 
