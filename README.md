@@ -8,4 +8,6 @@ Learn more about the current progress of this project in [our blog](https://inve
 
 ## Contributing
 
-This is a community project, contributions to help it progress faster are welcome, please read the [contribution guide of FlutterFire](https://github.com/FirebaseExtended/flutterfire/blob/master/CONTRIBUTING.md) to get started.
+This is a community project, contributions to help it progress faster are welcome:
+1. Before starting, please read the [contribution guide of FlutterFire](https://github.com/FirebaseExtended/flutterfire/blob/master/CONTRIBUTING.md).
+2. Refer to the [projects board](https://github.com/invertase/flutterfire_desktop/projects) to see the current progress & planned future work.
