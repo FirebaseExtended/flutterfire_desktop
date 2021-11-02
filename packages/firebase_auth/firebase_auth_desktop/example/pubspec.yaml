@@ -41,7 +41,7 @@ dependency_overrides:
       path: packages/firebase_core/firebase_core
       ref: "desktop/linux_windows"
   firebase_core_desktop:
-    path: ../
+    path: ../../../firebase_core/firebase_core_desktop
 
 dev_dependencies:
   flutter_test:
