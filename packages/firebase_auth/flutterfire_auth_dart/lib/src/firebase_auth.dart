@@ -247,12 +247,6 @@ class FirebaseAuth {
       final userData =
           (await _api.getCurrentUser(response['idToken'])).toJson();
 
-      // When signed-in anonymously, the property `providerUserInfo` is null
-      // so we manually add the provider as anonymous.
-      // userData['providerUserInfo'] ??= [
-      //   {'providerId': providerId}
-      // ];
-
       // Map the json response to an actual user.
       final user = User(userData..addAll(response), this);
 
