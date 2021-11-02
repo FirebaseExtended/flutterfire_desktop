@@ -102,15 +102,16 @@ class FirebaseAuth {
   /// TODO: write the codes
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
+    final providerId = AuthProvider.password.providerId;
+
     try {
-      final _userMap = await _api.signInWithEmailAndPassword(email, password);
+      final response = await _api.signInWithEmailAndPassword(email, password);
+      final userData = await _api.getCurrentUser(response['idToken']);
 
       // Map the json response to an actual user.
-      final user = User(_userMap, this);
+      final user = User(userData.toJson()..addAll(response), this);
 
       updateCurrentUserAndEvents(user);
-
-      final providerId = AuthProvider.password.providerId;
 
       // Make a credential object based on the current sign-in method.
       return UserCredential._(
@@ -136,10 +137,13 @@ class FirebaseAuth {
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
-      final _response =
+      final response =
           await _api.createUserWithEmailAndPassword(email, password);
+      final userData = await _api.getCurrentUser(response['idToken']);
 
-      final user = User(_response, this);
+      // Map the json response to an actual user.
+      final user = User(userData.toJson()..addAll(response), this);
+
       updateCurrentUserAndEvents(user);
 
       final providerId = AuthProvider.password.providerId;
@@ -164,9 +168,9 @@ class FirebaseAuth {
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      final _providers = await _api.fetchSignInMethodsForEmail(email);
+      final providers = await _api.fetchSignInMethodsForEmail(email);
 
-      return _providers;
+      return providers;
     } catch (e) {
       throw getException(e);
     }
@@ -239,13 +243,19 @@ class FirebaseAuth {
         );
       }
 
-      final _response = await _api.signInAnonymously();
+      final response = await _api.signInAnonymously();
+      final userData =
+          (await _api.getCurrentUser(response['idToken'])).toJson();
 
-      final _data = _response;
+      // When signed-in anonymously, the property `providerUserInfo` is null
+      // so we manually add the provider as anonymous.
+      // userData['providerUserInfo'] ??= [
+      //   {'providerId': providerId}
+      // ];
 
-      _data['isAnonymous'] = true;
+      // Map the json response to an actual user.
+      final user = User(userData..addAll(response), this);
 
-      final user = User(_data, this);
       updateCurrentUserAndEvents(user);
 
       return UserCredential._(
@@ -268,8 +278,8 @@ class FirebaseAuth {
   @protected
   Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
     try {
-      final userMap = await _api.reloadCurrentUser(idToken);
-      return userMap;
+      final response = await _api.getCurrentUser(idToken);
+      return response.toJson();
     } catch (e) {
       throw getException(e);
     }
@@ -294,7 +304,7 @@ class FirebaseAuth {
     try {
       updateCurrentUserAndEvents(null);
     } catch (exception) {
-      log('$exception', name: 'DartAuth/signOut');
+      log('$exception', name: 'FirebaseAuth/signOut');
 
       rethrow;
     }
@@ -336,7 +346,7 @@ class FirebaseAuth {
   ///
   @protected
   Exception getException(Object e) {
-    if (e is DetailedApiRequestError) {
+    if (e is idp.DetailedApiRequestError) {
       final authException = FirebaseAuthException.fromErrorCode(e.message!);
       log('$authException',
           name: 'flutterfire_auth_dart/${authException.code}');

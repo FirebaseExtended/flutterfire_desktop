@@ -37,12 +37,14 @@ class User {
 
   /// Returns whether the user is a anonymous.
   bool get isAnonymous {
-    return _user['isAnonymous'] ?? false;
+    // ignore: avoid_dynamic_calls
+    return providerData.isEmpty;
   }
 
   /// Returns additional metadata about the user, such as their creation time.
   UserMetadata? get metadata {
-    return _user['metadata'];
+    return UserMetadata(
+        int.parse(_user['createdAt']), int.parse(_user['lastLoginAt']));
   }
 
   /// Returns the users phone number.
@@ -60,7 +62,16 @@ class User {
 
   /// Returns a list of user information for each linked provider.
   List<UserInfo> get providerData {
-    return _user[''];
+    // ignore: avoid_dynamic_calls
+    return _user['providerUserInfo']
+            ?.map((userInfo) {
+              // ignore: avoid_dynamic_calls
+              userInfo['uid'] = uid;
+              return UserInfo(userInfo);
+            })
+            ?.toList()
+            ?.cast<UserInfo>() ??
+        [];
   }
 
   /// Returns a JWT refresh token for the user.
@@ -230,16 +241,7 @@ class User {
   }
 
   /// A Map representation of this instance.
-  Map<String, dynamic> toMap() => {
-        'refreshToken': refreshToken,
-        'idToken': _idToken,
-        'localId': uid,
-        'email': email,
-        'emailVerified': emailVerified,
-        'isAnonymous': isAnonymous,
-        'displayName': displayName,
-        'photoURL': photoURL,
-      };
+  Map<String, dynamic> toMap() => _user;
 }
 
 /// Throws if any auth method is called with no user signed in.

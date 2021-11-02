@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
 import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
-import 'package:googleapis/identitytoolkit/v3.dart';
+import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mockito/annotations.dart';
@@ -360,6 +360,22 @@ void main() {
       await fakeAuth.currentUser!.sendEmailVerification();
 
       verify(user.sendEmailVerification());
+    });
+    test('.metadata', () async {
+      await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
+
+      final metadata = auth.currentUser!.metadata!;
+
+      expect(metadata.creationTime!.isBefore(DateTime.now()), isTrue);
+      expect(metadata.lastSignInTime!.isBefore(DateTime.now()), isTrue);
+    });
+    test('.providerData', () async {
+      await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
+
+      expect(
+        auth.currentUser!.providerData.isNotEmpty,
+        isTrue,
+      );
     });
   });
 
