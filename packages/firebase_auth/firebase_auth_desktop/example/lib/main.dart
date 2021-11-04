@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_builder.dart';
+import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 
 import 'register_page.dart';
 import 'signin_page.dart';
@@ -21,6 +22,10 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: firebaseOptions);
+  await GoogleSignInDart.register(
+    clientId:
+        '448618578101-sg12d2qin42cpr00f8b0gehs5s7inm0v.apps.googleusercontent.com',
+  );
   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
   runApp(AuthExampleApp());
 }

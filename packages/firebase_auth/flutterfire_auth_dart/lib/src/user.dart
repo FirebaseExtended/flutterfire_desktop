@@ -139,10 +139,20 @@ class User {
   /// Links the user account with the given credentials.
   ///
   Future<UserCredential> linkWithCredential(AuthCredential credential) async {
-    return UserCredential._(
-      auth: _auth,
-      //await _auth._api.linkWithCredential(credential),
-    );
+    try {
+      final newCredential =
+          await _auth._api.linkWithCredential(_idToken, credential: credential);
+
+      await reload();
+
+      return UserCredential._(
+        auth: _auth,
+        credential: newCredential,
+      );
+    } catch (e) {
+      // TODO
+      throw _auth.getException(e);
+    }
   }
 
   /// Re-authenticates a user using a fresh credential.

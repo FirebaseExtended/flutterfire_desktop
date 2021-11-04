@@ -102,8 +102,6 @@ class FirebaseAuth {
   /// TODO: write the codes
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
-    final providerId = AuthProvider.password.providerId;
-
     try {
       final response = await _api.signInWithEmailAndPassword(email, password);
       final userData = await _api.getCurrentUser(response['idToken']);
@@ -116,11 +114,16 @@ class FirebaseAuth {
       // Make a credential object based on the current sign-in method.
       return UserCredential._(
         auth: this,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: false),
+        credential:
+            EmailAuthProvider.credential(email: email, password: password),
+        additionalUserInfo: AdditionalUserInfo(
+            isNewUser: false,
+            providerId: EmailAuthProvider.PROVIDER_ID,
+            username: userData.screenName,
+            profile: {
+              'displayName': userData.displayName,
+              'photoUrl': userData.photoUrl
+            }),
       );
     } catch (e) {
       throw getException(e);
@@ -146,15 +149,18 @@ class FirebaseAuth {
 
       updateCurrentUserAndEvents(user);
 
-      final providerId = AuthProvider.password.providerId;
-
       return UserCredential._(
         auth: this,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+        credential:
+            EmailAuthProvider.credential(email: email, password: password),
+        additionalUserInfo: AdditionalUserInfo(
+            isNewUser: true,
+            providerId: EmailAuthProvider.PROVIDER_ID,
+            username: userData.screenName,
+            profile: {
+              'displayName': userData.displayName,
+              'photoUrl': userData.photoUrl
+            }),
       );
     } catch (e) {
       throw getException(e);
@@ -229,13 +235,13 @@ class FirebaseAuth {
   ///
   /// TODO: describe exceptions
   Future<UserCredential> signInAnonymously() async {
-    final providerId = AuthProvider.anonymous.providerId;
+    const providerId = 'anonymous';
 
     try {
       if (currentUser?.isAnonymous ?? false) {
         return UserCredential._(
           auth: this,
-          credential: AuthCredential(
+          credential: const AuthCredential(
             providerId: providerId,
             signInMethod: providerId,
           ),
@@ -253,13 +259,10 @@ class FirebaseAuth {
       updateCurrentUserAndEvents(user);
 
       return UserCredential._(
-        auth: this,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: true),
-      );
+          auth: this,
+          additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+          credential: const AuthCredential(
+              providerId: providerId, signInMethod: providerId));
     } catch (e) {
       throw getException(e);
     }

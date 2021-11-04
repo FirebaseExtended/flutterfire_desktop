@@ -135,6 +135,42 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<AuthCredential> linkWithCredential(String idToken,
+      {required AuthCredential credential}) async {
+    if (credential is EmailAuthCredential) {
+      await _identityToolkit.setAccountInfo(
+        idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+            idToken: idToken,
+            email: credential.email,
+            password: credential.password),
+      );
+
+      return credential;
+    } else if (credential is GoogleAuthCredential) {
+      await _identityToolkit.verifyAssertion(
+        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+            idToken: idToken,
+            //TODO
+            requestUri: 'http://localhost',
+            postBody: 'id_token=${credential.idToken}&'
+                'providerId=${credential.providerId}'),
+      );
+
+      return credential;
+    } else {
+      final _response = await _identityToolkit.verifyAssertion(
+        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+            idToken: idToken,
+            //TODO
+            requestUri: 'http://localhost',
+            postBody: 'id_token=$idToken&providerId=${credential.providerId}'),
+      );
+
+      return OAuthProvider(_response.providerId!).credential();
+    }
+  }
+
+  /// TODO: write endpoint details
   Future<idp.UserInfo> getCurrentUser(String idToken) async {
     final _response = await _identityToolkit.getAccountInfo(
       idp.IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),

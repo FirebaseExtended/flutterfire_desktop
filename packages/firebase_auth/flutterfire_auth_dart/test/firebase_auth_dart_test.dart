@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
+import 'package:flutterfire_auth_dart/src/providers/email_auth.dart';
+import 'package:flutterfire_auth_dart/src/providers/google_auth.dart';
 import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
@@ -280,34 +282,14 @@ void main() {
     });
 
     group('User ', () {
-      test('delete()', () async {
-        final cred = await auth.createUserWithEmailAndPassword(
-          mockEmail,
-          mockPassword,
-        );
+      test('sendEmailVerification()', () async {
+        when(fakeAuth.currentUser).thenReturn(user);
+        when(user.sendEmailVerification()).thenAnswer((_) async {});
 
-        final user = cred.user;
+        await fakeAuth.signInAnonymously();
+        await fakeAuth.currentUser!.sendEmailVerification();
 
-        await user?.delete();
-
-        expect(auth.currentUser, isNull);
-        expect(
-          user?.delete(),
-          throwsA(
-            isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
-          ),
-        );
-        expect(
-          auth.signInWithEmailAndPassword(
-            mockEmail,
-            mockPassword,
-          ),
-          throwsA(
-            isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
-          ),
-        );
+        verify(user.sendEmailVerification());
       });
       test('updateEmail()', () async {
         final cred = await auth.createUserWithEmailAndPassword(
@@ -352,14 +334,60 @@ void main() {
         // Access token is updated
         expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
       });
-      test('sendEmailVerification()', () async {
-        when(fakeAuth.currentUser).thenReturn(user);
-        when(user.sendEmailVerification()).thenAnswer((_) async {});
+      test('delete()', () async {
+        final cred = await auth.signInWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        );
 
-        await fakeAuth.signInAnonymously();
-        await fakeAuth.currentUser!.sendEmailVerification();
+        final user = cred.user;
 
-        verify(user.sendEmailVerification());
+        await user?.delete();
+
+        expect(auth.currentUser, isNull);
+        expect(
+          user?.delete(),
+          throwsA(
+            isA<FirebaseAuthException>()
+                .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
+          ),
+        );
+        expect(
+          auth.signInWithEmailAndPassword(
+            mockEmail,
+            mockPassword,
+          ),
+          throwsA(
+            isA<FirebaseAuthException>()
+                .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
+          ),
+        );
+      });
+      test('.linkWithCredential() [Email]', () async {
+        final user = await auth.signInAnonymously();
+        await auth.currentUser!.linkWithCredential(
+          EmailAuthProvider.credential(
+              email: mockEmail, password: mockPassword),
+        );
+
+        expect(user.user!.providerData.length == 1, isTrue);
+        expect(user.user!.providerData[0].providerId,
+            EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD);
+      });
+      test('.linkWithCredential() [Google]', () async {
+        // TODO(pr-mais): mock tests
+        // final user =
+        //     await auth.signInWithEmailAndPassword(mockEmail, mockPassword);
+        // await auth.currentUser!.linkWithCredential(
+        //   GoogleAuthProvider.credential(
+        //       idToken: await auth.currentUser!.getIdToken()),
+        // );
+
+        // expect(user.user!.providerData.length > 1, isTrue);
+        // expect(user.user!.providerData[0].providerId,
+        //     EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD);
+        // expect(user.user!.providerData[1].providerId,
+        //     GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD);
       });
       test('.metadata', () async {
         await auth.signInWithEmailAndPassword(mockEmail, mockPassword);
