@@ -8,12 +8,8 @@ import 'dart:core';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-// TODO: Endorse this plugin
-import 'package:firebase_core_desktop/firebase_core_desktop.dart'
-    as core_desktop;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfire_functions_desktop/flutterfire_functions_desktop.dart';
 
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
@@ -23,16 +19,11 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
     );
 
 late FirebaseFunctions functions;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final core = core_desktop.FirebaseCore();
-  FirebasePlatform.instance = core;
-  // ignore: invalid_use_of_visible_for_testing_member
-  Firebase.delegatePackingProperty = core;
-
   final app =
       await Firebase.initializeApp(name: 'app', options: firebaseOptions);
-  FirebaseFunctionsPlatform.instance = FirebaseFunctionsDesktop(app: app);
   functions = FirebaseFunctions.instanceFor(app: app)
     ..useFunctionsEmulator('localhost', 5001);
   runApp(MyApp());
