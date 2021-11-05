@@ -1,4 +1,4 @@
-#include "include/flutterfire_functions_desktop/flutterfire_functions_desktop_plugin.h"
+#include "include/firebase_functions_desktop/firebase_functions_desktop_plugin.h"
 
 // This must be included before many other Windows headers.
 #include <windows.h>
@@ -16,13 +16,13 @@
 
 namespace {
 
-class FlutterfireFunctionsDesktopPlugin : public flutter::Plugin {
+class FirebaseFunctionsDesktopPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
-  FlutterfireFunctionsDesktopPlugin();
+  FirebaseFunctionsDesktopPlugin();
 
-  virtual ~FlutterfireFunctionsDesktopPlugin();
+  virtual ~FirebaseFunctionsDesktopPlugin();
 
  private:
   // Called when a method is called on this plugin's channel from Dart.
@@ -32,14 +32,14 @@ class FlutterfireFunctionsDesktopPlugin : public flutter::Plugin {
 };
 
 // static
-void FlutterfireFunctionsDesktopPlugin::RegisterWithRegistrar(
+void FirebaseFunctionsDesktopPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
   auto channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-          registrar->messenger(), "flutterfire_functions_desktop",
+          registrar->messenger(), "firebase_functions_desktop",
           &flutter::StandardMethodCodec::GetInstance());
 
-  auto plugin = std::make_unique<FlutterfireFunctionsDesktopPlugin>();
+  auto plugin = std::make_unique<FirebaseFunctionsDesktopPlugin>();
 
   channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
@@ -49,11 +49,11 @@ void FlutterfireFunctionsDesktopPlugin::RegisterWithRegistrar(
   registrar->AddPlugin(std::move(plugin));
 }
 
-FlutterfireFunctionsDesktopPlugin::FlutterfireFunctionsDesktopPlugin() {}
+FirebaseFunctionsDesktopPlugin::FirebaseFunctionsDesktopPlugin() {}
 
-FlutterfireFunctionsDesktopPlugin::~FlutterfireFunctionsDesktopPlugin() {}
+FirebaseFunctionsDesktopPlugin::~FirebaseFunctionsDesktopPlugin() {}
 
-void FlutterfireFunctionsDesktopPlugin::HandleMethodCall(
+void FirebaseFunctionsDesktopPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
   if (method_call.method_name().compare("getPlatformVersion") == 0) {
@@ -74,9 +74,9 @@ void FlutterfireFunctionsDesktopPlugin::HandleMethodCall(
 
 }  // namespace
 
-void FlutterfireFunctionsDesktopPluginRegisterWithRegistrar(
+void FirebaseFunctionsDesktopPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  FlutterfireFunctionsDesktopPlugin::RegisterWithRegistrar(
+  FirebaseFunctionsDesktopPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }

@@ -9,9 +9,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_desktop/firebase_core_desktop.dart'
     as core_desktop;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
+import 'package:firebase_functions_desktop/firebase_functions_desktop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutterfire_functions_desktop/flutterfire_functions_desktop.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 

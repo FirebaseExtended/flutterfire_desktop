@@ -13,12 +13,12 @@ import 'package:meta/meta.dart';
 class FirebaseFunctions {
   /// Creates Firebase Functions
   @visibleForTesting
-  FirebaseFunctions({required this.app, this.region = _defaultRegion});
+  FirebaseFunctions({required this.app, this.region = defaultRegion});
 
   /// Gets the [FirebaseFunctions] instance for the given [app] and [region].
   factory FirebaseFunctions.instanceFor({
     FirebaseApp? app,
-    String region = _defaultRegion,
+    String region = defaultRegion,
   }) {
     final _app = app ?? Firebase.app();
     if (_instances[_app] == null) {
@@ -30,7 +30,8 @@ class FirebaseFunctions {
     return _instances[_app]![region]!;
   }
 
-  static const _defaultRegion = 'us-central1';
+  /// The default region to use for the Firebase Functions API.
+  static const defaultRegion = 'us-central1';
   static final Map<FirebaseApp, Map<String, FirebaseFunctions>> _instances = {};
 
   /// Gets the [FirebaseFunctions] instance for the default app

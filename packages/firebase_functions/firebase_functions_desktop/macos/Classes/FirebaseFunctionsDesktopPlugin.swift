@@ -1,10 +1,10 @@
 import Cocoa
 import FlutterMacOS
 
-public class FlutterfireFunctionsDesktopPlugin: NSObject, FlutterPlugin {
+public class FirebaseFunctionsDesktopPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "flutterfire_functions_desktop", binaryMessenger: registrar.messenger)
-    let instance = FlutterfireFunctionsDesktopPlugin()
+    let channel = FlutterMethodChannel(name: "firebase_functions_desktop", binaryMessenger: registrar.messenger)
+    let instance = FirebaseFunctionsDesktopPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 

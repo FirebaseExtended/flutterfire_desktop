@@ -1,4 +1,4 @@
-// ignore_for_file: require_trailing_commas, public_member_api_docs, depend_on_referenced_packages, library_private_types_in_public_api
+// ignore_for_file: require_trailing_commas, public_member_api_docs, library_private_types_in_public_api
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -6,9 +6,7 @@
 import 'dart:core';
 
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter/material.dart';
 
 FirebaseOptions get firebaseOptions => const FirebaseOptions(

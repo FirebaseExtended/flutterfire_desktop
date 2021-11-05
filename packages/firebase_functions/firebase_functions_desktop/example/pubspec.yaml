@@ -1,4 +1,4 @@
-name: flutterfire_functions_desktop_example
+name: firebase_functions_desktop_example
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -24,14 +24,14 @@ dependencies:
   firebase_core:
   flutter:
     sdk: flutter
+  cloud_functions:
+  firebase_core_desktop:
+  firebase_functions_desktop:
 
 dependency_overrides:
-  cloud_functions: any
   firebase_core_desktop:
     path: ../../../firebase_core/firebase_core_desktop
-  flutterfire_functions_dart: 
-    path: ../../flutterfire_functions_dart
-  flutterfire_functions_desktop:
+  firebase_functions_desktop:
     path: ../
 
 dev_dependencies:

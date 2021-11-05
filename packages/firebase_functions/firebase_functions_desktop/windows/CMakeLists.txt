@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
-set(PROJECT_NAME "flutterfire_functions_desktop")
+set(PROJECT_NAME "firebase_functions_desktop")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "flutterfire_functions_desktop_plugin")
+set(PLUGIN_NAME "firebase_functions_desktop_plugin")
 
 add_library(${PLUGIN_NAME} SHARED
-  "flutterfire_functions_desktop_plugin.cpp"
+  "firebase_functions_desktop_plugin.cpp"
 )
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
@@ -18,7 +18,7 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(flutterfire_functions_desktop_bundled_libraries
+set(firebase_functions_desktop_bundled_libraries
   ""
   PARENT_SCOPE
 )

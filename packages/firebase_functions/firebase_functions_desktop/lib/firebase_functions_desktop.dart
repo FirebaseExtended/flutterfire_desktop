@@ -12,17 +12,28 @@ class FirebaseFunctionsDesktop extends FirebaseFunctionsPlatform {
   /// Constructs a FirebaseFunctionsDesktop
   FirebaseFunctionsDesktop({
     required FirebaseApp app,
-    String region = 'us-central1',
+    String region = functions_dart.FirebaseFunctions.defaultRegion,
   })  : _app = core_dart.Firebase.app(app.name),
         super(app, region);
 
+  FirebaseFunctionsDesktop._()
+      : _app = null,
+        super(null, functions_dart.FirebaseFunctions.defaultRegion);
+
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
-    FirebaseFunctionsPlatform.instance =
-        FirebaseFunctionsDesktop(app: Firebase.app());
+    FirebaseFunctionsPlatform.instance = FirebaseFunctionsDesktop.instance;
   }
 
-  final core_dart.FirebaseApp _app;
+  /// Stub initializer to allow creating an instance without
+  /// registering delegates or listeners.
+  ///
+  // ignore: prefer_constructors_over_static_methods
+  static FirebaseFunctionsDesktop get instance {
+    return FirebaseFunctionsDesktop._();
+  }
+
+  final core_dart.FirebaseApp? _app;
 
   /// The dart functions instance for this app
   @visibleForTesting
