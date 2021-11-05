@@ -20,7 +20,7 @@ dependencies:
   firebase_core_desktop: ^0.1.1-dev.0
 ```
 
-*Note: the plugin will override macOS implmenetation as it's currently being used for development purposes.*
+*Note: the plugin will override macOS implementation as it's currently being used for development purposes.*
 
 ## Contributing
 
