@@ -5,8 +5,6 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
-import 'package:flutterfire_auth_dart/src/providers/email_auth.dart';
-import 'package:flutterfire_auth_dart/src/providers/google_auth.dart';
 import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
@@ -104,13 +102,14 @@ void main() {
       auth = FirebaseAuth.instance;
 
       await auth.useAuthEmulator();
-      await emulatorClearAllUsers();
 
       onAuthStateChanged = StreamQueue(auth.onAuthStateChanged);
       onIdTokenChanged = StreamQueue(auth.onIdTokenChanged);
     });
 
-    setUp(() {
+    setUp(() async {
+      await emulatorClearAllUsers();
+
       fakeAuth = MockFirebaseAuth();
 
       when(fakeAuth.onAuthStateChanged)
@@ -335,7 +334,7 @@ void main() {
         expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
       });
       test('delete()', () async {
-        final cred = await auth.signInWithEmailAndPassword(
+        final cred = await auth.createUserWithEmailAndPassword(
           mockEmail,
           mockPassword,
         );
@@ -363,34 +362,24 @@ void main() {
           ),
         );
       });
-      test('.linkWithCredential() [Email]', () async {
-        final user = await auth.signInAnonymously();
-        await auth.currentUser!.linkWithCredential(
-          EmailAuthProvider.credential(
-              email: mockEmail, password: mockPassword),
-        );
+      group('linkWithCredential()', () {
+        setUp(() {
+          when(user.linkWithCredential(any)).thenAnswer((_) async => userCred);
+        });
+        test('should call linkWithCredential()', () async {
+          const newEmail = 'new@email.com';
 
-        expect(user.user!.providerData.length == 1, isTrue);
-        expect(user.user!.providerData[0].providerId,
-            EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD);
-      });
-      test('.linkWithCredential() [Google]', () async {
-        // TODO(pr-mais): mock tests
-        // final user =
-        //     await auth.signInWithEmailAndPassword(mockEmail, mockPassword);
-        // await auth.currentUser!.linkWithCredential(
-        //   GoogleAuthProvider.credential(
-        //       idToken: await auth.currentUser!.getIdToken()),
-        // );
+          final credential =
+              EmailAuthProvider.credential(email: newEmail, password: 'test')
+                  as EmailAuthCredential;
 
-        // expect(user.user!.providerData.length > 1, isTrue);
-        // expect(user.user!.providerData[0].providerId,
-        //     EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD);
-        // expect(user.user!.providerData[1].providerId,
-        //     GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD);
+          await fakeAuth.currentUser!.linkWithCredential(credential);
+
+          verify(user.linkWithCredential(credential));
+        });
       });
       test('.metadata', () async {
-        await auth.signInWithEmailAndPassword(mockEmail, mockPassword);
+        await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
         final metadata = auth.currentUser!.metadata!;
 
@@ -398,7 +387,7 @@ void main() {
         expect(metadata.lastSignInTime!.isBefore(DateTime.now()), isTrue);
       });
       test('.providerData', () async {
-        await auth.signInWithEmailAndPassword(mockEmail, mockPassword);
+        await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
         expect(
           auth.currentUser!.providerData.isNotEmpty,
