@@ -268,6 +268,24 @@ class FirebaseAuth {
     }
   }
 
+  /// Authenticates a Firebase client using a popup-based OAuth authentication
+  /// flow.
+  ///
+  /// If succeeds, returns the signed in user along with the provider's
+  /// credential.
+  ///
+  /// This method is only available on web based platforms.
+  Future<UserCredential> signInWithPopup() async {
+    // check if running on Web
+    if (identical(0, 0.0)) {
+      throw UnimplementedError(
+        'signInWithPopup() is only supported on web based platforms',
+      );
+    }
+
+    throw UnimplementedError('signInWithPop() is not yet implemented.');
+  }
+
   /// Update user's email.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
