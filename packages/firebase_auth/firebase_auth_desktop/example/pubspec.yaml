@@ -21,25 +21,19 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  firebase_auth:
+  firebase_auth: ^3.1.5
+  firebase_auth_desktop: ^0.1.1-dev.0
+  firebase_core: ^1.9.0
+  firebase_core_desktop: ^0.1.1-dev.0
   flutter:
-      sdk: flutter
+    sdk: flutter
   flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.0-nullsafety
+  google_sign_in_dartio: ^0.1.0
 
 dependency_overrides:
-  firebase_auth:
-    git:
-      url: https://github.com/FirebaseExtended/flutterfire.git
-      path: packages/firebase_auth/firebase_auth
-      ref: "desktop/linux_windows"
   firebase_auth_desktop:
     path: ../
-  firebase_core:
-    git:
-      url: https://github.com/FirebaseExtended/flutterfire.git
-      path: packages/firebase_core/firebase_core
-      ref: "desktop/linux_windows"
   firebase_core_desktop:
     path: ../../../firebase_core/firebase_core_desktop
 
@@ -49,7 +43,6 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
 
@@ -57,18 +50,14 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

@@ -21,16 +21,12 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  firebase_core:
+  firebase_core: ^1.9.0
+  firebase_core_desktop: ^0.1.1-dev.0
   flutter:
     sdk: flutter
 
 dependency_overrides:
-  firebase_core:
-    git:
-      url: https://github.com/FirebaseExtended/flutterfire.git
-      path: packages/firebase_core/firebase_core
-      ref: "desktop/linux_windows"
   firebase_core_desktop:
     path: ../
 
@@ -40,7 +36,6 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
 
@@ -48,18 +43,14 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
