@@ -1,4 +1,4 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, public_member_api_docs, depend_on_referenced_packages, library_private_types_in_public_api
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -6,14 +6,14 @@
 import 'dart:core';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 // TODO: Endorse this plugin
 import 'package:firebase_core_desktop/firebase_core_desktop.dart'
     as core_desktop;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
+import 'package:flutter/material.dart';
 import 'package:flutterfire_functions_desktop/flutterfire_functions_desktop.dart';
-import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
@@ -21,6 +21,7 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
       projectId: 'react-native-firebase-testing',
       messagingSenderId: '448618578101',
     );
+
 late FirebaseFunctions functions;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,14 +72,14 @@ class _MyAppState extends State<MyApp> {
             onPressed: () async {
               // See index.js in the functions folder for the example function we
               // are using for this example
-              final HttpsCallable callable = functions.httpsCallable(
-                  'listFruit',
+              final callable = functions.httpsCallable('listFruit',
                   options: HttpsCallableOptions(
                       timeout: const Duration(seconds: 5)));
 
               await callable().then((v) {
                 setState(() {
                   fruit.clear();
+                  // ignore: avoid_dynamic_calls
                   v.data.forEach((f) {
                     fruit.add(f);
                   });

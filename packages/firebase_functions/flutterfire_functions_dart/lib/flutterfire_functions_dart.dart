@@ -180,6 +180,8 @@ class HttpsCallableResult<T> {
 class HttpsCallableOptions {
   /// Options for configuring the behavior of a firebase cloud function
   const HttpsCallableOptions({this.timeout = const Duration(seconds: 30)});
+
+  /// The default options for creating a [HttpsCallable]
   static const defaultOptions =
       HttpsCallableOptions(timeout: Duration(seconds: 70));
 

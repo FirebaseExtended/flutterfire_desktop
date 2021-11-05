@@ -4,7 +4,6 @@
 // found in the LICENSE file.
 
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutterfire_functions_desktop/flutterfire_functions_desktop.dart';
 import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_desktop/firebase_core_desktop.dart'
@@ -12,9 +11,11 @@ import 'package:firebase_core_desktop/firebase_core_desktop.dart'
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'data.dart' as data;
+import 'package:flutterfire_functions_desktop/flutterfire_functions_desktop.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+
+import 'data.dart' as data;
 
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       appId: '1:448618578101:ios:0b650370bb29e29cac3efc',

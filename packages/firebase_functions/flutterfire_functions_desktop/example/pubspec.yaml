@@ -26,11 +26,15 @@ dependencies:
     sdk: flutter
 
 dependency_overrides:
-  flutterfire_functions_desktop:
-    path: ../
   cloud_functions: any
+  cloud_functions_platform_interface: any
+  firebase_core_desktop:
+    path: ../../../firebase_core/firebase_core_desktop
+  firebase_core_platform_interface: any
   flutterfire_functions_dart: 
     path: ../../flutterfire_functions_dart
+  flutterfire_functions_desktop:
+    path: ../
 
 dev_dependencies:
   flutter_test:
