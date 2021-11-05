@@ -1,12 +1,11 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, avoid_returning_this
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore: prefer_relative_imports
+import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
 import 'package:meta/meta.dart';
-
-import '../../flutterfire_auth_dart.dart';
-import '../auth_provider.dart';
 
 /// A generic provider instance.
 ///

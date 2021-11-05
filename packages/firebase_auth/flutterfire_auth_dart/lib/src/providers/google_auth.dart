@@ -1,8 +1,6 @@
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, prefer_relative_imports, non_constant_identifier_names, avoid_returning_this
 
-import 'oauth.dart';
-
-import '../auth_provider.dart';
+import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
 
 const _kProviderId = 'google.com';
 
@@ -10,7 +8,7 @@ const _kProviderId = 'google.com';
 /// access code, or use the provider to trigger user authentication flows.
 ///
 /// For example, on web based platforms pass the provider to a Firebase method
-/// (such as [signInWithPopup]):
+/// (such as [FirebaseAuth.signInWithPopup]):
 ///
 /// ```dart
 /// var googleProvider = GoogleAuthProvider();
@@ -57,7 +55,7 @@ class GoogleAuthProvider extends AuthProvider {
     return _kProviderId;
   }
 
-  List<String> _scopes = [];
+  final List<String> _scopes = [];
   Map<dynamic, dynamic> _parameters = {};
 
   /// Returns the currently assigned scopes to this provider instance.

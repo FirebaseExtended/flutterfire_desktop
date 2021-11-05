@@ -20,8 +20,10 @@ import 'src/providers/google_auth.dart';
 import 'src/providers/oauth.dart';
 import 'src/utils/jwt.dart';
 
+export 'src/auth_provider.dart';
 export 'src/providers/email_auth.dart';
 export 'src/providers/google_auth.dart';
+export 'src/providers/oauth.dart';
 
 part 'src/additional_user_info.dart';
 part 'src/api.dart';

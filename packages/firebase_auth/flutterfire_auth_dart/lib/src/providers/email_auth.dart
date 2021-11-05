@@ -1,6 +1,7 @@
-// ignore_for_file: require_trailing_commas
-import '../../flutterfire_auth_dart.dart';
-import '../auth_provider.dart';
+// ignore_for_file: require_trailing_commas, non_constant_identifier_names
+
+// ignore: prefer_relative_imports
+import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
 
 const _kLinkProviderId = 'emailLink';
 const _kProviderId = 'password';
