@@ -333,6 +333,22 @@ void main() {
         // Access token is updated
         expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
       });
+      test('updatePassword()', () async {
+        await auth.createUserWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        );
+
+        final oldToken = auth.currentUser!.uid;
+
+        // update the password
+        await auth.currentUser!.updatePassword('newPassword');
+
+        await auth.signInWithEmailAndPassword(mockEmail, 'newPassword');
+
+        // Access token is updated
+        expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
+      });
       test('delete()', () async {
         final cred = await auth.createUserWithEmailAndPassword(
           mockEmail,

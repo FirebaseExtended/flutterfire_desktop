@@ -170,7 +170,7 @@ class User {
   Future<void> reload() async {
     _assertSignedOut(_auth);
 
-    _user.addAll(await _auth.reloadCurrentUser(_idToken));
+    _user.addAll(await _auth._reloadCurrentUser(_idToken));
     _auth.updateCurrentUserAndEvents(_auth.currentUser);
   }
 
@@ -221,33 +221,63 @@ class User {
   ///   user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  ///
+  /// TODO
   Future<void> updatePassword(String newPassword) async {
-    throw UnimplementedError('updatePassword() is not implemented');
+    try {
+      _assertSignedOut(_auth);
+
+      await _auth._api.updatePassword(newPassword, _idToken);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user name.
+  /// Update user's displayName.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updateDisplayName(String? displayName) async {
-    _assertSignedOut(_auth);
-
-    await _auth.updateProfile({'displayName': displayName}, _idToken);
-    await reload();
+    try {
+      _assertSignedOut(_auth);
+      await _auth._api
+          .updateProfile({'displayName': displayName}, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user's profile picture.
+  /// Update user's photoURL.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updatePhotoURL(String? photoURL) async {
-    _assertSignedOut(_auth);
-
-    await _auth.updateProfile({'photoURL': photoURL}, _idToken);
-    await reload();
+    try {
+      _assertSignedOut(_auth);
+      await _auth._api.updateProfile({'photoURL': photoURL}, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user's profile.
+  /// Update user's profile.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updateProfile(Map<String, dynamic> newProfile) async {
-    _assertSignedOut(_auth);
+    try {
+      _assertSignedOut(_auth);
 
-    await _auth.updateProfile(newProfile, _idToken);
-    await reload();
+      await _auth._api.updateProfile(newProfile, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
   /// A Map representation of this instance.
@@ -263,13 +293,3 @@ void _assertSignedOut(FirebaseAuth instance) {
     throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
   }
 }
-
-/// Throws if any auth method is called with current user.
-// @protected
-// void _assertSignedIn(FirebaseAuth instance) {
-//   if (instance.currentUser == null) {
-//     return;
-//   } else {
-//     throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
-//   }
-// }

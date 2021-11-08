@@ -286,28 +286,12 @@ class FirebaseAuth {
     throw UnimplementedError('signInWithPop() is not yet implemented.');
   }
 
-  /// Update user's email.
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// Internally used to reload the current user and send events.
   @protected
-  Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
+  Future<Map<String, dynamic>> _reloadCurrentUser(String idToken) async {
     try {
       final response = await _api.getCurrentUser(idToken);
       return response.toJson();
-    } catch (e) {
-      throw getException(e);
-    }
-  }
-
-  /// Update user's photoURL.
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  @protected
-  Future updateProfile(Map<String, dynamic> newProfile, String idToken) async {
-    try {
-      await _api.updateProfile(newProfile, idToken, currentUser!.uid);
     } catch (e) {
       throw getException(e);
     }

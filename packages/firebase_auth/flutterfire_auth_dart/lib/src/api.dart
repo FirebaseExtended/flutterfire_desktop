@@ -135,6 +135,18 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<Map<String, dynamic>> updatePassword(
+      String newPassword, String idToken) async {
+    final _response = await _identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        password: newPassword,
+      ),
+    );
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
   Future<AuthCredential> linkWithCredential(String idToken,
       {required AuthCredential credential}) async {
     if (credential is EmailAuthCredential) {
