@@ -394,6 +394,23 @@ void main() {
           verify(user.linkWithCredential(credential));
         });
       });
+      group('reauthenticateWithCredential()', () {
+        setUp(() {
+          when(user.reauthenticateWithCredential(any))
+              .thenAnswer((_) async => userCred);
+        });
+        test('should call reauthenticateWithCredential()', () async {
+          const newEmail = 'new@email.com';
+
+          final credential =
+              EmailAuthProvider.credential(email: newEmail, password: 'test')
+                  as EmailAuthCredential;
+
+          await fakeAuth.currentUser!.reauthenticateWithCredential(credential);
+
+          verify(user.reauthenticateWithCredential(credential));
+        });
+      });
       test('.metadata', () async {
         await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 

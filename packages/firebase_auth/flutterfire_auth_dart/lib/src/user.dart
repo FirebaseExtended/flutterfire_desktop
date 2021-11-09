@@ -162,8 +162,42 @@ class User {
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
   ///
-  void reauthenticateWithCredential(AuthCredential credential) {
-    throw UnimplementedError('updateEmail() is not implemented');
+  Future<UserCredential> reauthenticateWithCredential(
+      AuthCredential credential) async {
+    try {
+      if (credential is EmailAuthCredential) {
+        await _auth._api
+            .signInWithEmailAndPassword(credential.email, credential.password!);
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+        );
+      } else if (credential is GoogleAuthCredential) {
+        final response = await _auth._api.reauthenticateWithCredential(
+            credential.idToken!, credential.providerId);
+
+        await reload();
+
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            profile: {
+              'displayName': response.displayName,
+              'photoUrl': response.photoUrl
+            },
+            providerId: response.providerId,
+            username: response.screenName,
+          ),
+        );
+      } else {
+        throw UnsupportedError('${credential.providerId} is not supported.');
+      }
+    } catch (e) {
+      // TODO
+      throw _auth.getException(e);
+    }
   }
 
   /// Refreshes the current user, if signed in.

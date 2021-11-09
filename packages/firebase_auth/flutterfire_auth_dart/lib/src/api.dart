@@ -61,6 +61,22 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<idp.VerifyAssertionResponse> reauthenticateWithCredential(
+      String idToken, String providerId) async {
+    final response = await _identityToolkit.verifyAssertion(
+      idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+        idToken: idToken,
+        //TODO
+        requestUri: 'http://localhost',
+        postBody: 'id_token=$idToken&'
+            'providerId=$providerId',
+      ),
+    );
+
+    return response;
+  }
+
+  /// TODO: write endpoint details
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     final _response = await _identityToolkit.createAuthUri(
       idp.IdentitytoolkitRelyingpartyCreateAuthUriRequest(

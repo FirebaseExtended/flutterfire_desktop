@@ -75,10 +75,13 @@ class MockUser extends _i1.Mock implements _i2.User {
                   Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
           as _i4.Future<_i2.UserCredential>);
   @override
-  void reauthenticateWithCredential(_i2.AuthCredential? credential) =>
-      super.noSuchMethod(
-          Invocation.method(#reauthenticateWithCredential, [credential]),
-          returnValueForMissingStub: null);
+  _i4.Future<_i2.UserCredential> reauthenticateWithCredential(
+          _i2.AuthCredential? credential) =>
+      (super.noSuchMethod(
+              Invocation.method(#reauthenticateWithCredential, [credential]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> reload() =>
       (super.noSuchMethod(Invocation.method(#reload, []),
@@ -205,18 +208,6 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
               returnValue:
                   Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
           as _i4.Future<_i2.UserCredential>);
-  @override
-  _i4.Future<Map<String, dynamic>> reloadCurrentUser(String? idToken) =>
-      (super.noSuchMethod(Invocation.method(#reloadCurrentUser, [idToken]),
-              returnValue:
-                  Future<Map<String, dynamic>>.value(<String, dynamic>{}))
-          as _i4.Future<Map<String, dynamic>>);
-  @override
-  _i4.Future<dynamic> updateProfile(
-          Map<String, dynamic>? newProfile, String? idToken) =>
-      (super.noSuchMethod(
-          Invocation.method(#updateProfile, [newProfile, idToken]),
-          returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
   @override
   _i4.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),
