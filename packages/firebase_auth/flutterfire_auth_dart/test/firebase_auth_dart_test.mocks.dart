@@ -20,11 +20,13 @@ import 'package:mockito/mockito.dart' as _i1;
 
 class _FakeIdTokenResult_0 extends _i1.Fake implements _i2.IdTokenResult {}
 
-class _FakeFirebaseApp_1 extends _i1.Fake implements _i3.FirebaseApp {}
+class _FakeUserCredential_1 extends _i1.Fake implements _i2.UserCredential {}
 
-class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
+class _FakeFirebaseApp_2 extends _i1.Fake implements _i3.FirebaseApp {}
 
 class _FakeException_3 extends _i1.Fake implements Exception {}
+
+class _FakeFirebaseAuth_4 extends _i1.Fake implements _i2.FirebaseAuth {}
 
 /// A class which mocks [User].
 ///
@@ -35,9 +37,6 @@ class MockUser extends _i1.Mock implements _i2.User {
   }
 
   @override
-  String get uid =>
-      (super.noSuchMethod(Invocation.getter(#uid), returnValue: '') as String);
-  @override
   bool get emailVerified =>
       (super.noSuchMethod(Invocation.getter(#emailVerified), returnValue: false)
           as bool);
@@ -45,6 +44,13 @@ class MockUser extends _i1.Mock implements _i2.User {
   bool get isAnonymous =>
       (super.noSuchMethod(Invocation.getter(#isAnonymous), returnValue: false)
           as bool);
+  @override
+  List<_i2.UserInfo> get providerData =>
+      (super.noSuchMethod(Invocation.getter(#providerData),
+          returnValue: <_i2.UserInfo>[]) as List<_i2.UserInfo>);
+  @override
+  String get uid =>
+      (super.noSuchMethod(Invocation.getter(#uid), returnValue: '') as String);
   @override
   _i4.Future<void> delete() =>
       (super.noSuchMethod(Invocation.method(#delete, []),
@@ -62,10 +68,20 @@ class MockUser extends _i1.Mock implements _i2.User {
                   Future<_i2.IdTokenResult>.value(_FakeIdTokenResult_0()))
           as _i4.Future<_i2.IdTokenResult>);
   @override
-  void reauthenticateWithCredential(_i2.AuthCredential? credential) =>
-      super.noSuchMethod(
-          Invocation.method(#reauthenticateWithCredential, [credential]),
-          returnValueForMissingStub: null);
+  _i4.Future<_i2.UserCredential> linkWithCredential(
+          _i2.AuthCredential? credential) =>
+      (super.noSuchMethod(Invocation.method(#linkWithCredential, [credential]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
+  @override
+  _i4.Future<_i2.UserCredential> reauthenticateWithCredential(
+          _i2.AuthCredential? credential) =>
+      (super.noSuchMethod(
+              Invocation.method(#reauthenticateWithCredential, [credential]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> reload() =>
       (super.noSuchMethod(Invocation.method(#reload, []),
@@ -119,7 +135,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
 
   @override
   _i3.FirebaseApp get app => (super.noSuchMethod(Invocation.getter(#app),
-      returnValue: _FakeFirebaseApp_1()) as _i3.FirebaseApp);
+      returnValue: _FakeFirebaseApp_2()) as _i3.FirebaseApp);
   @override
   set app(_i3.FirebaseApp? _app) =>
       super.noSuchMethod(Invocation.setter(#app, _app),
@@ -150,7 +166,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       (super.noSuchMethod(
               Invocation.method(#signInWithEmailAndPassword, [email, password]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> createUserWithEmailAndPassword(
@@ -158,7 +174,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       (super.noSuchMethod(
           Invocation.method(#createUserWithEmailAndPassword, [email, password]),
           returnValue:
-              Future<_i2.UserCredential>.value(_FakeUserCredential_2())) as _i4
+              Future<_i2.UserCredential>.value(_FakeUserCredential_1())) as _i4
           .Future<_i2.UserCredential>);
   @override
   _i4.Future<List<String>> fetchSignInMethodsForEmail(String? email) => (super
@@ -184,20 +200,14 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
   _i4.Future<_i2.UserCredential> signInAnonymously() =>
       (super.noSuchMethod(Invocation.method(#signInAnonymously, []),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
           as _i4.Future<_i2.UserCredential>);
   @override
-  _i4.Future<Map<String, dynamic>> reloadCurrentUser(String? idToken) =>
-      (super.noSuchMethod(Invocation.method(#reloadCurrentUser, [idToken]),
+  _i4.Future<_i2.UserCredential> signInWithPopup() =>
+      (super.noSuchMethod(Invocation.method(#signInWithPopup, []),
               returnValue:
-                  Future<Map<String, dynamic>>.value(<String, dynamic>{}))
-          as _i4.Future<Map<String, dynamic>>);
-  @override
-  _i4.Future<dynamic> updateProfile(
-          Map<String, dynamic>? newProfile, String? idToken) =>
-      (super.noSuchMethod(
-          Invocation.method(#updateProfile, [newProfile, idToken]),
-          returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),
@@ -231,6 +241,9 @@ class MockUserCredential extends _i1.Mock implements _i2.UserCredential {
     _i1.throwOnMissingStub(this);
   }
 
+  @override
+  _i2.FirebaseAuth get auth => (super.noSuchMethod(Invocation.getter(#auth),
+      returnValue: _FakeFirebaseAuth_4()) as _i2.FirebaseAuth);
   @override
   String toString() => super.toString();
 }

@@ -1,9 +1,12 @@
 // ignore_for_file: public_member_api_docs, use_build_context_synchronously, avoid_print
 
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -228,6 +231,22 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                 ),
               ),
             ),
+            if (widget.user?.isAnonymous ?? false)
+              ElevatedButton(
+                onPressed: () async {
+                  final account = await GoogleSignIn().signIn();
+
+                  log(account?.toString() ?? '');
+
+                  await widget.user!.linkWithCredential(
+                    GoogleAuthProvider.credential(
+                      idToken: (await account!.authentication).idToken,
+                      accessToken: (await account.authentication).accessToken,
+                    ),
+                  );
+                },
+                child: const Text('link with Google'),
+              ),
           ],
         ),
       ),

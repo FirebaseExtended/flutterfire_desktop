@@ -15,65 +15,66 @@ void main() {
   );
 
   const testAppName = 'testApp';
+  group('$Firebase', () {
+    setUp(() async {
+      clearInteractions(mock);
+      Firebase.delegatePackingProperty = mock;
 
-  setUp(() async {
-    clearInteractions(mock);
-    Firebase.delegatePackingProperty = mock;
+      final fakeApp = FakeFirebaseApp(name: testAppName, options: testOptions);
+      final fakeDefaultApp = FakeFirebaseApp(options: testOptions);
 
-    final fakeApp = FakeFirebaseApp(name: testAppName, options: testOptions);
-    final fakeDefaultApp = FakeFirebaseApp(options: testOptions);
-
-    when(mock.apps).thenReturn([fakeApp]);
-    when(mock.app()).thenReturn(fakeDefaultApp);
-    when(mock.app(testAppName)).thenReturn(fakeApp);
-    when(mock.initializeApp(name: testAppName, options: testOptions))
-        .thenAnswer((_) {
-      return Future.value(fakeApp);
+      when(mock.apps).thenReturn([fakeApp]);
+      when(mock.app()).thenReturn(fakeDefaultApp);
+      when(mock.app(testAppName)).thenReturn(fakeApp);
+      when(mock.initializeApp(name: testAppName, options: testOptions))
+          .thenAnswer((_) {
+        return Future.value(fakeApp);
+      });
+      when(mock.initializeApp(options: testOptions)).thenAnswer((_) {
+        return Future.value(fakeDefaultApp);
+      });
     });
-    when(mock.initializeApp(options: testOptions)).thenAnswer((_) {
-      return Future.value(fakeDefaultApp);
+
+    test('.apps', () {
+      final apps = Firebase.apps;
+      verify(mock.apps);
+      expect(apps[0], Firebase.app(testAppName));
     });
-  });
 
-  test('.apps', () {
-    final apps = Firebase.apps;
-    verify(mock.apps);
-    expect(apps[0], Firebase.app(testAppName));
-  });
+    test('.app()', () {
+      final app = Firebase.app(testAppName);
+      verify(mock.app(testAppName));
 
-  test('.app()', () {
-    final app = Firebase.app(testAppName);
-    verify(mock.app(testAppName));
+      expect(app.name, testAppName);
+      expect(app.options, testOptions);
+    });
 
-    expect(app.name, testAppName);
-    expect(app.options, testOptions);
-  });
+    test('.initializeApp() default', () async {
+      final initializedApp = await Firebase.initializeApp(
+        options: testOptions,
+      );
+      final app = Firebase.app();
 
-  test('.initializeApp() default', () async {
-    final initializedApp = await Firebase.initializeApp(
-      options: testOptions,
-    );
-    final app = Firebase.app();
+      expect(initializedApp, app);
+      verifyInOrder([
+        mock.initializeApp(options: testOptions),
+        mock.app(),
+      ]);
+    });
 
-    expect(initializedApp, app);
-    verifyInOrder([
-      mock.initializeApp(options: testOptions),
-      mock.app(),
-    ]);
-  });
+    test('.initializeApp() secondary', () async {
+      final initializedApp = await Firebase.initializeApp(
+        name: testAppName,
+        options: testOptions,
+      );
+      final app = Firebase.app(testAppName);
 
-  test('.initializeApp() secondary', () async {
-    final initializedApp = await Firebase.initializeApp(
-      name: testAppName,
-      options: testOptions,
-    );
-    final app = Firebase.app(testAppName);
-
-    expect(initializedApp, app);
-    verifyInOrder([
-      mock.initializeApp(name: testAppName, options: testOptions),
-      mock.app(testAppName),
-    ]);
+      expect(initializedApp, app);
+      verifyInOrder([
+        mock.initializeApp(name: testAppName, options: testOptions),
+        mock.app(testAppName),
+      ]);
+    });
   });
 }
 

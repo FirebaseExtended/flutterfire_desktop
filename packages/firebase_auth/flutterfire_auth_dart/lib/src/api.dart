@@ -10,25 +10,25 @@ class API {
   // ignore: public_member_api_docs
   API(this._apiKey, this._projectId, {http.Client? client}) {
     _client = client ?? clientViaApiKey(_apiKey);
-    _identityToolkit = IdentityToolkitApi(_client).relyingparty;
+    _identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
   late final String _apiKey;
   late final String _projectId;
 
   late http.Client _client;
-  late RelyingpartyResource _identityToolkit;
+  late idp.RelyingpartyResource _identityToolkit;
 
   void _setApiClient(http.Client client) {
     _client = client;
-    _identityToolkit = IdentityToolkitApi(client).relyingparty;
+    _identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
   }
 
   /// TODO: write endpoint details
   Future<Map<String, dynamic>> signInWithEmailAndPassword(
       String email, String password) async {
     final _response = await _identityToolkit.verifyPassword(
-      IdentitytoolkitRelyingpartyVerifyPasswordRequest(
+      idp.IdentitytoolkitRelyingpartyVerifyPasswordRequest(
         returnSecureToken: true,
         password: password,
         email: email,
@@ -42,7 +42,7 @@ class API {
   Future<Map<String, dynamic>> createUserWithEmailAndPassword(
       String email, String password) async {
     final _response = await _identityToolkit.signupNewUser(
-      IdentitytoolkitRelyingpartySignupNewUserRequest(
+      idp.IdentitytoolkitRelyingpartySignupNewUserRequest(
         email: email,
         password: password,
       ),
@@ -54,16 +54,32 @@ class API {
 
   Future<Map<String, dynamic>> signInAnonymously() async {
     final _response = await _identityToolkit.signupNewUser(
-      IdentitytoolkitRelyingpartySignupNewUserRequest(),
+      idp.IdentitytoolkitRelyingpartySignupNewUserRequest(),
     );
 
     return _response.toJson();
   }
 
   /// TODO: write endpoint details
+  Future<idp.VerifyAssertionResponse> reauthenticateWithCredential(
+      String idToken, String providerId) async {
+    final response = await _identityToolkit.verifyAssertion(
+      idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+        idToken: idToken,
+        //TODO
+        requestUri: 'http://localhost',
+        postBody: 'id_token=$idToken&'
+            'providerId=$providerId',
+      ),
+    );
+
+    return response;
+  }
+
+  /// TODO: write endpoint details
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     final _response = await _identityToolkit.createAuthUri(
-      IdentitytoolkitRelyingpartyCreateAuthUriRequest(
+      idp.IdentitytoolkitRelyingpartyCreateAuthUriRequest(
         identifier: email,
         // TODO hmm?
         continueUri: 'http://localhost:8080/app',
@@ -76,7 +92,7 @@ class API {
   /// TODO: write endpoint details
   Future sendPasswordResetEmail(String email) async {
     await _identityToolkit.getOobConfirmationCode(
-      Relyingparty(
+      idp.Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
         // TODO have to be sent, otherwise the user won't be redirected to the app.
@@ -88,7 +104,7 @@ class API {
   /// TODO: write endpoint details
   Future resetUserPassword(String idToken, {String? newPassword}) async {
     await _identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         password: newPassword,
       ),
@@ -98,7 +114,7 @@ class API {
   /// TODO: write endpoint details
   Future sendSignInLinkToEmail(String email) async {
     await _identityToolkit.getOobConfirmationCode(
-      Relyingparty(
+      idp.Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
         // have to be sent, otherwise the user won't be redirected to the app.
@@ -111,7 +127,7 @@ class API {
   Future<Map<String, dynamic>> updateEmail(
       String newEmail, String idToken, String uid) async {
     final _response = await _identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         email: newEmail,
         idToken: idToken,
         localId: uid,
@@ -124,7 +140,7 @@ class API {
   Future<Map<String, dynamic>> updateProfile(
       Map<String, dynamic> newProfile, String idToken, String uid) async {
     final _response = await _identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         displayName: newProfile['displayName'],
         photoUrl: newProfile['photoURL'],
         idToken: idToken,
@@ -135,18 +151,69 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
+  Future<Map<String, dynamic>> updatePassword(
+      String newPassword, String idToken) async {
+    final _response = await _identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        password: newPassword,
+      ),
+    );
+    return _response.toJson();
+  }
+
+  /// TODO: write endpoint details
+  Future<dynamic> linkWithEmail(String idToken,
+      {required EmailAuthCredential credential}) async {
+    return _identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        email: credential.email,
+        password: credential.password,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future<idp.VerifyAssertionResponse> linkWithCredential(String idToken,
+      {required AuthCredential credential, String? requestUri}) async {
+    idp.VerifyAssertionResponse response;
+
+    if (credential is GoogleAuthCredential) {
+      response = await _identityToolkit.verifyAssertion(
+        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+          idToken: idToken,
+          requestUri: requestUri,
+          postBody: 'id_token=${credential.idToken}&'
+              'providerId=${credential.providerId}',
+        ),
+      );
+    } else {
+      response = await _identityToolkit.verifyAssertion(
+        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+          idToken: idToken,
+          requestUri: requestUri,
+          postBody: 'id_token=$idToken&providerId=${credential.providerId}',
+        ),
+      );
+    }
+
+    return response;
+  }
+
+  /// TODO: write endpoint details
+  Future<idp.UserInfo> getCurrentUser(String idToken) async {
     final _response = await _identityToolkit.getAccountInfo(
-      IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
+      idp.IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
     );
 
-    return _response.toJson()['users'][0];
+    return _response.users![0];
   }
 
   /// TODO: write endpoint details
   Future<String?> sendEmailVerification(String idToken) async {
     final _response = await _identityToolkit.getOobConfirmationCode(
-      Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
+      idp.Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
     );
 
     return _response.email;
@@ -191,7 +258,7 @@ class API {
   /// TODO: write endpoint details
   Future<void> delete(String idToken, String uid) async {
     await _identityToolkit.deleteAccount(
-      IdentitytoolkitRelyingpartyDeleteAccountRequest(
+      idp.IdentitytoolkitRelyingpartyDeleteAccountRequest(
         idToken: idToken,
         localId: uid,
       ),
@@ -231,7 +298,7 @@ class API {
 
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
-    _identityToolkit = IdentityToolkitApi(
+    _identityToolkit = idp.IdentityToolkitApi(
       clientViaApiKey(_apiKey),
       rootUrl: rootUrl,
     ).relyingparty;

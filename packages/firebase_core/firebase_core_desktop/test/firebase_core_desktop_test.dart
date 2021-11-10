@@ -22,45 +22,46 @@ void main() {
   );
 
   const testAppName = 'testApp';
+  group('$Firebase', () {
+    setUp(() async {
+      clearInteractions(mock);
+      Firebase.delegatePackingProperty = mock;
 
-  setUp(() async {
-    clearInteractions(mock);
-    Firebase.delegatePackingProperty = mock;
+      final platformApp = FirebaseAppPlatform(testAppName, testOptions);
 
-    final platformApp = FirebaseAppPlatform(testAppName, testOptions);
-
-    when(mock.apps).thenReturn([platformApp]);
-    when(mock.app(testAppName)).thenReturn(platformApp);
-    when(mock.initializeApp(name: testAppName, options: testOptions))
-        .thenAnswer((_) {
-      return Future.value(platformApp);
+      when(mock.apps).thenReturn([platformApp]);
+      when(mock.app(testAppName)).thenReturn(platformApp);
+      when(mock.initializeApp(name: testAppName, options: testOptions))
+          .thenAnswer((_) {
+        return Future.value(platformApp);
+      });
     });
-  });
 
-  test('.apps', () {
-    final apps = Firebase.apps;
-    verify(mock.apps);
-    expect(apps[0], Firebase.app(testAppName));
-  });
+    test('.apps', () {
+      final apps = Firebase.apps;
+      verify(mock.apps);
+      expect(apps[0], Firebase.app(testAppName));
+    });
 
-  test('.app()', () {
-    final app = Firebase.app(testAppName);
-    verify(mock.app(testAppName));
+    test('.app()', () {
+      final app = Firebase.app(testAppName);
+      verify(mock.app(testAppName));
 
-    expect(app.name, testAppName);
-    expect(app.options, testOptions);
-  });
+      expect(app.name, testAppName);
+      expect(app.options, testOptions);
+    });
 
-  test('.initializeApp()', () async {
-    final initializedApp =
-        await Firebase.initializeApp(name: testAppName, options: testOptions);
-    final app = Firebase.app(testAppName);
+    test('.initializeApp()', () async {
+      final initializedApp =
+          await Firebase.initializeApp(name: testAppName, options: testOptions);
+      final app = Firebase.app(testAppName);
 
-    expect(initializedApp, app);
-    verifyInOrder([
-      mock.initializeApp(name: testAppName, options: testOptions),
-      mock.app(testAppName),
-    ]);
+      expect(initializedApp, app);
+      verifyInOrder([
+        mock.initializeApp(name: testAppName, options: testOptions),
+        mock.app(testAppName),
+      ]);
+    });
   });
 }
 

@@ -11,12 +11,80 @@ class User {
   final Map<String, dynamic> _user;
   final String _idToken;
 
+  /// The users display name.
+  ///
+  /// Will be `null` if signing in anonymously or via password authentication.
+  String? get displayName {
+    return _user['displayName'];
+  }
+
+  /// The users email address.
+  ///
+  /// Will be `null` if signing in anonymously.
+  String? get email {
+    return _user['email'];
+  }
+
+  /// Returns whether the users email address has been verified.
+  ///
+  /// To send a verification email, see [sendEmailVerification].
+  ///
+  /// Once verified, call [reload] to ensure the latest user information is
+  /// retrieved from Firebase.
+  bool get emailVerified {
+    return _user['emailVerified'] ?? false;
+  }
+
+  /// Returns whether the user is a anonymous.
+  bool get isAnonymous {
+    // ignore: avoid_dynamic_calls
+    return providerData.isEmpty;
+  }
+
+  /// Returns additional metadata about the user, such as their creation time.
+  UserMetadata? get metadata {
+    return UserMetadata(
+        int.parse(_user['createdAt']), int.parse(_user['lastLoginAt']));
+  }
+
+  /// Returns the users phone number.
+  ///
+  /// This property will be `null` if the user has not signed in or been has
+  /// their phone number linked.
+  String? get phoneNumber {
+    return _user['phoneNumber'];
+  }
+
+  /// The photo URL of a user, could be `null`.
+  String? get photoURL {
+    return _user['photoUrl'];
+  }
+
+  /// Returns a list of user information for each linked provider.
+  List<UserInfo> get providerData {
+    // ignore: avoid_dynamic_calls
+    return _user['providerUserInfo']
+            ?.map((userInfo) {
+              // ignore: avoid_dynamic_calls
+              userInfo['uid'] = uid;
+              return UserInfo(userInfo);
+            })
+            ?.toList()
+            ?.cast<UserInfo>() ??
+        [];
+  }
+
   /// Returns a JWT refresh token for the user.
   ///
   /// This property maybe `null` or empty if the underlying platform does not
   /// support providing refresh tokens.
   String? get refreshToken {
     return _user['refreshToken'];
+  }
+
+  /// The unique id of a user.
+  String get uid {
+    return _user['localId'];
   }
 
   /// Deletes and signs out the user.
@@ -68,51 +136,49 @@ class User {
     }
   }
 
-  /// The unique id of a user.
-  String get uid {
-    return _user['localId'];
-  }
-
-  /// The users email address.
+  /// Links the user account with the given credentials.
   ///
-  /// Will be `null` if signing in anonymously.
-  String? get email {
-    return _user['email'];
-  }
+  Future<UserCredential> linkWithCredential(AuthCredential credential) async {
+    try {
+      if (credential is EmailAuthCredential) {
+        await _auth._api.linkWithEmail(
+          _idToken,
+          credential: credential,
+        );
 
-  /// Returns whether the users email address has been verified.
-  ///
-  /// To send a verification email, see [sendEmailVerification].
-  ///
-  /// Once verified, call [reload] to ensure the latest user information is
-  /// retrieved from Firebase.
-  bool get emailVerified {
-    return _user['emailVerified'] ?? false;
-  }
+        await reload();
 
-  /// Returns whether the user is a anonymous.
-  bool get isAnonymous {
-    return _user['isAnonymous'] ?? false;
-  }
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+        );
+      } else {
+        final response = await _auth._api.linkWithCredential(
+          _idToken,
+          credential: credential,
+          requestUri: _auth.app.options.authDomain,
+        );
 
-  /// Returns the users phone number.
-  ///
-  /// This property will be `null` if the user has not signed in or been has
-  /// their phone number linked.
-  String? get phoneNumber {
-    return _user['phoneNumber'];
-  }
+        await reload();
 
-  /// The users display name.
-  ///
-  /// Will be `null` if signing in anonymously or via password authentication.
-  String? get displayName {
-    return _user['displayName'];
-  }
-
-  /// The photo URL of a user, could be `null`.
-  String? get photoURL {
-    return _user['photoUrl'];
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            providerId: response.providerId,
+            username: response.screenName,
+            profile: {
+              'displayName': response.displayName,
+              'photoURL': response.photoUrl,
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      // TODO
+      throw _auth.getException(e);
+    }
   }
 
   /// Re-authenticates a user using a fresh credential.
@@ -122,15 +188,49 @@ class User {
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
   ///
-  void reauthenticateWithCredential(AuthCredential credential) {
-    throw UnimplementedError('updateEmail() is not implemented');
+  Future<UserCredential> reauthenticateWithCredential(
+      AuthCredential credential) async {
+    try {
+      if (credential is EmailAuthCredential) {
+        await _auth._api
+            .signInWithEmailAndPassword(credential.email, credential.password!);
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+        );
+      } else if (credential is GoogleAuthCredential) {
+        final response = await _auth._api.reauthenticateWithCredential(
+            credential.idToken!, credential.providerId);
+
+        await reload();
+
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            profile: {
+              'displayName': response.displayName,
+              'photoURL': response.photoUrl
+            },
+            providerId: response.providerId,
+            username: response.screenName,
+          ),
+        );
+      } else {
+        throw UnsupportedError('${credential.providerId} is not supported.');
+      }
+    } catch (e) {
+      // TODO
+      throw _auth.getException(e);
+    }
   }
 
   /// Refreshes the current user, if signed in.
   Future<void> reload() async {
     _assertSignedOut(_auth);
 
-    _user.addAll(await _auth.reloadCurrentUser(_idToken));
+    _user.addAll(await _auth._reloadCurrentUser(_idToken));
     _auth.updateCurrentUserAndEvents(_auth.currentUser);
   }
 
@@ -181,46 +281,67 @@ class User {
   ///   user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  ///
+  /// TODO
   Future<void> updatePassword(String newPassword) async {
-    throw UnimplementedError('updatePassword() is not implemented');
+    try {
+      _assertSignedOut(_auth);
+
+      await _auth._api.updatePassword(newPassword, _idToken);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user name.
+  /// Update user's displayName.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updateDisplayName(String? displayName) async {
-    _assertSignedOut(_auth);
-
-    await _auth.updateProfile({'displayName': displayName}, _idToken);
-    await reload();
+    try {
+      _assertSignedOut(_auth);
+      await _auth._api
+          .updateProfile({'displayName': displayName}, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user's profile picture.
+  /// Update user's photoURL.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updatePhotoURL(String? photoURL) async {
-    _assertSignedOut(_auth);
-
-    await _auth.updateProfile({'photoURL': photoURL}, _idToken);
-    await reload();
+    try {
+      _assertSignedOut(_auth);
+      await _auth._api.updateProfile({'photoURL': photoURL}, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
-  /// Update the user's profile.
+  /// Update user's profile.
+  ///
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// TODO
   Future<void> updateProfile(Map<String, dynamic> newProfile) async {
-    _assertSignedOut(_auth);
+    try {
+      _assertSignedOut(_auth);
 
-    await _auth.updateProfile(newProfile, _idToken);
-    await reload();
+      await _auth._api.updateProfile(newProfile, _idToken, uid);
+      await reload();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
   /// A Map representation of this instance.
-  Map<String, dynamic> toMap() => {
-        'refreshToken': refreshToken,
-        'idToken': _idToken,
-        'localId': uid,
-        'email': email,
-        'emailVerified': emailVerified,
-        'isAnonymous': isAnonymous,
-        'displayName': displayName,
-        'photoURL': photoURL,
-      };
+  Map<String, dynamic> toMap() => _user;
 }
 
 /// Throws if any auth method is called with no user signed in.
@@ -232,13 +353,3 @@ void _assertSignedOut(FirebaseAuth instance) {
     throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
   }
 }
-
-/// Throws if any auth method is called with current user.
-// @protected
-// void _assertSignedIn(FirebaseAuth instance) {
-//   if (instance.currentUser == null) {
-//     return;
-//   } else {
-//     throw AuthException.fromErrorCode(ErrorCode.userNotSignedIn);
-//   }
-// }

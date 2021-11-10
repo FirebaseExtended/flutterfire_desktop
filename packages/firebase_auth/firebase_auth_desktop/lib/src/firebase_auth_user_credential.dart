@@ -10,9 +10,9 @@ class UserCredential extends UserCredentialPlatform {
           auth: auth,
           additionalUserInfo: AdditionalUserInfo(
             isNewUser: ipUserCredential.additionalUserInfo!.isNewUser,
-            profile: ipUserCredential.additionalUserInfo!.profile,
-            providerId: ipUserCredential.additionalUserInfo!.providerId,
-            username: ipUserCredential.additionalUserInfo!.username,
+            profile: ipUserCredential.additionalUserInfo?.profile,
+            providerId: ipUserCredential.additionalUserInfo?.providerId,
+            username: ipUserCredential.additionalUserInfo?.username,
           ),
           credential: AuthCredential(
             providerId: ipUserCredential.credential!.providerId,

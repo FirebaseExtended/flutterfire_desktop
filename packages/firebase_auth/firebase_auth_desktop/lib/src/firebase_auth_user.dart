@@ -44,9 +44,37 @@ class User extends UserPlatform {
   bool get isAnonymous => _user.isAnonymous;
 
   @override
-  Future<UserCredentialPlatform> linkWithCredential(AuthCredential credential) {
-    // TODO: implement linkWithCredential
-    throw UnimplementedError();
+  Future<UserCredentialPlatform> linkWithCredential(
+      AuthCredential credential) async {
+    try {
+      return UserCredential(
+        auth,
+        await _user.linkWithCredential(_authCredential(credential)),
+      );
+    } catch (e) {
+      // TODO(pr-mais): handle Dart exception
+      rethrow;
+    }
+  }
+
+  /// Map from Dart package type to the platfrom interface type.
+  auth_dart.AuthCredential _authCredential(AuthCredential credential) {
+    if (credential is EmailAuthCredential) {
+      return auth_dart.EmailAuthProvider.credential(
+        email: credential.email,
+        password: credential.password!,
+      );
+    } else if (credential is GoogleAuthCredential) {
+      return auth_dart.GoogleAuthProvider.credential(
+        idToken: credential.idToken,
+        accessToken: credential.accessToken,
+      );
+    } else {
+      return auth_dart.AuthCredential(
+        providerId: credential.providerId,
+        signInMethod: credential.signInMethod,
+      );
+    }
   }
 
   @override

@@ -36,7 +36,7 @@ class ErrorCode {
   static const userNotFound = 'USER_NOT_FOUND';
 }
 
-/// And exception wrapping error codes from the IP API.
+/// Exception wrapping error codes from the Identity Platform REST API, usually of type [idp.DetailedApiRequestError].
 class FirebaseAuthException extends FirebaseException implements Exception {
   // ignore: public_member_api_docs
   FirebaseAuthException({required String code, String message = ''})

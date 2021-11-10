@@ -103,23 +103,27 @@ class FirebaseAuth {
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
     try {
-      final _userMap = await _api.signInWithEmailAndPassword(email, password);
+      final response = await _api.signInWithEmailAndPassword(email, password);
+      final userData = await _api.getCurrentUser(response['idToken']);
 
       // Map the json response to an actual user.
-      final user = User(_userMap, this);
+      final user = User(userData.toJson()..addAll(response), this);
 
       updateCurrentUserAndEvents(user);
 
-      final providerId = AuthProvider.password.providerId;
-
       // Make a credential object based on the current sign-in method.
-      return UserCredential(
-        user: user,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: false),
+      return UserCredential._(
+        auth: this,
+        credential:
+            EmailAuthProvider.credential(email: email, password: password),
+        additionalUserInfo: AdditionalUserInfo(
+            isNewUser: false,
+            providerId: EmailAuthProvider.PROVIDER_ID,
+            username: userData.screenName,
+            profile: {
+              'displayName': userData.displayName,
+              'photoUrl': userData.photoUrl
+            }),
       );
     } catch (e) {
       throw getException(e);
@@ -136,21 +140,27 @@ class FirebaseAuth {
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
-      final _response =
+      final response =
           await _api.createUserWithEmailAndPassword(email, password);
+      final userData = await _api.getCurrentUser(response['idToken']);
 
-      final user = User(_response, this);
+      // Map the json response to an actual user.
+      final user = User(userData.toJson()..addAll(response), this);
+
       updateCurrentUserAndEvents(user);
 
-      final providerId = AuthProvider.password.providerId;
-
-      return UserCredential(
-        user: user,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+      return UserCredential._(
+        auth: this,
+        credential:
+            EmailAuthProvider.credential(email: email, password: password),
+        additionalUserInfo: AdditionalUserInfo(
+            isNewUser: true,
+            providerId: EmailAuthProvider.PROVIDER_ID,
+            username: userData.screenName,
+            profile: {
+              'displayName': userData.displayName,
+              'photoUrl': userData.photoUrl
+            }),
       );
     } catch (e) {
       throw getException(e);
@@ -164,9 +174,9 @@ class FirebaseAuth {
   /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      final _providers = await _api.fetchSignInMethodsForEmail(email);
+      final providers = await _api.fetchSignInMethodsForEmail(email);
 
-      return _providers;
+      return providers;
     } catch (e) {
       throw getException(e);
     }
@@ -225,13 +235,13 @@ class FirebaseAuth {
   ///
   /// TODO: describe exceptions
   Future<UserCredential> signInAnonymously() async {
-    final providerId = AuthProvider.anonymous.providerId;
+    const providerId = 'anonymous';
 
     try {
       if (currentUser?.isAnonymous ?? false) {
-        return UserCredential(
-          user: currentUser,
-          credential: AuthCredential(
+        return UserCredential._(
+          auth: this,
+          credential: const AuthCredential(
             providerId: providerId,
             signInMethod: providerId,
           ),
@@ -239,50 +249,49 @@ class FirebaseAuth {
         );
       }
 
-      final _response = await _api.signInAnonymously();
+      final response = await _api.signInAnonymously();
+      final userData =
+          (await _api.getCurrentUser(response['idToken'])).toJson();
 
-      final _data = _response;
+      // Map the json response to an actual user.
+      final user = User(userData..addAll(response), this);
 
-      _data['isAnonymous'] = true;
-
-      final user = User(_data, this);
       updateCurrentUserAndEvents(user);
 
-      return UserCredential(
-        user: user,
-        credential: AuthCredential(
-          providerId: providerId,
-          signInMethod: providerId,
-        ),
-        additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+      return UserCredential._(
+          auth: this,
+          additionalUserInfo: AdditionalUserInfo(isNewUser: true),
+          credential: const AuthCredential(
+              providerId: providerId, signInMethod: providerId));
+    } catch (e) {
+      throw getException(e);
+    }
+  }
+
+  /// Authenticates a Firebase client using a popup-based OAuth authentication
+  /// flow.
+  ///
+  /// If succeeds, returns the signed in user along with the provider's
+  /// credential.
+  ///
+  /// This method is only available on web based platforms.
+  Future<UserCredential> signInWithPopup() async {
+    // check if running on Web
+    if (identical(0, 0.0)) {
+      throw UnimplementedError(
+        'signInWithPopup() is only supported on web based platforms',
       );
-    } catch (e) {
-      throw getException(e);
     }
+
+    throw UnimplementedError('signInWithPop() is not yet implemented.');
   }
 
-  /// Update user's email.
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// Internally used to reload the current user and send events.
   @protected
-  Future<Map<String, dynamic>> reloadCurrentUser(String idToken) async {
+  Future<Map<String, dynamic>> _reloadCurrentUser(String idToken) async {
     try {
-      final userMap = await _api.reloadCurrentUser(idToken);
-      return userMap;
-    } catch (e) {
-      throw getException(e);
-    }
-  }
-
-  /// Update user's photoURL.
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  @protected
-  Future updateProfile(Map<String, dynamic> newProfile, String idToken) async {
-    try {
-      await _api.updateProfile(newProfile, idToken, currentUser!.uid);
+      final response = await _api.getCurrentUser(idToken);
+      return response.toJson();
     } catch (e) {
       throw getException(e);
     }
@@ -294,7 +303,7 @@ class FirebaseAuth {
     try {
       updateCurrentUserAndEvents(null);
     } catch (exception) {
-      log('$exception', name: 'DartAuth/signOut');
+      log('$exception', name: 'FirebaseAuth/signOut');
 
       rethrow;
     }
@@ -336,7 +345,7 @@ class FirebaseAuth {
   ///
   @protected
   Exception getException(Object e) {
-    if (e is DetailedApiRequestError) {
+    if (e is idp.DetailedApiRequestError) {
       final authException = FirebaseAuthException.fromErrorCode(e.message!);
       log('$authException',
           name: 'flutterfire_auth_dart/${authException.code}');
