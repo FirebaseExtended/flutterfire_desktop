@@ -163,39 +163,42 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<AuthCredential> linkWithCredential(String idToken,
-      {required AuthCredential credential}) async {
-    if (credential is EmailAuthCredential) {
-      await _identityToolkit.setAccountInfo(
-        idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
-            idToken: idToken,
-            email: credential.email,
-            password: credential.password),
-      );
+  Future<dynamic> linkWithEmail(String idToken,
+      {required EmailAuthCredential credential}) async {
+    return _identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        email: credential.email,
+        password: credential.password,
+      ),
+    );
+  }
 
-      return credential;
-    } else if (credential is GoogleAuthCredential) {
-      await _identityToolkit.verifyAssertion(
+  /// TODO: write endpoint details
+  Future<idp.VerifyAssertionResponse> linkWithCredential(String idToken,
+      {required AuthCredential credential, String? requestUri}) async {
+    idp.VerifyAssertionResponse response;
+
+    if (credential is GoogleAuthCredential) {
+      response = await _identityToolkit.verifyAssertion(
         idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-            idToken: idToken,
-            //TODO
-            requestUri: 'http://localhost',
-            postBody: 'id_token=${credential.idToken}&'
-                'providerId=${credential.providerId}'),
+          idToken: idToken,
+          requestUri: requestUri,
+          postBody: 'id_token=${credential.idToken}&'
+              'providerId=${credential.providerId}',
+        ),
       );
-
-      return credential;
     } else {
-      final _response = await _identityToolkit.verifyAssertion(
+      response = await _identityToolkit.verifyAssertion(
         idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-            idToken: idToken,
-            //TODO
-            requestUri: 'http://localhost',
-            postBody: 'id_token=$idToken&providerId=${credential.providerId}'),
+          idToken: idToken,
+          requestUri: requestUri,
+          postBody: 'id_token=$idToken&providerId=${credential.providerId}',
+        ),
       );
-
-      return OAuthProvider(_response.providerId!).credential();
     }
+
+    return response;
   }
 
   /// TODO: write endpoint details

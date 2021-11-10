@@ -140,15 +140,41 @@ class User {
   ///
   Future<UserCredential> linkWithCredential(AuthCredential credential) async {
     try {
-      final newCredential =
-          await _auth._api.linkWithCredential(_idToken, credential: credential);
+      if (credential is EmailAuthCredential) {
+        await _auth._api.linkWithEmail(
+          _idToken,
+          credential: credential,
+        );
 
-      await reload();
+        await reload();
 
-      return UserCredential._(
-        auth: _auth,
-        credential: newCredential,
-      );
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+        );
+      } else {
+        final response = await _auth._api.linkWithCredential(
+          _idToken,
+          credential: credential,
+          requestUri: _auth.app.options.authDomain,
+        );
+
+        await reload();
+
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            providerId: response.providerId,
+            username: response.screenName,
+            profile: {
+              'displayName': response.displayName,
+              'photoURL': response.photoUrl,
+            },
+          ),
+        );
+      }
     } catch (e) {
       // TODO
       throw _auth.getException(e);
@@ -185,7 +211,7 @@ class User {
             isNewUser: response.isNewUser ?? false,
             profile: {
               'displayName': response.displayName,
-              'photoUrl': response.photoUrl
+              'photoURL': response.photoUrl
             },
             providerId: response.providerId,
             username: response.screenName,

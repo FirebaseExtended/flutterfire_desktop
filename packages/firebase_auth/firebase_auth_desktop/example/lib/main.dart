@@ -15,6 +15,7 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
       apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
       projectId: 'react-native-firebase-testing',
       messagingSenderId: '448618578101',
+      authDomain: 'https://react-native-firebase-testing.firebaseapp.com',
     );
 
 // Requires that the Firebase Auth emulator is running locally

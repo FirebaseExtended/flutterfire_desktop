@@ -17,7 +17,6 @@ import 'package:meta/meta.dart';
 
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
-import 'src/providers/oauth.dart';
 import 'src/utils/jwt.dart';
 
 export 'src/auth_provider.dart';
