@@ -51,7 +51,6 @@ class API {
   }
 
   /// TODO: write endpoint details
-
   Future<Map<String, dynamic>> signInAnonymously() async {
     final _response = await _identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(),
@@ -61,14 +60,13 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> reauthenticateWithCredential(
-      String idToken, String providerId) async {
+  Future<idp.VerifyAssertionResponse> signInWithCredential(String providerId,
+      {String? idToken, String? accessToken, String? requestUri}) async {
     final response = await _identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
-        //TODO
-        requestUri: 'http://localhost',
-        postBody: 'id_token=$idToken&'
+        requestUri: requestUri,
+        postBody: 'id_token=$accessToken&'
             'providerId=$providerId',
       ),
     );
@@ -112,13 +110,13 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendSignInLinkToEmail(String email) async {
+  Future sendSignInLinkToEmail(String email, String? continueUrl) async {
     await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
         // have to be sent, otherwise the user won't be redirected to the app.
-        // continueUrl: ,
+        continueUrl: continueUrl,
       ),
     );
   }

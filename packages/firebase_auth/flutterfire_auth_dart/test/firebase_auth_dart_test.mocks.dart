@@ -193,8 +193,10 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
               {#newPassword: newPassword, #oldPassword: oldPassword}),
           returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
   @override
-  _i4.Future<dynamic> sendSignInLinkToEmail(String? email) =>
-      (super.noSuchMethod(Invocation.method(#sendSignInLinkToEmail, [email]),
+  _i4.Future<dynamic> sendSignInLinkToEmail(String? email,
+          [String? continueUrl]) =>
+      (super.noSuchMethod(
+          Invocation.method(#sendSignInLinkToEmail, [email, continueUrl]),
           returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
   @override
   _i4.Future<_i2.UserCredential> signInAnonymously() =>
@@ -208,6 +210,29 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
               returnValue:
                   Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
           as _i4.Future<_i2.UserCredential>);
+  @override
+  _i4.Future<_i2.UserCredential> signInWithCredential(
+          _i2.AuthCredential? credential) =>
+      (super.noSuchMethod(
+              Invocation.method(#signInWithCredential, [credential]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
+  @override
+  _i4.Future<_i2.UserCredential> signInWithEmailLink(
+          String? email, String? emailLink) =>
+      (super.noSuchMethod(
+              Invocation.method(#signInWithEmailLink, [email, emailLink]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+          as _i4.Future<_i2.UserCredential>);
+  @override
+  _i4.Future<void> verifyPhoneNumber({String? phoneNumber}) =>
+      (super.noSuchMethod(
+          Invocation.method(
+              #verifyPhoneNumber, [], {#phoneNumber: phoneNumber}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
   _i4.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),

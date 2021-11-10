@@ -6,7 +6,7 @@ class UserInfo {
   @protected
   UserInfo(this._data);
 
-  final Map<String, dynamic> _data;
+  final Map<String, String?> _data;
 
   /// The users display name.
   ///
@@ -47,6 +47,9 @@ class UserInfo {
   String? get uid {
     return _data['uid'];
   }
+
+  /// Map representation of this instance.
+  Map<String, String?> toMap() => _data;
 
   @override
   String toString() {

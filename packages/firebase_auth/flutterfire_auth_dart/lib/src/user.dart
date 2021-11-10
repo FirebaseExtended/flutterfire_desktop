@@ -67,7 +67,8 @@ class User {
             ?.map((userInfo) {
               // ignore: avoid_dynamic_calls
               userInfo['uid'] = uid;
-              return UserInfo(userInfo);
+              // ignore: avoid_dynamic_calls
+              return UserInfo(userInfo?.cast<String, String?>());
             })
             ?.toList()
             ?.cast<UserInfo>() ??
@@ -199,8 +200,12 @@ class User {
           credential: credential,
         );
       } else if (credential is GoogleAuthCredential) {
-        final response = await _auth._api.reauthenticateWithCredential(
-            credential.idToken!, credential.providerId);
+        final response = await _auth._api.signInWithCredential(
+          credential.providerId,
+          idToken: _idToken,
+          accessToken: credential.accessToken,
+          requestUri: _auth.app.options.authDomain,
+        );
 
         await reload();
 

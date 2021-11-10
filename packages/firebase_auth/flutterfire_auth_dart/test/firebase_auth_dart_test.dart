@@ -142,7 +142,6 @@ void main() {
 
         await auth.signOut();
       });
-
       test('should throw.', () async {
         await emulatorClearAllUsers();
         expect(
@@ -193,6 +192,12 @@ void main() {
         expect(await onAuthStateChanged.next, isNull);
         expect(await onIdTokenChanged.next, isNull);
       });
+    });
+
+    group('signInWithCredential()', () {
+      test('Google', () {});
+      test('Twitter', () {});
+      test('Facebook', () {});
     });
 
     group('Fetch providers list ', () {
