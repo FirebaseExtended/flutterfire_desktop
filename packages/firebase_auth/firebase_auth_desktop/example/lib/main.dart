@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_builder.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'register_page.dart';
 import 'signin_page.dart';
@@ -22,6 +23,8 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
 // e.g via `melos run firebase:emulator`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Must add this line.
+  await windowManager.ensureInitialized();
   await Firebase.initializeApp(options: firebaseOptions);
   await GoogleSignInDart.register(
     clientId:

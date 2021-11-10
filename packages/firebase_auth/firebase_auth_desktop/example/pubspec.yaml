@@ -30,6 +30,7 @@ dependencies:
   flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.0-nullsafety
   google_sign_in_dartio: ^0.1.0
+  window_manager: ^0.0.5
 
 dependency_overrides:
   firebase_auth_desktop:

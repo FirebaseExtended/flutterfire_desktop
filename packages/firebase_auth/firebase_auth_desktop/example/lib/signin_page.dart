@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:window_manager/window_manager.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -64,6 +65,8 @@ class _SignInPageState extends State<SignInPage> {
               return TextButton(
                 onPressed: () async {
                   final user = _auth.currentUser;
+                  await _signOut();
+
                   if (user == null) {
                     ScaffoldSnackbar.of(context).show('No one has signed in.');
                     return;
@@ -101,6 +104,7 @@ class _SignInPageState extends State<SignInPage> {
   /// Example code for sign out.
   Future<void> _signOut() async {
     await _auth.signOut();
+    await GoogleSignIn().signOut();
   }
 }
 
@@ -224,7 +228,16 @@ class _UserInfoCardState extends State<_UserInfoCard> {
                       icon: const Icon(Icons.text_snippet),
                     ),
                     IconButton(
-                      onPressed: () => widget.user!.delete(),
+                      onPressed: () async {
+                        if (widget.user!.providerData.any(
+                          (element) =>
+                              element.providerId ==
+                              GoogleAuthProvider.PROVIDER_ID,
+                        )) {
+                          await GoogleSignIn().signOut();
+                        }
+                        await widget.user!.delete();
+                      },
                       icon: const Icon(Icons.delete_forever),
                     ),
                   ],
@@ -495,8 +508,7 @@ class _EmailLinkSignInSectionState extends State<_EmailLinkSignInSection> {
       await _auth.sendSignInLinkToEmail(
         email: _email,
         actionCodeSettings: ActionCodeSettings(
-          url:
-              'https://react-native-firebase-testing.firebaseapp.com/emailSignin',
+          url: 'https://reactnativefirebase.page.link/test',
           handleCodeInApp: true,
           iOSBundleId: 'io.flutter.plugins.firebaseAuthExample',
           androidPackageName: 'io.flutter.plugins.firebaseauthexample',
@@ -875,22 +887,23 @@ class _OtherProvidersSignInSectionState
                   ),
                   Visibility(
                     visible: !kIsWeb,
-                    child: ListTile(
-                      title: const Text('Facebook'),
+                    child:
+                        // ListTile(
+                        //   title: const Text('Facebook'),
+                        //   leading: Radio<int>(
+                        //     value: 1,
+                        //     groupValue: _selection,
+                        //     onChanged: _handleRadioButtonSelected,
+                        //   ),
+                        // ),
+                        ListTile(
+                      title: const Text('Google'),
                       leading: Radio<int>(
-                        value: 1,
+                        value: 3,
                         groupValue: _selection,
                         onChanged: _handleRadioButtonSelected,
                       ),
                     ),
-                    // ListTile(
-                    //   title: const Text('Google'),
-                    //   leading: Radio<int>(
-                    //     value: 3,
-                    //     groupValue: _selection,
-                    //     onChanged: _handleRadioButtonSelected,
-                    //   ),
-                    // ),
                   ),
                 ],
               ),
@@ -984,8 +997,27 @@ class _OtherProvidersSignInSectionState
         _signInWithTwitter();
         break;
       default:
-      // _signInWithGoogle();
+        _signInWithGoogle();
     }
+  }
+
+  Future<UserCredential> _signInWithGoogle() async {
+    // Trigger the authentication flow
+    final googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final googleAuth = await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    await windowManager.show();
+
+    // Once signed in, return the UserCredential
+    return FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   /// Example code of how to sign in with Github.
