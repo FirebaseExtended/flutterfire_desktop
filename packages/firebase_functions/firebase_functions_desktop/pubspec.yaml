@@ -1,0 +1,43 @@
+name: firebase_functions_desktop
+description: Desktop implementation of cloud_functions
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_dart
+version: 0.1.0-dev.0
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.20.0"
+
+dependencies:
+  cloud_functions: any
+  cloud_functions_platform_interface: ^5.0.12
+  firebase_core:
+  firebase_core_desktop: 
+  flutter:
+    sdk: flutter
+  flutterfire_core_dart: ^0.1.1-dev.0
+  flutterfire_functions_dart: ^0.1.0-dev.0
+  http: ^0.13.4
+  meta: ^1.3.0
+
+dev_dependencies:
+  firebase_core_platform_interface: 
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.0
+
+flutter:
+  plugin:
+    implements: cloud_functions
+    platforms:
+      macos:
+        dartPluginClass: FirebaseFunctionsDesktop
+        pluginClass: none
+      linux:
+        dartPluginClass: FirebaseFunctionsDesktop
+        pluginClass: none
+      windows:
+        dartPluginClass: FirebaseFunctionsDesktop
+        pluginClass: none
+
