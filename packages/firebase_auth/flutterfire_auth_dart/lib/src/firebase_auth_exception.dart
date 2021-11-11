@@ -43,7 +43,7 @@ class FirebaseAuthException extends FirebaseException implements Exception {
       : super(plugin: 'firebase_auth', code: code, message: message);
 
   /// Construct an exception based on the returned error code.
-  factory FirebaseAuthException.fromErrorCode(String code) {
+  factory FirebaseAuthException.fromErrorCode(String code, {String? message}) {
     switch (code) {
       case ErrorCode.emailNotFound:
         return FirebaseAuthException(
@@ -107,7 +107,7 @@ class FirebaseAuthException extends FirebaseException implements Exception {
         );
       default:
         return FirebaseAuthException(
-          message: 'Unknown error happened.',
+          message: message ?? 'Unknown error happened.',
           code: 'UNKNOWN',
         );
     }

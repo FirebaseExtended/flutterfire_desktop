@@ -51,7 +51,6 @@ class API {
   }
 
   /// TODO: write endpoint details
-
   Future<Map<String, dynamic>> signInAnonymously() async {
     final _response = await _identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(),
@@ -61,14 +60,16 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> reauthenticateWithCredential(
-      String idToken, String providerId) async {
+  Future<idp.VerifyAssertionResponse> signInWithOAuthCredential(
+      {String? idToken,
+      required String providerId,
+      required String providerIdToken,
+      String? requestUri}) async {
     final response = await _identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
-        //TODO
-        requestUri: 'http://localhost',
-        postBody: 'id_token=$idToken&'
+        requestUri: requestUri,
+        postBody: 'id_token=$providerIdToken&'
             'providerId=$providerId',
       ),
     );
@@ -112,13 +113,13 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendSignInLinkToEmail(String email) async {
+  Future sendSignInLinkToEmail(String email, String? continueUrl) async {
     await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
         // have to be sent, otherwise the user won't be redirected to the app.
-        // continueUrl: ,
+        continueUrl: continueUrl,
       ),
     );
   }
@@ -175,28 +176,17 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> linkWithCredential(String idToken,
-      {required AuthCredential credential, String? requestUri}) async {
-    idp.VerifyAssertionResponse response;
-
-    if (credential is GoogleAuthCredential) {
-      response = await _identityToolkit.verifyAssertion(
-        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-          idToken: idToken,
-          requestUri: requestUri,
-          postBody: 'id_token=${credential.idToken}&'
-              'providerId=${credential.providerId}',
-        ),
-      );
-    } else {
-      response = await _identityToolkit.verifyAssertion(
-        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-          idToken: idToken,
-          requestUri: requestUri,
-          postBody: 'id_token=$idToken&providerId=${credential.providerId}',
-        ),
-      );
-    }
+  Future<idp.VerifyAssertionResponse> linkWithOAuthCredential(String idToken,
+      {required String providerIdToken,
+      required String providerId,
+      String? requestUri}) async {
+    final response = await _identityToolkit.verifyAssertion(
+      idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+        idToken: idToken,
+        requestUri: requestUri,
+        postBody: 'id_token=$providerIdToken&providerId=$providerId',
+      ),
+    );
 
     return response;
   }

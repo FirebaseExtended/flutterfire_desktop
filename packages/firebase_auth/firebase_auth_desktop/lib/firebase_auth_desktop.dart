@@ -11,6 +11,7 @@ import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
 
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_user_credential.dart';
+part 'src/dart_to_platfrom_type.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
@@ -201,7 +202,6 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
   @override
   bool isSignInWithEmailLink(String emailLink) {
-    // TODO: implement isSignInWithEmailLink
     throw UnimplementedError();
   }
 
@@ -258,9 +258,16 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
   @override
   Future<UserCredentialPlatform> signInWithCredential(
-      AuthCredential credential) {
-    // TODO: implement signInWithCredential
-    throw UnimplementedError();
+      AuthCredential credential) async {
+    try {
+      return UserCredential(
+        this,
+        await _auth!.signInWithCredential(_authCredential(credential)),
+      );
+    } catch (e) {
+      // TODO(pr_mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override
@@ -271,9 +278,16 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
   @override
   Future<UserCredentialPlatform> signInWithEmailLink(
-      String email, String emailLink) {
-    // TODO: implement signInWithEmailLink
-    throw UnimplementedError();
+      String email, String emailLink) async {
+    try {
+      return UserCredential(
+        this,
+        await _auth!.signInWithEmailLink(email, emailLink),
+      );
+    } catch (e) {
+      // TODO(pr_mais): throw FirebaseAuthException
+      rethrow;
+    }
   }
 
   @override

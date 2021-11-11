@@ -57,26 +57,6 @@ class User extends UserPlatform {
     }
   }
 
-  /// Map from Dart package type to the platfrom interface type.
-  auth_dart.AuthCredential _authCredential(AuthCredential credential) {
-    if (credential is EmailAuthCredential) {
-      return auth_dart.EmailAuthProvider.credential(
-        email: credential.email,
-        password: credential.password!,
-      );
-    } else if (credential is GoogleAuthCredential) {
-      return auth_dart.GoogleAuthProvider.credential(
-        idToken: credential.idToken,
-        accessToken: credential.accessToken,
-      );
-    } else {
-      return auth_dart.AuthCredential(
-        providerId: credential.providerId,
-        signInMethod: credential.signInMethod,
-      );
-    }
-  }
-
   @override
   Future<ConfirmationResultPlatform> linkWithPhoneNumber(String phoneNumber,
       RecaptchaVerifierFactoryPlatform applicationVerifier) {
@@ -101,8 +81,9 @@ class User extends UserPlatform {
   String? get photoURL => _user.photoURL;
 
   @override
-  // TODO: implement providerData
-  List<UserInfo> get providerData => throw UnimplementedError();
+  List<UserInfo> get providerData {
+    return _user.providerData.map((user) => UserInfo(user.toMap())).toList();
+  }
 
   @override
   Future<UserCredentialPlatform> reauthenticateWithCredential(
@@ -112,13 +93,15 @@ class User extends UserPlatform {
   }
 
   @override
-  // TODO: implement refreshToken
   String? get refreshToken => _user.refreshToken;
 
   @override
-  Future<void> reload() {
-    // TODO: implement reload
-    throw UnimplementedError();
+  Future<void> reload() async {
+    try {
+      await _user.reload();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override

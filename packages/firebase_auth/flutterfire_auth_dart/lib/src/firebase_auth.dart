@@ -221,9 +221,9 @@ class FirebaseAuth {
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
   /// - `EMAIL_NOT_FOUND`: user doesn't exist
-  Future sendSignInLinkToEmail(String email) async {
+  Future sendSignInLinkToEmail(String email, [String? continueUrl]) async {
     try {
-      await _api.sendSignInLinkToEmail(email);
+      await _api.sendSignInLinkToEmail(email, continueUrl);
     } catch (e) {
       throw getException(e);
     }
@@ -284,6 +284,87 @@ class FirebaseAuth {
     }
 
     throw UnimplementedError('signInWithPop() is not yet implemented.');
+  }
+
+  /// TODO
+  Future<UserCredential> signInWithCredential(
+    AuthCredential credential,
+  ) async {
+    idp.VerifyAssertionResponse response;
+
+    if (credential is GoogleAuthCredential) {
+      response = await _api.signInWithOAuthCredential(
+        requestUri: app.options.authDomain,
+        providerIdToken: credential.idToken!,
+        providerId: credential.providerId,
+      );
+    } else {
+      throw UnsupportedError('This credential is not supported yet.');
+    }
+
+    final userData = await _api.getCurrentUser(response.idToken!);
+
+    // Map the json response to an actual user.
+    final user = User(userData.toJson()..addAll(response.toJson()), this);
+
+    updateCurrentUserAndEvents(user);
+
+    return UserCredential._(
+      auth: this,
+      credential: credential,
+      additionalUserInfo: AdditionalUserInfo(
+        isNewUser: response.isNewUser ?? false,
+        providerId: response.providerId,
+        username: response.screenName,
+        profile: {
+          'displayName': response.displayName,
+          'photoUrl': response.photoUrl
+        },
+      ),
+    );
+  }
+
+  /// TODO
+  Future<UserCredential> signInWithEmailLink(
+      String email, String emailLink) async {
+    throw UnimplementedError();
+    // final response = await _api.signInWithEmailLink(
+    //     email, Uri.parse(emailLink).queryParameters['oobCode']!);
+
+    // final userData = await _api.getCurrentUser(response.idToken!);
+
+    // // Map the json response to an actual user.
+    // final user = User(userData.toJson()..addAll(response.toJson()), this);
+
+    // updateCurrentUserAndEvents(user);
+
+    // return UserCredential._(
+    //   auth: this,
+    //   credential: EmailAuthProvider.credentialWithLink(
+    //       email: email, emailLink: emailLink),
+    // );
+  }
+
+  /// TODO
+  Future<void> verifyPhoneNumber({required String phoneNumber}) async {
+    throw UnimplementedError();
+
+    // final response = await _api.verifyPhoneNumber(phoneNumber);
+
+    // log(response.sessionInfo!);
+
+    // final userData = await _api.getCurrentUser(response.idToken!);
+
+    // // Map the json response to an actual user.
+    // final user = User(userData.toJson()..addAll(response.toJson()), this);
+
+    // updateCurrentUserAndEvents(user);
+
+    // return UserCredential._(
+    //   auth: this,
+    //   credential: EmailAuthProvider.credentialWithLink(
+    //       email: email, emailLink: emailLink),
+    // );
   }
 
   /// Internally used to reload the current user and send events.
