@@ -83,7 +83,7 @@ class User {
     return _user['refreshToken'];
   }
 
-  /// The unique id of a user.
+  /// The unique id of a user in Firebase.
   String get uid {
     return _user['localId'];
   }
@@ -153,10 +153,11 @@ class User {
           auth: _auth,
           credential: credential,
         );
-      } else {
-        final response = await _auth._api.linkWithCredential(
+      } else if (credential is GoogleAuthCredential) {
+        final response = await _auth._api.linkWithOAuthCredential(
           _idToken,
-          credential: credential,
+          providerId: credential.providerId,
+          providerIdToken: credential.idToken!,
           requestUri: _auth.app.options.authDomain,
         );
 
@@ -175,6 +176,8 @@ class User {
             },
           ),
         );
+      } else {
+        throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
       // TODO
@@ -200,10 +203,10 @@ class User {
           credential: credential,
         );
       } else if (credential is GoogleAuthCredential) {
-        final response = await _auth._api.signInWithCredential(
-          credential.providerId,
+        final response = await _auth._api.signInWithOAuthCredential(
           idToken: _idToken,
-          accessToken: credential.accessToken,
+          providerId: credential.providerId,
+          providerIdToken: credential.idToken!,
           requestUri: _auth.app.options.authDomain,
         );
 

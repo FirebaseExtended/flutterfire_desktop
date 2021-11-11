@@ -60,13 +60,16 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> signInWithCredential(String providerId,
-      {String? idToken, String? accessToken, String? requestUri}) async {
+  Future<idp.VerifyAssertionResponse> signInWithOAuthCredential(
+      {String? idToken,
+      required String providerId,
+      required String providerIdToken,
+      String? requestUri}) async {
     final response = await _identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: requestUri,
-        postBody: 'id_token=$accessToken&'
+        postBody: 'id_token=$providerIdToken&'
             'providerId=$providerId',
       ),
     );
@@ -173,28 +176,17 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> linkWithCredential(String idToken,
-      {required AuthCredential credential, String? requestUri}) async {
-    idp.VerifyAssertionResponse response;
-
-    if (credential is GoogleAuthCredential) {
-      response = await _identityToolkit.verifyAssertion(
-        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-          idToken: idToken,
-          requestUri: requestUri,
-          postBody: 'id_token=${credential.idToken}&'
-              'providerId=${credential.providerId}',
-        ),
-      );
-    } else {
-      response = await _identityToolkit.verifyAssertion(
-        idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-          idToken: idToken,
-          requestUri: requestUri,
-          postBody: 'id_token=$idToken&providerId=${credential.providerId}',
-        ),
-      );
-    }
+  Future<idp.VerifyAssertionResponse> linkWithOAuthCredential(String idToken,
+      {required String providerIdToken,
+      required String providerId,
+      String? requestUri}) async {
+    final response = await _identityToolkit.verifyAssertion(
+      idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+        idToken: idToken,
+        requestUri: requestUri,
+        postBody: 'id_token=$providerIdToken&providerId=$providerId',
+      ),
+    );
 
     return response;
   }

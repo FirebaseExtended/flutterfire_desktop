@@ -293,10 +293,10 @@ class FirebaseAuth {
     idp.VerifyAssertionResponse response;
 
     if (credential is GoogleAuthCredential) {
-      response = await _api.signInWithCredential(
-        credential.providerId,
+      response = await _api.signInWithOAuthCredential(
         requestUri: app.options.authDomain,
-        accessToken: credential.idToken,
+        providerIdToken: credential.idToken!,
+        providerId: credential.providerId,
       );
     } else {
       throw UnsupportedError('This credential is not supported yet.');
