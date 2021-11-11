@@ -9,23 +9,23 @@ environment:
   flutter: ">=1.20.0"
 
 dependencies:
-  cloud_functions: any
-  cloud_functions_platform_interface: ^5.0.12
-  firebase_core:
-  firebase_core_desktop: 
+  cloud_functions: ^3.1.1
+  cloud_functions_platform_interface: ^5.0.14
+  firebase_core: ^1.10.0
+  firebase_core_dart: ^0.1.1-dev.1
+  firebase_core_desktop: ^0.1.1-dev.1
+  firebase_functions_dart: ^0.1.0-dev.1
   flutter:
     sdk: flutter
-  flutterfire_core_dart: ^0.1.1-dev.0
-  flutterfire_functions_dart: ^0.1.0-dev.0
   http: ^0.13.4
   meta: ^1.3.0
 
 dev_dependencies:
-  firebase_core_platform_interface: 
+  firebase_core_platform_interface: ^4.1.0
   flutter_test:
     sdk: flutter
   mockito: ^5.0.0
-  plugin_platform_interface: ^2.0.0
+  plugin_platform_interface: ^2.0.2
 
 flutter:
   plugin:
@@ -40,4 +40,3 @@ flutter:
       windows:
         dartPluginClass: FirebaseFunctionsDesktop
         pluginClass: none
-

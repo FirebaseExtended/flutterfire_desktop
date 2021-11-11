@@ -4,7 +4,7 @@
 library flutterfire_functions_dart;
 
 import 'dart:convert';
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 

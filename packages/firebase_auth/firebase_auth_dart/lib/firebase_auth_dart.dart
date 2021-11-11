@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' as idp;
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';

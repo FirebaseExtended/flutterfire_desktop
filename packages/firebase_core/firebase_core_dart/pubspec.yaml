@@ -1,0 +1,17 @@
+name: firebase_core_dart
+description: Pure Dart implementation of FlutterFire core API.
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_dart
+version: 0.1.1-dev.0
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  collection: ^1.15.0
+  meta: ^1.7.0
+
+dev_dependencies:
+  mockito: ^5.0.0
+  test: ^1.16.0
+  

@@ -1,11 +1,11 @@
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
+
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
-
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
-import 'package:flutterfire_functions_dart/flutterfire_functions_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebase_functions_dart/firebase_functions_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';

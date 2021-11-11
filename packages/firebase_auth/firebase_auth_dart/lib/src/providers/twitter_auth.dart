@@ -4,7 +4,7 @@
 // found in the LICENSE file.
 
 // ignore: prefer_relative_imports
-import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
 const _kProviderId = 'twitter.com';
 

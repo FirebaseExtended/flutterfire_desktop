@@ -2,8 +2,8 @@ library cloud_functions_desktop;
 
 import 'package:cloud_functions_platform_interface/cloud_functions_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
-import 'package:flutterfire_functions_dart/flutterfire_functions_dart.dart'
+import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
+import 'package:firebase_functions_dart/firebase_functions_dart.dart'
     as functions_dart;
 import 'package:meta/meta.dart';
 

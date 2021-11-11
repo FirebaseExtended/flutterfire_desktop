@@ -1,6 +1,6 @@
 // ignore_for_file: require_trailing_commas
 
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

@@ -4,14 +4,14 @@ library firebase_auth_desktop;
 
 import 'dart:async';
 
+import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart' as auth_dart;
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart' as core_dart;
+import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
 
+part 'src/dart_to_platfrom_type.dart';
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_user_credential.dart';
-part 'src/dart_to_platfrom_type.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {

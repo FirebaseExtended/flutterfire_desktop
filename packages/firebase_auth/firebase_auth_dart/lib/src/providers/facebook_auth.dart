@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
 const _kProviderId = 'facebook.com';
 

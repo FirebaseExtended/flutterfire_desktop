@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
-import 'package:flutterfire_core_dart/flutterfire_core_dart.dart';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';

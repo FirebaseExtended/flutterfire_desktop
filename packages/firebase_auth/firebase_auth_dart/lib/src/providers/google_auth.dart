@@ -1,6 +1,6 @@
 // ignore_for_file: require_trailing_commas, prefer_relative_imports, non_constant_identifier_names, avoid_returning_this
 
-import 'package:flutterfire_auth_dart/flutterfire_auth_dart.dart';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
 const _kProviderId = 'google.com';
 

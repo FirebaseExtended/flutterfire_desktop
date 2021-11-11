@@ -1,4 +1,4 @@
-import '../flutterfire_core_dart.dart';
+import '../firebase_core_dart.dart';
 
 import 'firebase_exception.dart';
 
