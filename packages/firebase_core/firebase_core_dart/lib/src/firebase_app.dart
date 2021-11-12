@@ -1,4 +1,4 @@
-part of flutterfire_core_dart;
+part of firebase_core_dart;
 
 /// A Dart only implementation of a Firebase app instance.
 class FirebaseApp {

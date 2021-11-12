@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 
 /// The options used to configure a Firebase app.
 ///
-/// The default app:
+/// The **DEFAULT** app doesn't have a name:
 /// ```dart
 /// await Firebase.initializeApp(
 ///   options: const FirebaseOptions(
@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 /// );
 /// ```
 ///
-/// Secondary app:
+/// Secondary app should have a name:
 /// ```dart
 /// await Firebase.initializeApp(
 ///   name: 'SecondaryApp',
@@ -33,6 +33,19 @@ import 'package:meta/meta.dart';
 class FirebaseOptions {
   /// The options used to configure a Firebase app.
   ///
+  /// The **DEFAULT** app doesn't have a name:
+  /// ```dart
+  /// await Firebase.initializeApp(
+  ///   options: const FirebaseOptions(
+  ///     apiKey: '...',
+  ///     appId: '...',
+  ///     messagingSenderId: '...',
+  ///     projectId: '...',
+  ///   )
+  /// );
+  /// ```
+  ///
+  /// Secondary app should have a name:
   /// ```dart
   /// await Firebase.initializeApp(
   ///   name: 'SecondaryApp',
