@@ -1,7 +1,9 @@
-/// Support for Firebase authentication methods
-/// with pure dart implmentation.
-///
-library flutterfire_functions_dart;
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
+/// Pure Dart implementation for Firebase functions.
+library firebase_functions_dart;
 
 import 'dart:convert';
 import 'package:firebase_core_dart/firebase_core_dart.dart';

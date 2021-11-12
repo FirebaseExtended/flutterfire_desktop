@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 part of firebase_auth_desktop;
 
 /// Dart delegate implementation of [UserCredentialPlatform].

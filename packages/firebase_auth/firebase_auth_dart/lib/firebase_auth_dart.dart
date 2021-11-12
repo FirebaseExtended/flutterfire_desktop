@@ -1,6 +1,9 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 /// Support for Firebase authentication methods
-/// with pure dart implmentation.
-///
+/// with a pure Dart implmentation.
 library firebase_auth_dart;
 
 import 'dart:async';
