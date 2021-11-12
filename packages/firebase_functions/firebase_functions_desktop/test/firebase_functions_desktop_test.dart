@@ -39,13 +39,17 @@ Future<void> main() async {
     group('.instance', () {
       test('uses the default FirebaseApp instance', () {
         expect(FirebaseFunctions.instance.app, isA<FirebaseApp>());
-        expect(FirebaseFunctions.instance.app.name,
-            equals(defaultFirebaseAppName));
+        expect(
+          FirebaseFunctions.instance.app.name,
+          equals(defaultFirebaseAppName),
+        );
       });
 
       test('uses the default Functions region', () {
         expect(
-            FirebaseFunctions.instance.delegate.region, equals('us-central1'));
+          FirebaseFunctions.instance.delegate.region,
+          equals('us-central1'),
+        );
       });
     });
 
@@ -74,7 +78,9 @@ Future<void> main() async {
       test('accepts a secondary FirebaseApp instance and custom region',
           () async {
         final functionsSecondary = FirebaseFunctions.instanceFor(
-            app: secondaryApp, region: 'europe-west1');
+          app: secondaryApp,
+          region: 'europe-west1',
+        );
         expect(functionsSecondary.app, isA<FirebaseApp>());
         expect(functionsSecondary.app.name, secondaryApp!.name);
         expect(functionsSecondary.delegate.region, equals('europe-west1'));
@@ -97,7 +103,9 @@ Future<void> main() async {
 
         // Instances using the same region but a different FirebaseApp should not be identical.
         final functions3 = FirebaseFunctions.instanceFor(
-            app: secondaryApp, region: 'europe-west1');
+          app: secondaryApp,
+          region: 'europe-west1',
+        );
         expect(functions1, isNot(same(functions3)));
 
         // Instances using the same FirebaseApp but a different region should not be identical.
@@ -110,28 +118,35 @@ Future<void> main() async {
     group('.useEmulator()', () {
       test('passes emulator "origin" through to the delegate', () {
         // Check null by default.
-        expect(FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
-            isNull);
+        expect(
+          FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
+          isNull,
+        );
         // Set the origin for the default FirebaseFunctions instance.
         FirebaseFunctions.instance.useFunctionsEmulator('0.0.0.0', 5000);
 
-        expect(FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
-            equals('http://0.0.0.0:5000'));
+        expect(
+          FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
+          equals('http://0.0.0.0:5000'),
+        );
       });
 
       test('"origin" is only set for the specific FirebaseFunctions instance',
           () {
         FirebaseFunctions.instance.useFunctionsEmulator('0.0.0.0', 5000);
         // Origin on the default FirebaseFunctions instance should be set.
-        expect(FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
-            equals('http://0.0.0.0:5000'));
+        expect(
+          FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
+          equals('http://0.0.0.0:5000'),
+        );
         // Origin on a secondary FirebaseFunctions instance should remain unset/null.
         expect(
-            FirebaseFunctions.instanceFor(region: 'europe-west1')
-                .httpsCallable('test')
-                .delegate
-                .origin,
-            isNull);
+          FirebaseFunctions.instanceFor(region: 'europe-west1')
+              .httpsCallable('test')
+              .delegate
+              .origin,
+          isNull,
+        );
       });
 
       test('handles "localhost" and "127.0.0.1" origin only for Android', () {
@@ -151,11 +166,9 @@ Future<void> main() async {
             FirebaseFunctions.instance.useFunctionsEmulator(testOrigin, 5000);
             // Origin on the default FirebaseFunctions instance should be set.
             expect(
-                FirebaseFunctions.instance
-                    .httpsCallable('test')
-                    .delegate
-                    .origin,
-                equals(expectedOrigin));
+              FirebaseFunctions.instance.httpsCallable('test').delegate.origin,
+              equals(expectedOrigin),
+            );
           }
         }
       });
@@ -163,26 +176,36 @@ Future<void> main() async {
 
     group('.httpsCallable()', () {
       test('throws if "name" is an empty string', () {
-        expect(() {
-          FirebaseFunctions.instance.httpsCallable('');
-        }, throwsA(isA<AssertionError>()));
+        expect(
+          () {
+            FirebaseFunctions.instance.httpsCallable('');
+          },
+          throwsA(isA<AssertionError>()),
+        );
       });
 
       test('passes "name" through to delegate', () {
-        expect(FirebaseFunctions.instance.httpsCallable('foo').delegate.name,
-            equals('foo'));
+        expect(
+          FirebaseFunctions.instance.httpsCallable('foo').delegate.name,
+          equals('foo'),
+        );
       });
 
       test('provides default "options" if none provided', () {
-        expect(FirebaseFunctions.instance.httpsCallable('foo').delegate.options,
-            isNotNull);
+        expect(
+          FirebaseFunctions.instance.httpsCallable('foo').delegate.options,
+          isNotNull,
+        );
       });
 
       test('passes custom "options" through to the delegate', () {
         final delegate = FirebaseFunctions.instance
-            .httpsCallable('foo',
-                options: HttpsCallableOptions(
-                    timeout: const Duration(seconds: 1337)))
+            .httpsCallable(
+              'foo',
+              options: HttpsCallableOptions(
+                timeout: const Duration(seconds: 1337),
+              ),
+            )
             .delegate;
         expect(delegate.options, isNotNull);
         expect(delegate.options.timeout, isA<Duration>());
@@ -195,15 +218,20 @@ Future<void> main() async {
     late HttpsCallable httpsCallable;
     setUpAll(() async {
       final app = await Firebase.initializeApp(
-          name: 'an app', options: firebaseOptions);
+        name: 'an app',
+        options: firebaseOptions,
+      );
       final firebaseFunctions = FirebaseFunctions.instanceFor(app: app);
       final delegate = firebaseFunctions.delegate as FirebaseFunctionsDesktop;
       delegate.dartFunctions.setApiClient(
-          MockClient((http.Request request) async => http.Response(
-                request.body,
-                200,
-                headers: {'content-type': 'application/json'},
-              )));
+        MockClient(
+          (http.Request request) async => http.Response(
+            request.body,
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
 
       httpsCallable = firebaseFunctions.httpsCallable('foo');
     });
@@ -281,20 +309,29 @@ Future<void> main() async {
 
       test('parameter validation throws if any other type of data is passed',
           () async {
-        expect(() {
-          return httpsCallable.call(() => {});
-        }, throwsA(isA<AssertionError>()));
+        expect(
+          () {
+            return httpsCallable.call(() => {});
+          },
+          throwsA(isA<AssertionError>()),
+        );
 
         // Check nested values in Lists or Maps also throw if invalid:
-        expect(() {
-          return httpsCallable.call({
-            'valid': 'hello world',
-            'not_valid': () => {},
-          });
-        }, throwsA(isA<AssertionError>()));
-        expect(() {
-          return httpsCallable.call(['valid', () => {}]);
-        }, throwsA(isA<AssertionError>()));
+        expect(
+          () {
+            return httpsCallable.call({
+              'valid': 'hello world',
+              'not_valid': () => {},
+            });
+          },
+          throwsA(isA<AssertionError>()),
+        );
+        expect(
+          () {
+            return httpsCallable.call(['valid', () => {}]);
+          },
+          throwsA(isA<AssertionError>()),
+        );
       });
     });
   });
