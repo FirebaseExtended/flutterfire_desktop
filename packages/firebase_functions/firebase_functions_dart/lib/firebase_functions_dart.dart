@@ -3,10 +3,13 @@
 ///
 library flutterfire_functions_dart;
 
+import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
+part 'src/exceptions.dart';
 
 /// A [FirebaseFunctions] instance that provides an [httpsCallable] interface
 /// for accessing the Firebase Functions API.
@@ -126,40 +129,66 @@ class HttpsCallable {
       final encodedData = json.encode({'data': data});
 
       try {
-        final result = await _client.post(
+        final response = await _client.post(
           _url,
           body: encodedData,
           headers: {
             'Content-Type': 'application/json'
-            // TODO: Authorization headers
+            // if (authToken != null)
             // 'Authorization': 'Bearer $authToken',
-            // 'Firebase'
+            // if (messagingToken != null)
+            // 'Firebase-Instance-ID-Token': '$messagingToken',
+            // if (appCheckToken != null)
+            // 'X-Firebase-AppCheck': '$appCheckToken'
           },
         ).timeout(options.timeout);
-        try {
-          final res = json.decode(result.body.isEmpty ? '{}' : result.body)
-              as Map<String, dynamic>;
-          if (res['result'] != null) {
-            return HttpsCallableResult(res['result']);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          try {
+            final body =
+                json.decode(response.body.isEmpty ? '{}' : response.body)
+                    as Map<String, dynamic>;
+            // Result is for backwards compatibility
+            final result = body['data'] ?? body['result'];
+            if (result == null) {
+              throw FirebaseFunctionsException(
+                message: 'Response is missing data field',
+                code: 'internal',
+                details: 'Result body from http call was ${response.body}',
+              );
+            }
+            return HttpsCallableResult(result);
+          } catch (e, st) {
+            // ignore: avoid_print
+            throw FirebaseFunctionsException(
+              message: 'Failed to parse json response',
+              code: 'internal',
+              details: 'Result body from http call was ${response.body}',
+              stackTrace: st,
+            );
           }
-          return HttpsCallableResult(res['data']);
-        } catch (e, st) {
-          // TODO: Specific error for invalid json response
-          // ignore: avoid_print
-          print('$e, $st');
-          rethrow;
+        } else {
+          throw _errorForResponse(
+            response.statusCode,
+            response.body.isEmpty ? null : json.decode(response.body),
+          );
         }
-      } catch (e, st) {
-        // TODO: Specific error for http error
-        // ignore: avoid_print
-        print('$e, $st');
-        rethrow;
+      } on TimeoutException catch (e, st) {
+        throw FirebaseFunctionsException(
+          message: 'Firebase functions timeout',
+          code: 'timeout',
+          details:
+              '${options.timeout} millisecond timeout occurred on request to $_url with $encodedData',
+          stackTrace: st,
+        );
       }
     } catch (e, st) {
-      // TODO: Specific error for invalid json input
-      // ignore: avoid_print
-      print('$e, $st');
-      rethrow;
+      throw FirebaseFunctionsException(
+        message: 'Data was not json encodeable',
+        code: 'internal',
+        details:
+            '${options.timeout} millisecond timeout occurred on request to $_url with $data',
+        stackTrace: st,
+      );
     }
   }
 }
