@@ -1,4 +1,4 @@
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// A structure containing additional user information from a federated identity
 /// provider.

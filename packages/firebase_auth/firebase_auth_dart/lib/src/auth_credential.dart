@@ -1,4 +1,4 @@
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// Interface that represents the credentials returned by an auth provider.
 /// Implementations specify the details about each auth provider's credential

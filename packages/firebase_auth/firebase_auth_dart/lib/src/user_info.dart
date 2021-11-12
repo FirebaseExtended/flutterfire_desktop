@@ -1,4 +1,4 @@
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// User profile information, visible only to the Firebase project's apps.
 class UserInfo {

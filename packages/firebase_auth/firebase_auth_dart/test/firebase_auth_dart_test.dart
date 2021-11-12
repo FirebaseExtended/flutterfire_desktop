@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
+import 'package:firebase_auth_dart/src/utils/persistence.dart';
+
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
@@ -59,9 +61,9 @@ Future<http.Response> _mockSuccessRequests(http.Request req) async {
 
 Future<http.Response> _mockFailedRequests(http.Request req) async {
   if (req.url.path.contains('verifyPassword')) {
-    return errorResponse(ErrorCode.emailNotFound);
+    return errorResponse('EMAIL_NOT_FOUND');
   } else if (req.url.path.contains('createAuthUri')) {
-    return errorResponse(ErrorCode.invalidIdentifier);
+    return errorResponse('INVALID_IDENTIFIER');
   } else {
     return http.Response('Error: Unknown endpoint', 404);
   }
@@ -147,7 +149,7 @@ void main() {
         expect(
           () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
           throwsA(isA<FirebaseAuthException>()
-              .having((e) => e.code, 'error code', ErrorCode.emailNotFound)),
+              .having((e) => e.code, 'error code', 'EMAIL_NOT_FOUND')),
         );
       });
       test('sign-out.', () async {
@@ -215,7 +217,7 @@ void main() {
           () => auth.fetchSignInMethodsForEmail(''),
           throwsA(
             isA<FirebaseAuthException>().having((p0) => p0.code,
-                'invalid identifier code', ErrorCode.invalidIdentifier),
+                'invalid identifier code', 'INVALID_IDENTIFIER'),
           ),
         );
       });
@@ -317,7 +319,7 @@ void main() {
           ),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
+                .having((p0) => p0.code, 'error code', 'EMAIL_NOT_FOUND'),
           ),
         );
       });
@@ -369,7 +371,7 @@ void main() {
           user?.delete(),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', ErrorCode.userNotFound),
+                .having((p0) => p0.code, 'error code', 'USER_NOT_FOUND'),
           ),
         );
         expect(
@@ -379,7 +381,7 @@ void main() {
           ),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', ErrorCode.emailNotFound),
+                .having((p0) => p0.code, 'error code', 'EMAIL_NOT_FOUND'),
           ),
         );
       });

@@ -1,6 +1,7 @@
 // ignore_for_file: require_trailing_commas
 
-part of flutterfire_auth_dart;
+import 'dart:convert';
+import 'dart:io';
 
 /// A storage box is a container for key-value pairs of data
 /// which exists in one box with specific name.

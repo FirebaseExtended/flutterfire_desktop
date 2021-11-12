@@ -1,4 +1,4 @@
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// A UserCredential is returned from authentication requests such as
 /// [FirebaseAuth.createUserWithEmailAndPassword].

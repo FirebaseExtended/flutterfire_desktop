@@ -1,7 +1,7 @@
 /// Support for Firebase authentication methods
 /// with pure dart implmentation.
 ///
-library flutterfire_auth_dart;
+library firebase_auth_dart;
 
 import 'dart:async';
 import 'dart:convert';
@@ -18,6 +18,7 @@ import 'package:meta/meta.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/utils/jwt.dart';
+import 'src/utils/persistence.dart';
 
 export 'src/auth_provider.dart';
 export 'src/providers/email_auth.dart';
@@ -36,4 +37,3 @@ part 'src/user.dart';
 part 'src/user_credential.dart';
 part 'src/user_info.dart';
 part 'src/user_metadata.dart';
-part 'src/utils/persistence.dart';
