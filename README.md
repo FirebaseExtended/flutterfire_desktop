@@ -22,6 +22,34 @@ dependencies:
 
 *Note: the plugin will override macOS implementation as it's currently being used for development purposes.*
 
+## Firebase App Initialization
+
+Unlike FlutterFire for mobile and web platfroms, the initlization in Desktop is done from Dart, which means there are no additional config files required.
+### DEFAULT app
+To initialize the default app, provide only options without a name.
+ ```dart
+ await Firebase.initializeApp(
+   options: const FirebaseOptions(
+     apiKey: '...',
+     appId: '...',
+     messagingSenderId: '...',
+     projectId: '...',
+   )
+ );
+ ```
+### Secondary app
+ ```dart
+ await Firebase.initializeApp(
+   name: 'SecondaryApp',
+   options: const FirebaseOptions(
+     apiKey: '...',
+     appId: '...',
+     messagingSenderId: '...',
+     projectId: '...',
+   )
+ );
+ ```
+
 ## Contributing
 
 This is a community project, contributions to help it progress faster are welcome:
