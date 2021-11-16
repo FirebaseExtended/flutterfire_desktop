@@ -32,8 +32,12 @@ class FirebaseCore extends FirebasePlatform {
     String? name,
     FirebaseOptions? options,
   }) async {
-    assert(options != null);
-    // Initialize the app in flutterfire_core_dart
+    assert(
+      options != null,
+      'options should be provided to initialize the default app.',
+    );
+
+    // Initialize the app in firebase_core_dart
     final _dartOptions = core_dart.FirebaseOptions.fromMap(options!.asMap);
     final _dartApp = await core_dart.Firebase.initializeApp(
       name: name,
