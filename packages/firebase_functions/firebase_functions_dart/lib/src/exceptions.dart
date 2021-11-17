@@ -81,9 +81,9 @@ String codeForHTTPStatus(int status) {
       return 'unavailable';
     case 504:
       return 'deadline-exceeded';
-    default: // ignore
+    default:
+      return 'unknown';
   }
-  return 'unknown';
 }
 
 /// Takes an HTTP response and returns the corresponding Error, if any.
