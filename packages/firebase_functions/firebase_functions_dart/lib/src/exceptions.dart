@@ -20,6 +20,35 @@ class FirebaseFunctionsException extends FirebaseException
 
   /// Additional data provided with the exception.
   final dynamic details;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! FirebaseFunctionsException) {
+      return false;
+    }
+    return other.message == message &&
+        other.code == code &&
+        other.details == details;
+  }
+
+  @override
+  int get hashCode => Object.hash(plugin, code, message, details);
+
+  @override
+  String toString() {
+    var output = '[$plugin/$code] $message';
+    if (details != null) {
+      output += '\n$details';
+    }
+    if (stackTrace != null) {
+      output += '\n\n${stackTrace.toString()}';
+    }
+
+    return output;
+  }
 }
 
 /// Takes an HTTP status code and returns the corresponding ErrorCode.

@@ -124,67 +124,69 @@ class HttpsCallable {
   /// Calls the function with the given data.
   Future<HttpsCallableResult<T>> call<T>([dynamic data]) async {
     assert(_debugIsValidParameterType(data), 'data must be json serialized');
+    String encodedData;
     try {
-      final encodedData = json.encode({'data': data});
-
-      try {
-        final response = await _client.post(
-          _url,
-          body: encodedData,
-          headers: {
-            'Content-Type': 'application/json'
-            // if (authToken != null)
-            // 'Authorization': 'Bearer $authToken',
-            // if (messagingToken != null)
-            // 'Firebase-Instance-ID-Token': '$messagingToken',
-            // if (appCheckToken != null)
-            // 'X-Firebase-AppCheck': '$appCheckToken'
-          },
-        ).timeout(options.timeout);
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          try {
-            final body =
-                json.decode(response.body.isEmpty ? '{}' : response.body)
-                    as Map<String, dynamic>;
-            // Result is for backwards compatibility
-            final result = body['data'] ?? body['result'];
-            if (result == null) {
-              throw FirebaseFunctionsException(
-                message: 'Response is missing data field',
-                code: 'internal',
-                details: 'Result body from http call was ${response.body}',
-              );
-            }
-            return HttpsCallableResult(result);
-          } catch (e, st) {
-            throw FirebaseFunctionsException(
-              message: 'Failed to parse json response',
-              code: 'internal',
-              details: 'Result body from http call was ${response.body}',
-              stackTrace: st,
-            );
-          }
-        } else {
-          throw _errorForResponse(
-            response.statusCode,
-            response.body.isEmpty ? null : json.decode(response.body),
-          );
-        }
-      } on TimeoutException catch (e, st) {
-        throw FirebaseFunctionsException(
-          message: 'Firebase functions timeout',
-          code: 'timeout',
-          details:
-              '${options.timeout} millisecond timeout occurred on request to $_url with $encodedData',
-          stackTrace: st,
-        );
-      }
+      encodedData = json.encode({'data': data});
     } catch (e, st) {
       throw FirebaseFunctionsException(
         message: 'Data was not json encodeable',
         code: 'internal',
         details:
             '${options.timeout} millisecond timeout occurred on request to $_url with $data',
+        stackTrace: st,
+      );
+    }
+
+    try {
+      final response = await _client.post(
+        _url,
+        body: encodedData,
+        headers: {
+          'Content-Type': 'application/json'
+          // if (authToken != null)
+          // 'Authorization': 'Bearer $authToken',
+          // if (messagingToken != null)
+          // 'Firebase-Instance-ID-Token': '$messagingToken',
+          // if (appCheckToken != null)
+          // 'X-Firebase-AppCheck': '$appCheckToken'
+        },
+      ).timeout(options.timeout);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        Map<String, dynamic> body;
+        try {
+          body = json.decode(response.body.isEmpty ? '{}' : response.body)
+              as Map<String, dynamic>;
+        } catch (e, st) {
+          throw FirebaseFunctionsException(
+            message: 'Failed to parse json response',
+            code: 'internal',
+            details: 'Result body from http call was ${response.body}',
+            stackTrace: st,
+          );
+        }
+        if (!body.containsKey('data') && !body.containsKey('result')) {
+          throw FirebaseFunctionsException(
+            message: 'Response is missing data field',
+            code: 'internal',
+            details: 'Result body from http call was ${response.body}',
+          );
+        }
+        // Result is for backwards compatibility
+        final result = body['data'] ?? body['result'];
+
+        return HttpsCallableResult(result);
+      } else {
+        throw _errorForResponse(
+          response.statusCode,
+          response.body.isEmpty ? null : json.decode(response.body),
+        );
+      }
+    } on TimeoutException catch (e, st) {
+      throw FirebaseFunctionsException(
+        message: 'Firebase functions timeout',
+        code: 'timeout',
+        details:
+            '${options.timeout} millisecond timeout occurred on request to $_url with $encodedData',
         stackTrace: st,
       );
     }
