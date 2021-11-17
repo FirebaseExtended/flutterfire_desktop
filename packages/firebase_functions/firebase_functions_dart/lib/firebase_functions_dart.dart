@@ -5,7 +5,6 @@ library flutterfire_functions_dart;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
@@ -158,7 +157,6 @@ class HttpsCallable {
             }
             return HttpsCallableResult(result);
           } catch (e, st) {
-            // ignore: avoid_print
             throw FirebaseFunctionsException(
               message: 'Failed to parse json response',
               code: 'internal',
