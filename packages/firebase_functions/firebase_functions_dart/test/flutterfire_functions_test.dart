@@ -260,4 +260,68 @@ Future<void> main() async {
       });
     });
   });
+
+  group('Exceptions', () {
+    HttpsCallable? httpsCallable;
+    late FirebaseFunctions functions;
+
+    setUpAll(() async {
+      final app = await Firebase.initializeApp(
+          name: 'another app', options: firebaseOptions);
+      functions = FirebaseFunctions.instanceFor(app: app);
+    });
+
+    test('Returning a non-json object throws', () {
+      Future<http.Response> _nonJsonObject(http.Request value) async =>
+          http.Response('asdfadsf', 200,
+              headers: {'Content-Type': 'application/json'});
+
+      functions.setApiClient(MockClient(_nonJsonObject));
+      httpsCallable = functions.httpsCallable('foo');
+      expect(
+        () => httpsCallable!.call(['valid', '']),
+        throwsA(
+          isA<FirebaseFunctionsException>()
+              .having((e) => e.code, 'code', contains('internal'))
+              .having((e) => e.message, 'message',
+                  contains('Failed to parse json response'))
+              .having((e) => e.details, 'details',
+                  contains('Result body from http call was')),
+        ),
+      );
+    });
+
+    test('Returning a json object without a data or result key throws', () {
+      Future<http.Response> _nonJsonObject(http.Request value) async =>
+          http.Response('{"bad": null}', 200,
+              headers: {'Content-Type': 'application/json'});
+
+      functions.setApiClient(MockClient(_nonJsonObject));
+      httpsCallable = functions.httpsCallable('foo');
+      expect(
+        () => httpsCallable!.call(['valid', '']),
+        throwsA(
+          isA<FirebaseFunctionsException>()
+              .having((e) => e.code, 'code', contains('internal'))
+              .having((e) => e.message, 'message',
+                  contains('Response is missing data field'))
+              .having((e) => e.details, 'details',
+                  contains('Result body from http call was {"bad": null}')),
+        ),
+      );
+    });
+    test('Returning a non 200 status throws', () {
+      Future<http.Response> _nonJsonObject(http.Request value) async =>
+          http.Response('{"bad": null}', 400,
+              headers: {'Content-Type': 'application/json'});
+
+      functions.setApiClient(MockClient(_nonJsonObject));
+      httpsCallable = functions.httpsCallable('foo');
+      expect(
+        () => httpsCallable!.call(['valid', '']),
+        throwsA(isA<FirebaseFunctionsException>()
+            .having((e) => e.code, 'code', contains('invalid-argument'))),
+      );
+    });
+  });
 }
