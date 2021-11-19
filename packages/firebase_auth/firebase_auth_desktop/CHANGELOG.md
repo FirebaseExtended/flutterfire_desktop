@@ -1,3 +1,14 @@
+## 0.1.1-dev.1
+
+ - **FIX**: example dependencies.
+ - **FIX**: run format & fix analyzer problems.
+ - **FEAT**: OAuth Sign In & Link (#14).
+ - **FEAT**: User methods (#13).
+ - **CHORE**: update example apps dependencies.
+ - **CHORE**: update example packages git ref.
+ - **CHORE**: bumping flutter constraints.
+ - **CHORE**: rename firebase_dart packages.
+
 ## 0.1.1-dev.0
 
  - **TEST**: more tests.
