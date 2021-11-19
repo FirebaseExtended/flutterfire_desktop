@@ -30,7 +30,7 @@ instead, add your configurations as options to `initializeApp` method without a 
 ```dart
 const firebaseOptions = FirebaseOptions(
   appId: '...',
-  apiKey: ...',
+  apiKey: '...',
   projectId: '...',
   messagingSenderId: '...',
   authDomain: '...',
