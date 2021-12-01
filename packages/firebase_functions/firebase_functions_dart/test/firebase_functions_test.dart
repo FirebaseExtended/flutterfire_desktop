@@ -4,6 +4,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_functions_dart/firebase_functions_dart.dart';
 import 'package:http/http.dart' as http;
@@ -159,7 +162,7 @@ Future<void> main() async {
 
       Future<http.Response> _successResponse(http.Request value) async =>
           http.Response(value.body, 200,
-              headers: {'Content-Type': 'application/json'});
+              headers: {'content-type': 'application/json'});
 
       setUpAll(() async {
         final app = await Firebase.initializeApp(
@@ -274,7 +277,7 @@ Future<void> main() async {
     test('Returning a non-json object throws', () {
       Future<http.Response> _nonJsonObject(http.Request value) async =>
           http.Response('asdfadsf', 200,
-              headers: {'Content-Type': 'application/json'});
+              headers: {'content-type': 'application/json'});
 
       functions.setApiClient(MockClient(_nonJsonObject));
       httpsCallable = functions.httpsCallable('foo');
@@ -294,7 +297,7 @@ Future<void> main() async {
     test('Returning a json object without a data or result key throws', () {
       Future<http.Response> _nonJsonObject(http.Request value) async =>
           http.Response('{"bad": null}', 200,
-              headers: {'Content-Type': 'application/json'});
+              headers: {'content-type': 'application/json'});
 
       functions.setApiClient(MockClient(_nonJsonObject));
       httpsCallable = functions.httpsCallable('foo');
@@ -313,7 +316,7 @@ Future<void> main() async {
     test('Returning a non 200 status throws', () {
       Future<http.Response> _nonJsonObject(http.Request value) async =>
           http.Response('{"bad": null}', 400,
-              headers: {'Content-Type': 'application/json'});
+              headers: {'content-type': 'application/json'});
 
       functions.setApiClient(MockClient(_nonJsonObject));
       httpsCallable = functions.httpsCallable('foo');
@@ -322,6 +325,75 @@ Future<void> main() async {
         throwsA(isA<FirebaseFunctionsException>()
             .having((e) => e.code, 'code', contains('invalid-argument'))),
       );
+    });
+  });
+
+  group('Authentication', () {
+    late final HttpsCallable httpsCallable;
+    late final FirebaseApp app;
+    late final FirebaseFunctions functions;
+
+    Future<http.Response> _authCheck(http.Request value) async {
+      if (value.headers.containsKey('Authorization')) {
+        return http.Response(jsonEncode({'data': 'authorized'}), 200,
+            headers: {'content-type': 'application/json'});
+      } else {
+        return http.Response(jsonEncode({'code': 'unauthenticated'}), 401,
+            headers: {'content-type': 'application/json'});
+      }
+    }
+
+    Future<http.Response> _authorize(http.Request request) async {
+      if (request.url.path.contains('signupNewUser')) {
+        return http.Response(
+            jsonEncode({
+              'idToken':
+                  // A jwt that should expire in the year 9000
+                  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIiLCJpYXQiOjE2MzgzMzM5NjUsImV4cCI6MjIxODc0MjY2NzkxLCJhdWQiOiIiLCJzdWIiOiIifQ.au4g9rl9k6C-OLTipN_E8AIOaN81HB5Qh1L3BpR3fNU'
+            }),
+            200,
+            headers: {'content-type': 'application/json'});
+      } else {
+        return http.Response(
+            jsonEncode({
+              'kind': 'identitytoolkit#GetAccountInfoResponse',
+              'users': [{}],
+            }),
+            200,
+            headers: {'content-type': 'application/json'});
+      }
+    }
+
+    setUpAll(() async {
+      app = await Firebase.initializeApp(
+          options: firebaseOptions, name: 'auth_functions');
+      // Clear auth storage
+      StorageBox.instanceOf(app.options.projectId)
+          .putValue('${app.options.apiKey}:${app.name}', null);
+      functions = FirebaseFunctions.instanceFor(app: app);
+      functions.setApiClient(MockClient(_authCheck));
+      httpsCallable = functions.httpsCallable('testFunctionAuthorized');
+    });
+
+    tearDown(() async {
+      // Clear auth storage
+      StorageBox.instanceOf(app.options.projectId)
+          .putValue('${app.options.apiKey}:${app.name}', null);
+    });
+    test('unauthorized access throws', () async {
+      expect(
+        () => httpsCallable.call('unauthorized'),
+        throwsA(isA<FirebaseFunctionsException>()
+            .having((e) => e.code, 'code', contains('unauthenticated'))),
+      );
+    });
+
+    test('authorized access succeeds', () async {
+      final auth = FirebaseAuth.instanceFor(app: app);
+      auth.setApiClient(MockClient(_authorize));
+      await auth.signInAnonymously();
+      final result = await httpsCallable.call('auth');
+      expect(result.data, equals('authorized'));
     });
   });
 }
