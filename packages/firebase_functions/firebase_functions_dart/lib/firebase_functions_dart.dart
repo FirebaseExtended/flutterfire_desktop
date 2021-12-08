@@ -5,6 +5,7 @@ library flutterfire_functions_dart;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
@@ -136,15 +137,19 @@ class HttpsCallable {
         stackTrace: st,
       );
     }
+    final auth = FirebaseAuth.instanceFor(app: app);
+    String? authToken;
+    if (auth.currentUser != null) {
+      authToken = await auth.currentUser!.getIdToken();
+    }
 
     try {
       final response = await _client.post(
         _url,
         body: encodedData,
         headers: {
-          'Content-Type': 'application/json'
-          // if (authToken != null)
-          // 'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+          if (authToken != null) 'Authorization': 'Bearer $authToken',
           // if (messagingToken != null)
           // 'Firebase-Instance-ID-Token': '$messagingToken',
           // if (appCheckToken != null)
@@ -176,9 +181,16 @@ class HttpsCallable {
 
         return HttpsCallableResult(result);
       } else {
+        Map<String, dynamic> details;
+        try {
+          details = json.decode(response.body);
+        } catch (e) {
+          // fine if we can't parse explicit error data
+          details = {'details': response.body};
+        }
         throw _errorForResponse(
           response.statusCode,
-          response.body.isEmpty ? null : json.decode(response.body),
+          details,
         );
       }
     } on TimeoutException catch (e, st) {
