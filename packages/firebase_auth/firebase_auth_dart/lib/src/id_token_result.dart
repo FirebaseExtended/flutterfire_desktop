@@ -4,7 +4,7 @@
 
 // ignore_for_file: avoid_dynamic_calls, require_trailing_commas
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 // ignore: public_member_api_docs
 class IdTokenResult {

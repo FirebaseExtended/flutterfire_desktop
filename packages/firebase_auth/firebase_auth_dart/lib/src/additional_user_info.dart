@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// A structure containing additional user information from a federated identity
 /// provider.

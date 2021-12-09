@@ -4,7 +4,7 @@
 
 // ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// Pure Dart service layer to perform all requests
 /// with the underlying Identity Toolkit API.

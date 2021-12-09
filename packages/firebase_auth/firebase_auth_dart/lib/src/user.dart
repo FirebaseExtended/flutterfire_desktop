@@ -4,7 +4,7 @@
 
 // ignore_for_file: require_trailing_commas
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// User object wrapping the responses from identity toolkit.
 class User {
@@ -362,6 +362,6 @@ void _assertSignedOut(FirebaseAuth instance) {
   if (instance.currentUser != null) {
     return;
   } else {
-    throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+    throw FirebaseAuthException(code: 'NOT_SIGNED_IN');
   }
 }

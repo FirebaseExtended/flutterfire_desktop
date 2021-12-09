@@ -1,10 +1,6 @@
-// Copyright 2021 Invertase Limited. All rights reserved.
-// Use of this source code is governed by a BSD-style license
-// that can be found in the LICENSE file.
-
 // ignore_for_file: require_trailing_commas
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
@@ -214,7 +210,7 @@ class FirebaseAuth {
         final token = await currentUser!.getIdToken();
         await _api.resetUserPassword(token);
       } else {
-        throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+        throw FirebaseAuthException(code: 'USER_NOT_FOUND');
       }
     } catch (e) {
       throw getException(e);
@@ -402,7 +398,7 @@ class FirebaseAuth {
       if (currentUser != null) {
         return await _api.refreshIdToken(currentUser!.refreshToken!);
       } else {
-        throw FirebaseAuthException.fromErrorCode(ErrorCode.userNotSignedIn);
+        throw FirebaseAuthException(code: 'NOT_SIGNED_IN');
       }
     } on HttpException catch (_) {
       rethrow;
@@ -431,17 +427,16 @@ class FirebaseAuth {
   @protected
   Exception getException(Object e) {
     if (e is idp.DetailedApiRequestError) {
-      final authException = FirebaseAuthException.fromErrorCode(e.message!);
-      log('$authException',
-          name: 'flutterfire_auth_dart/${authException.code}');
+      final authException = FirebaseAuthException(code: e.message!);
+      log('$authException', name: 'firebase_auth_dart/${authException.code}');
 
       return authException;
     } else if (e is Exception) {
-      log('$e', name: 'flutterfire_auth_dart');
+      log('$e', name: 'firebase_auth_dart');
 
       return e;
     } else {
-      log('$e', name: 'flutterfire_auth_dart');
+      log('$e', name: 'firebase_auth_dart');
 
       return Exception(e);
     }

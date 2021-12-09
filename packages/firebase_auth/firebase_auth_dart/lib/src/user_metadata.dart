@@ -4,7 +4,7 @@
 
 // ignore_for_file: require_trailing_commas
 
-part of flutterfire_auth_dart;
+part of firebase_auth_dart;
 
 /// Interface representing a user's metadata.
 class UserMetadata {

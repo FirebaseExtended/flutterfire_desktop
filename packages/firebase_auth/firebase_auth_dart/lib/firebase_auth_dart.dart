@@ -1,7 +1,7 @@
 /// Support for Firebase authentication methods
 /// with pure dart implmentation.
 ///
-library flutterfire_auth_dart;
+library firebase_auth_dart;
 
 import 'dart:async';
 import 'dart:convert';
