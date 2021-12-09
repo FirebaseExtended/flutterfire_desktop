@@ -13,7 +13,7 @@
  - **REFACTOR**: useEmulator methods.
  - **FIX**: implement desktop user.
  - **FEAT**: support desktop IdTokenResult.
- - **FEAT**: initial design of flutterfire_core_dart (#5).
+ - **FEAT**: initial design of firebase_core_dart (#5).
  - **FEAT**: persistence & local storage (#4).
  - **FEAT**: user sendEmailVerification().
  - **FEAT**: user updateProfile & tests.

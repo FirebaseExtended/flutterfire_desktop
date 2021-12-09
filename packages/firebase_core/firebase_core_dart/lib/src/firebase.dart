@@ -1,19 +1,29 @@
-part of flutterfire_core_dart;
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
+part of firebase_core_dart;
 
 /// Entry point of Firebase Core for dart-only apps.
 class Firebase {
   // Ensures end-users cannot initialize the class.
   Firebase._();
 
-  ///
+  // Cached & lazily loaded instance of [FirebasePlatform].
+  // Avoids a [MethodChannelFirebase] being initialized until the user
+  // starts using Firebase.
+  // The property is visible for testing to allow tests to set a mock
+  // instance directly as a static property since the class is not initialized.
   @visibleForTesting
+  // ignore: public_member_api_docs
   static FirebaseCoreDelegate? delegatePackingProperty;
 
   static FirebaseCoreDelegate get _delegate =>
       delegatePackingProperty ?? FirebaseCoreDelegate._instance;
 
   /// Initializes a new [FirebaseApp] instance by [name] and [options] and returns
-  /// the created app. This method should be called before any usage of FlutterFire plugins.
+  /// the created app. This method should be called before any usage of
+  /// the Dart only `*_dart` plugins.
   ///
   /// If no name is passed, the options will be considered as the DEFAULT app.
   static Future<FirebaseApp> initializeApp({

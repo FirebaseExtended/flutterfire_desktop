@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 // ignore_for_file: deprecated_member_use_from_same_package, require_trailing_commas
 
 import 'package:collection/collection.dart';
@@ -5,7 +9,7 @@ import 'package:meta/meta.dart';
 
 /// The options used to configure a Firebase app.
 ///
-/// The default app:
+/// The **DEFAULT** app doesn't have a name:
 /// ```dart
 /// await Firebase.initializeApp(
 ///   options: const FirebaseOptions(
@@ -17,7 +21,7 @@ import 'package:meta/meta.dart';
 /// );
 /// ```
 ///
-/// Secondary app:
+/// Secondary app should have a name:
 /// ```dart
 /// await Firebase.initializeApp(
 ///   name: 'SecondaryApp',
@@ -33,6 +37,19 @@ import 'package:meta/meta.dart';
 class FirebaseOptions {
   /// The options used to configure a Firebase app.
   ///
+  /// The **DEFAULT** app doesn't have a name:
+  /// ```dart
+  /// await Firebase.initializeApp(
+  ///   options: const FirebaseOptions(
+  ///     apiKey: '...',
+  ///     appId: '...',
+  ///     messagingSenderId: '...',
+  ///     projectId: '...',
+  ///   )
+  /// );
+  /// ```
+  ///
+  /// Secondary app should have a name:
   /// ```dart
   /// await Firebase.initializeApp(
   ///   name: 'SecondaryApp',
