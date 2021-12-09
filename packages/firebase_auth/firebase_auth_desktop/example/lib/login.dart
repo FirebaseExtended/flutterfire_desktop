@@ -1,13 +1,14 @@
-// ignore_for_file: public_member_api_docs, use_build_context_synchronously, avoid_print
-
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_desktop_example/animated_error.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_signin_button/button_builder.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -32,79 +33,179 @@ class ScaffoldSnackbar {
   }
 }
 
-/// Entrypoint example for various sign-in flows with Firebase.
-class SignInPage extends StatefulWidget {
-  SignInPage({Key? key}) : super(key: key);
+enum AuthMode { login, register }
 
-  /// The page title.
-  final String title = 'Sign In & Out';
-
-  @override
-  State<StatefulWidget> createState() => _SignInPageState();
+extension on AuthMode {
+  String get label => this == AuthMode.login ? 'Login' : 'Register';
 }
 
-class _SignInPageState extends State<SignInPage> {
-  User? user;
+/// Entrypoint example for various sign-in flows with Firebase.
+class AuthGate extends StatefulWidget {
+  const AuthGate({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  String error = '';
+
+  AuthMode mode = AuthMode.login;
+
+  bool isLoading = false;
+
+  setIsLoading() {
+    setState(() {
+      isLoading = !isLoading;
+    });
+  }
 
   @override
   void initState() {
-    _auth.userChanges().listen(
-          (event) => setState(() => user = event),
-        );
     super.initState();
+  }
+
+  void onClick() async {
+    if (formKey.currentState?.validate() ?? false) {
+      setIsLoading();
+
+      try {
+        if (mode == AuthMode.login) {
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+        } else {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        setIsLoading();
+
+        setState(() {
+          error = '${e.message}';
+        });
+      } catch (e) {
+        setIsLoading();
+      }
+    }
+  }
+
+  void onGoogleSignIn() async {
+    try {
+      // Trigger the authentication flow
+      final googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final googleAuth = await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      await windowManager.show();
+
+      // Once signed in, return the UserCredential
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = '${e.message}';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: <Widget>[
-          Builder(
-            builder: (BuildContext context) {
-              return TextButton(
-                onPressed: () async {
-                  final user = _auth.currentUser;
-                  await _signOut();
-
-                  if (user == null) {
-                    ScaffoldSnackbar.of(context).show('No one has signed in.');
-                    return;
-                  }
-                  await _signOut();
-
-                  final uid = user.uid;
-                  ScaffoldSnackbar.of(context)
-                      .show('$uid has successfully signed out.');
-                },
-                child: const Text('Sign out'),
-              );
-            },
-          )
-        ],
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return ListView(
-            padding: const EdgeInsets.all(8),
-            children: <Widget>[
-              _UserInfoCard(user: user),
-              const _EmailPasswordForm(),
-              const _EmailLinkSignInSection(),
-              const _AnonymouslySignInSection(),
-              const _PhoneSignInSection(),
-              const _OtherProvidersSignInSection(),
-            ],
-          );
-        },
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: SizedBox(
+            width: 400,
+            child: Form(
+              key: formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedError(text: error, show: error.isNotEmpty),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(hintText: 'Email'),
+                    validator: (value) =>
+                        value != null && value.isNotEmpty ? null : 'Required',
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(hintText: 'Password'),
+                    validator: (value) =>
+                        value != null && value.isNotEmpty ? null : 'Required',
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : onClick,
+                      child: isLoading
+                          ? const CircularProgressIndicator.adaptive()
+                          : Text(mode.label),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: SignInButton(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Buttons.Google
+                          : Buttons.GoogleDark,
+                      onPressed: onGoogleSignIn,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyText1,
+                      children: [
+                        TextSpan(
+                            text: mode == AuthMode.login
+                                ? "Don't have an account? "
+                                : "You have an account? "),
+                        TextSpan(
+                          text: mode == AuthMode.login
+                              ? "Register now"
+                              : "Click to login",
+                          style: const TextStyle(color: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              setState(() {
+                                mode = mode == AuthMode.login
+                                    ? AuthMode.register
+                                    : AuthMode.login;
+                              });
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
-  }
-
-  /// Example code for sign out.
-  Future<void> _signOut() async {
-    await _auth.signOut();
-    await GoogleSignIn().signOut();
   }
 }
 
@@ -517,7 +618,6 @@ class _EmailLinkSignInSectionState extends State<_EmailLinkSignInSection> {
 
       ScaffoldSnackbar.of(context).show('An email has been sent to $_email');
     } catch (e) {
-      print(e);
       ScaffoldSnackbar.of(context).show('Sending email failed');
     }
   }
@@ -820,7 +920,6 @@ class _PhoneSignInSectionState extends State<_PhoneSignInSection> {
       ScaffoldSnackbar.of(context)
           .show('Successfully signed in UID: ${user.uid}');
     } catch (e) {
-      print(e);
       ScaffoldSnackbar.of(context).show('Failed to sign in');
     }
   }
@@ -1037,7 +1136,6 @@ class _OtherProvidersSignInSectionState
       final user = userCredential.user!;
       ScaffoldSnackbar.of(context).show('Sign In ${user.uid} with GitHub');
     } catch (e) {
-      print(e);
       ScaffoldSnackbar.of(context).show('Failed to sign in with GitHub: $e');
     }
   }
@@ -1051,7 +1149,6 @@ class _OtherProvidersSignInSectionState
       final user = (await _auth.signInWithCredential(credential)).user!;
       ScaffoldSnackbar.of(context).show('Sign In ${user.uid} with Facebook');
     } catch (e) {
-      print(e);
       ScaffoldSnackbar.of(context).show('Failed to sign in with Facebook: $e');
     }
   }
@@ -1075,7 +1172,6 @@ class _OtherProvidersSignInSectionState
       final user = userCredential.user!;
       ScaffoldSnackbar.of(context).show('Sign In ${user.uid} with Twitter');
     } catch (e) {
-      print(e);
       ScaffoldSnackbar.of(context).show('Failed to sign in with Twitter: $e');
     }
   }

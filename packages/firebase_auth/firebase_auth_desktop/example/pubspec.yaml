@@ -18,19 +18,21 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  firebase_auth: ^3.1.5
+  firebase_auth: ^3.3.1
   firebase_auth_desktop: ^0.1.1-dev.1
   firebase_core: ^1.9.0
   firebase_core_desktop: ^0.1.1-dev.1
   flutter:
     sdk: flutter
+  flutter_lints: ^1.0.4
   flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.0-nullsafety
   google_sign_in_dartio: ^0.1.0
   window_manager: ^0.0.5
+  yaru: ^0.2.0
 
 dependency_overrides:
   firebase_auth_desktop:
@@ -46,7 +48,6 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

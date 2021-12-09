@@ -102,6 +102,15 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     return this;
   }
 
+  /// Map [auth_dart.FirebaseAuthException] to [FirebaseAuthException].
+  Exception _mapExceptionType(Object e) {
+    if (e is auth_dart.FirebaseAuthException) {
+      return FirebaseAuthException(code: e.code, message: e.message);
+    } else {
+      return Exception(e);
+    }
+  }
+
   @override
   Future<UserCredentialPlatform> signInWithEmailAndPassword(
       String email, String password) async {
@@ -111,8 +120,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailAndPassword(email, password),
       );
     } catch (exception) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw _mapExceptionType(exception);
     }
   }
 
