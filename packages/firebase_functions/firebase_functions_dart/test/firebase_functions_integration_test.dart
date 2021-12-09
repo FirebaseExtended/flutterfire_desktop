@@ -1,9 +1,5 @@
 // ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_functions_dart/firebase_functions_dart.dart';
