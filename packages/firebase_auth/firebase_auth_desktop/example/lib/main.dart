@@ -1,7 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages, public_member_api_docs
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_desktop_example/profile.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
@@ -9,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:yaru/yaru.dart';
 
 import 'login.dart';
+import 'profile.dart';
 
 /// Initialize with a secondary app until dart-only initialization is merged.
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
@@ -75,13 +75,14 @@ class AuthExampleApp extends StatelessWidget {
                 ),
                 Expanded(
                   child: StreamBuilder<User?>(
-                      stream: FirebaseAuth.instance.authStateChanges(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return const ProfilePage();
-                        }
-                        return const AuthGate();
-                      }),
+                    stream: FirebaseAuth.instance.authStateChanges(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return const ProfilePage();
+                      }
+                      return const AuthGate();
+                    },
+                  ),
                 ),
               ],
             );
