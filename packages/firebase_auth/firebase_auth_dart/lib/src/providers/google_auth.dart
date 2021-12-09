@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 // ignore_for_file: require_trailing_commas, prefer_relative_imports, non_constant_identifier_names, avoid_returning_this
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
