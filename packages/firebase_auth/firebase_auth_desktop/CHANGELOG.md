@@ -1,3 +1,10 @@
+## 0.1.1-dev.2
+
+ - **FIX**: pub versions (#20).
+ - **FEAT**: brand new auth example app.
+ - **CHORE**: publish packages.
+ - **CHORE**: publish packages.
+
 ## 0.1.1-dev.1
 
  - **FIX**: example dependencies.

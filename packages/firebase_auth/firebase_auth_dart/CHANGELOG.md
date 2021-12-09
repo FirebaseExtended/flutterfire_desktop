@@ -1,3 +1,9 @@
+## 0.1.1-dev.1
+
+ - **REFACTOR**: rename _dart packages.
+ - **FIX**: pub versions (#20).
+ - **CHORE**: rename firebase_dart packages.
+
 ## 0.1.1-dev.0
 
  - **TEST**: more tests.
