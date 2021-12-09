@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class AnimatedError extends StatefulWidget {
@@ -28,13 +30,13 @@ class _AnimatedErrorState extends State<AnimatedError>
           visible: widget.show,
           child: Container(
             alignment: AlignmentDirectional.centerStart,
-            child: Text(widget.show ? widget.text : ''),
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(5),
             ),
+            child: Text(widget.show ? widget.text : ''),
           ),
         ),
       ),

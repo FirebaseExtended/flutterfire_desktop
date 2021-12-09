@@ -4,9 +4,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 /// Profile page shows after sign in or registerationg
 class ProfilePage extends StatefulWidget {
+  // ignore: public_member_api_docs
   const ProfilePage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProfilePageState createState() => _ProfilePageState();
 }
 
@@ -21,9 +23,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Map User provider data into a list of Provider Ids.
-  get userProviders => user.providerData.map((e) => e.providerId).toList();
+  List get userProviders => user.providerData.map((e) => e.providerId).toList();
 
-  updateProfileImage() async {
+  Future updateProfileImage() async {
     await user.updatePhotoURL(photoURL);
   }
 
@@ -67,8 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(user.displayName ?? "User"),
-              Text(user.email ?? "User"),
+              Text(user.displayName ?? 'User'),
+              Text(user.email ?? 'User'),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
