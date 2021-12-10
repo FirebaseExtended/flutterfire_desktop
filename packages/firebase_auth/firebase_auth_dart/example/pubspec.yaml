@@ -1,0 +1,22 @@
+name: firebase_auth_dart_example
+description: A simple command-line application.
+version: 1.0.0
+# homepage: https://www.example.com
+environment:
+  sdk: '>=2.14.4 <3.0.0'
+
+dev_dependencies:
+  lints: ^1.0.0
+
+dependencies:
+  ansicolor: ^2.0.1
+  args: ^2.3.0
+  cli_util: ^0.3.5
+  firebase_auth_dart: ^0.1.1-dev.1
+  firebase_core_dart: ^0.1.1-dev.1
+
+dependency_overrides:
+  firebase_auth_dart:
+    path: ../
+  firebase_core_dart:
+    path: ../../../firebase_core/firebase_core_dart
