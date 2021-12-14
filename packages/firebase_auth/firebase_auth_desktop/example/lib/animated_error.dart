@@ -36,7 +36,13 @@ class _AnimatedErrorState extends State<AnimatedError>
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Text(widget.show ? widget.text : ''),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Text(
+                widget.show ? widget.text : '',
+                key: ValueKey<String>(widget.text),
+              ),
+            ),
           ),
         ),
       ),

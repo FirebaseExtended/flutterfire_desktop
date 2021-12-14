@@ -26,7 +26,11 @@ class ScaffoldSnackbar {
     ScaffoldMessenger.of(_context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          width: 400,
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
   }
 }
