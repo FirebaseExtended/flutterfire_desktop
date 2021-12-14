@@ -52,7 +52,8 @@ class User extends UserPlatform {
     try {
       return UserCredential(
         auth,
-        await _user.linkWithCredential(mapAuthCredential(credential)),
+        await _user
+            .linkWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
       throw mapExceptionType(e);
@@ -73,8 +74,7 @@ class User extends UserPlatform {
   }
 
   @override
-  // TODO: implement metadata
-  UserMetadata get metadata => throw UnimplementedError();
+  UserMetadata get metadata => mapUserMetadataFromDart(_user.metadata);
 
   @override
   String? get phoneNumber => _user.phoneNumber;
@@ -89,9 +89,16 @@ class User extends UserPlatform {
 
   @override
   Future<UserCredentialPlatform> reauthenticateWithCredential(
-      AuthCredential credential) {
-    // TODO: implement reauthenticateWithCredential
-    throw UnimplementedError();
+      AuthCredential credential) async {
+    try {
+      return UserCredential(
+        auth,
+        await _user.reauthenticateWithCredential(
+            mapAuthCredentialFromPlatform(credential)),
+      );
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override
@@ -102,27 +109,33 @@ class User extends UserPlatform {
     try {
       await _user.reload();
     } catch (e) {
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
   @override
-  Future<void> sendEmailVerification(ActionCodeSettings? actionCodeSettings) {
-    // TODO: implement sendEmailVerification
-    throw UnimplementedError();
+  Future<void> sendEmailVerification(
+      ActionCodeSettings? actionCodeSettings) async {
+    try {
+      await _user.sendEmailVerification();
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override
-  // TODO: implement tenantId
-  String? get tenantId => throw UnimplementedError();
+  String? get tenantId => _user.tenantId;
 
   @override
   String get uid => _user.uid;
 
   @override
-  Future<UserPlatform> unlink(String providerId) {
-    // TODO: implement unlink
-    throw UnimplementedError();
+  Future<UserPlatform> unlink(String providerId) async {
+    try {
+      return User(auth, await _user.unlink(providerId));
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override

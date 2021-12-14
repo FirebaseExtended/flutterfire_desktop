@@ -251,8 +251,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInAnonymously(),
       );
     } catch (e) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -262,7 +261,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.signInWithCredential(mapAuthCredential(credential)),
+        await _auth!
+            .signInWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
       throw mapExceptionType(e);

@@ -87,9 +87,33 @@ class User {
     return _user['refreshToken'];
   }
 
+  /// The current user's tenant ID.
+  ///
+  /// This is a read-only property, which indicates the tenant ID used to sign in
+  /// the current user.
+  /// This is null if the user is signed in from the parent project.
+  String? get tenantId => throw UnimplementedError();
+
   /// The unique id of a user in Firebase.
   String get uid {
     return _user['localId'];
+  }
+
+  /// Unlinks a provider from a user account.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  ///
+  /// **no-such-provider:**
+  /// Thrown if the user does not have this provider linked or when the provider
+  /// ID given does not exist.
+  Future<User> unlink(String providerId) async {
+    try {
+      // await _auth._api.unlink();
+      // await reload();
+      throw UnimplementedError();
+    } catch (e) {
+      throw _auth.getException(e);
+    }
   }
 
   /// Deletes and signs out the user.
