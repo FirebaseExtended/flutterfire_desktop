@@ -427,7 +427,14 @@ class FirebaseAuth {
   @protected
   Exception getException(Object e) {
     if (e is idp.DetailedApiRequestError) {
-      final authException = FirebaseAuthException(code: e.message!);
+      var errorCode = e.message ?? '';
+
+      // Solves a problem with incosistent error codes coming from the server.
+      if (errorCode.contains(' ')) {
+        errorCode = errorCode.split(' ').first;
+      }
+
+      final authException = FirebaseAuthException(code: errorCode);
       log('$authException', name: 'firebase_auth_dart/${authException.code}');
 
       return authException;

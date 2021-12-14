@@ -13,7 +13,8 @@ import 'package:firebase_auth_platform_interface/firebase_auth_platform_interfac
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
 
-part 'src/dart_to_platfrom_type.dart';
+import 'src/utils/type_mapper.dart';
+
 part 'src/firebase_auth_user.dart';
 part 'src/firebase_auth_user_credential.dart';
 
@@ -106,15 +107,6 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     return this;
   }
 
-  /// Map [auth_dart.FirebaseAuthException] to [FirebaseAuthException].
-  Exception _mapExceptionType(Object e) {
-    if (e is auth_dart.FirebaseAuthException) {
-      return FirebaseAuthException(code: e.code, message: e.message);
-    } else {
-      return Exception(e);
-    }
-  }
-
   @override
   Future<UserCredentialPlatform> signInWithEmailAndPassword(
       String email, String password) async {
@@ -123,8 +115,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         this,
         await _auth!.signInWithEmailAndPassword(email, password),
       );
-    } catch (exception) {
-      throw _mapExceptionType(exception);
+    } catch (e) {
+      throw mapExceptionType(e);
     }
   }
 
@@ -132,9 +124,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
       return await _auth!.fetchSignInMethodsForEmail(email);
-    } catch (exception) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+    } catch (e) {
+      throw mapExceptionType(e);
     }
   }
 
@@ -156,8 +147,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.sendPasswordResetEmail(email);
     } catch (e) {
-      // TODO(pr_Mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -176,8 +166,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.createUserWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -227,8 +216,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.sendSignInLinkToEmail(email);
     } catch (e) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -274,11 +262,10 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.signInWithCredential(_authCredential(credential)),
+        await _auth!.signInWithCredential(mapAuthCredential(credential)),
       );
     } catch (e) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -297,8 +284,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailLink(email, emailLink),
       );
     } catch (e) {
-      // TODO(pr_mais): throw FirebaseAuthException
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -326,7 +312,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.signOut();
     } catch (e) {
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -336,9 +322,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       await _auth!.useAuthEmulator();
 
       return;
-    } catch (exception) {
-      // TODO(pr-mais): throw [FirebaseAuthException]
-      rethrow;
+    } catch (e) {
+      throw mapExceptionType(e);
     }
   }
 

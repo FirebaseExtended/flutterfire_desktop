@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-part of firebase_auth_desktop;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 
-/// Map from Dart package type to the platfrom interface type.
-auth_dart.AuthCredential _authCredential(AuthCredential credential) {
+/// Map from [AuthCredential] to [auth_dart.AuthCredential].
+auth_dart.AuthCredential mapAuthCredential(AuthCredential credential) {
   if (credential is EmailAuthCredential) {
     return auth_dart.EmailAuthProvider.credential(
       email: credential.email,
@@ -21,5 +22,14 @@ auth_dart.AuthCredential _authCredential(AuthCredential credential) {
       providerId: credential.providerId,
       signInMethod: credential.signInMethod,
     );
+  }
+}
+
+/// Map [auth_dart.FirebaseAuthException] to [FirebaseAuthException].
+Exception mapExceptionType(Object e) {
+  if (e is auth_dart.FirebaseAuthException) {
+    return FirebaseAuthException(code: e.code, message: e.message);
+  } else {
+    return Exception(e);
   }
 }
