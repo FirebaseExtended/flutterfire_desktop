@@ -39,8 +39,7 @@ class User extends UserPlatform {
 
       return IdTokenResult(idTokenResult.toMap);
     } catch (e) {
-      // TODO(pr-mais):
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -53,11 +52,10 @@ class User extends UserPlatform {
     try {
       return UserCredential(
         auth,
-        await _user.linkWithCredential(_authCredential(credential)),
+        await _user.linkWithCredential(mapAuthCredential(credential)),
       );
     } catch (e) {
-      // TODO(pr-mais): handle Dart exception
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -132,8 +130,7 @@ class User extends UserPlatform {
     try {
       await _user.updateEmail(newEmail);
     } catch (e) {
-      // TODO(pr-mais):
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
@@ -142,8 +139,7 @@ class User extends UserPlatform {
     try {
       await _user.updatePassword(newPassword);
     } catch (e) {
-      // TODO(pr-mais):
-      rethrow;
+      throw mapExceptionType(e);
     }
   }
 
