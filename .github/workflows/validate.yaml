@@ -74,4 +74,4 @@ jobs:
       - name: Start Firebase Emulator
         run: cd .\.github\workflows\scripts && .\start-firebase-emulator.bat
       - name: 'Run Tests'
-        run: cmd /K melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
+        run: cmd /c melos run test --no-select
