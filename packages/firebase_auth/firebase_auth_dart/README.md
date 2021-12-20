@@ -27,7 +27,7 @@ Initialize the package by calling the API entry point:
 FirebaseAuth auth = FirebaseAuth.instance;
 ```
 
-By default, this allows you to interact with Firebase Auth using the default Firebase App used whilst installing Firebase. If however you'd like to use a secondary Firebase App, use the instanceFor method:
+By default, this allows you to interact with Firebase Auth using the default Firebase App used whilst installing Firebase. If however you'd like to use a secondary Firebase App, use the `instanceFor` method:
 
 ```dart
 FirebaseApp secondaryApp = Firebase.app('SecondaryApp');
@@ -38,7 +38,7 @@ FirebaseAuth auth = FirebaseAuth.instanceFor(app: secondaryApp);
 
 You can listen to changes in authentication states through the following streams:
 
-1. `onAuthStateChanged()`: fires eents pon in changes in user's state, on sign in and sign out.
+1. `onAuthStateChanged()`: fires event upon changes in `User` state, on sign in and sign out.
    ```dart
    FirebaseAuth.instance
   .onAuthStateChanged()
@@ -50,7 +50,7 @@ You can listen to changes in authentication states through the following streams
     }
   });
    ```
-2. `onIdTokenChanged()`: in addition to listening to the changes in User state, it also fires events when the current user's token changes.
+2. `onIdTokenChanged()`: in addition to listening to the changes in `User` state, it also fires events when the current user's token changes.
    ```dart
    FirebaseAuth.instance
   .onIdTokenChanged()
