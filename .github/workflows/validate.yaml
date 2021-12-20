@@ -60,6 +60,10 @@ jobs:
       - name: 'Install Flutter'
         run: .\.github\workflows\scripts\install-flutter.bat stable
       - name: 'Install Tools'
-        run: .\.github\workflows\scripts\install-tools.bat
+        run: |
+          .\.github\workflows\scripts\install-tools.bat
+          npm i -g firebase-tools
+      - name: Start Firebase Emulator
+        run: cd .\.github\workflows\scripts && .\start-firebase-emulator.bat
       - name: 'Run Tests'
         run: cmd /K melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
