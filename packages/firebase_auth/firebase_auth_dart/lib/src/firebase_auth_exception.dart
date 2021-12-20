@@ -46,7 +46,12 @@ class FirebaseAuthException extends FirebaseException implements Exception {
   FirebaseAuthException({String code = 'UKNOWN', String? message})
       : super(
           plugin: 'firebase_auth',
-          code: code,
+          code: _getCode(code),
           message: error[code] ?? message,
         );
+
+  /// Map to error code that matches the rest of FlutterFire plugins.
+  static String _getCode(String code) {
+    return code.toLowerCase().replaceAll('error_', '').replaceAll('_', '-');
+  }
 }
