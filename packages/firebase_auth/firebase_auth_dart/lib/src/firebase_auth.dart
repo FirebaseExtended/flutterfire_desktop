@@ -435,7 +435,8 @@ class FirebaseAuth {
       }
 
       final authException = FirebaseAuthException(code: errorCode);
-      log('$authException', name: 'firebase_auth_dart/${authException.code}');
+      log('${authException.message}',
+          name: 'firebase_auth_dart/${authException.code}');
 
       return authException;
     } else if (e is Exception) {
