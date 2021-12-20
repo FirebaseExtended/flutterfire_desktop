@@ -63,9 +63,9 @@ Future<http.Response> _mockSuccessRequests(http.Request req) async {
 
 Future<http.Response> _mockFailedRequests(http.Request req) async {
   if (req.url.path.contains('verifyPassword')) {
-    return errorResponse('EMAIL_NOT_FOUND');
+    return errorResponse('email-not-found');
   } else if (req.url.path.contains('createAuthUri')) {
-    return errorResponse('INVALID_IDENTIFIER');
+    return errorResponse('invalid-identifier');
   } else {
     return http.Response('Error: Unknown endpoint', 404);
   }
@@ -151,7 +151,7 @@ void main() {
         expect(
           () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
           throwsA(isA<FirebaseAuthException>()
-              .having((e) => e.code, 'error code', 'EMAIL_NOT_FOUND')),
+              .having((e) => e.code, 'error code', 'email-not-found')),
         );
       });
       test('sign-out.', () async {
@@ -219,7 +219,7 @@ void main() {
           () => auth.fetchSignInMethodsForEmail(''),
           throwsA(
             isA<FirebaseAuthException>().having((p0) => p0.code,
-                'invalid identifier code', 'INVALID_IDENTIFIER'),
+                'invalid identifier code', 'invalid-identifier'),
           ),
         );
       });
@@ -321,7 +321,7 @@ void main() {
           ),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', 'EMAIL_NOT_FOUND'),
+                .having((p0) => p0.code, 'error code', 'email-not-found'),
           ),
         );
       });
@@ -373,7 +373,7 @@ void main() {
           user?.delete(),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', 'USER_NOT_FOUND'),
+                .having((p0) => p0.code, 'error code', 'user-not-found'),
           ),
         );
         expect(
@@ -383,7 +383,7 @@ void main() {
           ),
           throwsA(
             isA<FirebaseAuthException>()
-                .having((p0) => p0.code, 'error code', 'EMAIL_NOT_FOUND'),
+                .having((p0) => p0.code, 'error code', 'email-not-found'),
           ),
         );
       });
