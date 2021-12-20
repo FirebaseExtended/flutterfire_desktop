@@ -67,7 +67,7 @@ GOTO :start
   EXIT /B 1
 
 :start
-  IF DEFINED IS_CI (
+  IF DEFINED CI (
     GOTO :run_for_ci
   ) ELSE (
     ECHO Starting Firebase Emulator Suite in foreground.
