@@ -2,7 +2,7 @@
 
 @REM Configuration options:
 SET STORAGE_EMULATOR_DEBUG=true
-SET EMULATOR_COMMAND="firebase emulators:start --only auth,firestore,functions,storage --project react-native-firebase-testing"
+SET EMULATOR_COMMAND="firebase emulators:start --only auth,functions --project react-native-firebase-testing"
 SET /A MAX_RETRIES=3
 SET /A MAX_CHECKATTEMPTS=60
 SET /A CHECKATTEMPTS_WAIT=1
