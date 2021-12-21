@@ -1,3 +1,16 @@
+## 0.1.1-dev.2
+
+ - **FIX**: pub versions (#20).
+ - **FEAT**: implement more user methods and properties.
+ - **FEAT**: adding updateDisplayName example.
+ - **FEAT**: map exceptions between Dart and Platform packages (#27).
+ - **FEAT**: brand new auth example app.
+ - **DOCS**: README & API docs (#28).
+ - **DOCS**: README & comments (#26).
+ - **CHORE**: remove old example app code.
+ - **CHORE**: publish packages.
+ - **CHORE**: publish packages.
+
 ## 0.1.1-dev.1
 
  - **FIX**: example dependencies.
