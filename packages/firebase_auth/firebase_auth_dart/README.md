@@ -111,7 +111,91 @@ The user will persist accross sessions, such as restarting the app, until the us
       print(e);
     }
    ```
+   
+#### OAuth providers
 
+The package supports OAuth sign-in providers such as Google, through `signInWithCredential()` method.
+This method takes a `AuthCredential` object, which requires the providerId and signInMethod.
+
+However, to authenticate via an OAuth provider, you will need some kind of a token returned after the user
+signs in with the provider to be passed to `signInWithCredential()`, mostly it means using another package to carry this flow for you. Currently, there's no package for any provider that is Dart only and not dependent on the Flutter SDK.
+
+### Signing Out
+
+To sign a user out, call the `signOut()` method:
+```dart
+await FirebaseAuth.instance.signOut();
+```
+If you are listening to changes in authentication state, a new event will be sent to your listeners.
+### User management
+Once authenticated, you have access to the user via the User class. The class stores the current information about the user such as their unique user ID, any linked provider accounts and methods to manage the user.
+
+The User class is returned from any authentication state listeners, or as part of a UserCredential when using authentication methods. If you are sure the user is currently signed-in, you can also access the User via the `currentUser` property on the `FirebaseAuth` instance. The examples below show how to access the user:
+
+1. Via `currentUser`:
+
+    ```dart
+    var currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      print(currentUser.uid);
+    }
+    ```
+2. Via Sign-in methods:
+
+    ```dart
+    UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
+
+    print(userCredential.user!.uid);
+    ```
+3. Via state listner stream:
+
+    ```dart
+    FirebaseAuth.instance
+      .onAuthStateChanged()
+      .listen((User? user) {
+        if (user != null) {
+          print(user.uid);
+        }
+      });
+    ```
+
+#### Deleting a user
+If your user wishes to delete their account from your project, this can be achieved with the `delete()` method. Since this is a security-sensitive operation, it requires that user must have recently signed-in. You can handle this scenario by catching the error, for example:
+```dart
+try {
+  await FirebaseAuth.instance.currentUser!.delete();
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'requires-recent-login') {
+    print('The user must reauthenticate before this operation can be executed.');
+  }
+}
+```
+#### Reauthenticating a user
+As mentioned above, some operations such as deleting the user, updating their email address or providers require the user to have recently signed in. Rather than signing the user out and back in again, the `reauthenticateWithCredential()` method can be called. If a recent login is required, create a new AuthCredential and pass it to the method. For example, to reauthenticate with email & password, create a new `EmailAuthCredential`:
+```dart
+// Prompt the user to enter their email and password
+String email = 'barry.allen@example.com';
+String password = 'SuperSecretPassword!';
+
+// Create a credential
+AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
+
+// Reauthenticate
+await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(credential);
+```
+#### Emulator Usage
+If you are using the local Authentication emulator, then it is possible to connect to this using the useAuthEmulator method. Ensure you pass the correct port on which the Firebase emulator is running on. Ensure you have enabled network connections to the emulators in your apps following the emulator usage instructions in the general FlutterFire installation notes for each operating system.
+```dart
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  // Ideal time to initialize
+  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //...
+}
+```
 ## Issue and Feedback
 
 Please file any issues, bugs, or feature requests in [our issue tracker](https://github.com/invertase/flutterfire_desktop/issues/new/choose).
