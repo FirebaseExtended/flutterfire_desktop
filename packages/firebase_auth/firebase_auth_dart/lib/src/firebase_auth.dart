@@ -25,24 +25,27 @@ class FirebaseAuth {
     });
   }
 
-  // Cached instances of [FirebaseAuth].
-  static final Map<String, FirebaseAuth> _firebaseAuthInstances = {};
-
-  /// The [FirebaseApp] for this current Auth instance.
-  late FirebaseApp app;
-
-  /// Change the HTTP client for the purpose of testing.
-  @visibleForTesting
-  void setApiClient(http.Client client) {
-    _api._setApiClient(client);
-  }
-
   /// Returns an instance using the default [FirebaseApp].
   // ignore: prefer_constructors_over_static_methods
   static FirebaseAuth get instance {
     final defaultAppInstance = Firebase.app();
 
     return FirebaseAuth.instanceFor(app: defaultAppInstance);
+  }
+
+  // Cached instances of [FirebaseAuth].
+  static final Map<String, FirebaseAuth> _firebaseAuthInstances = {};
+
+  /// The [FirebaseApp] for this current Auth instance.
+  late FirebaseApp app;
+
+  /// Initialized [API] instance linked to this instance.
+  late final API _api;
+
+  /// Change the HTTP client for the purpose of testing.
+  @visibleForTesting
+  void setApiClient(http.Client client) {
+    _api._setApiClient(client);
   }
 
   StorageBox<Object> get _userStorage =>
@@ -57,15 +60,18 @@ class FirebaseAuth {
     }
   }
 
-  late final API _api;
-
   // ignore: close_sinks
   late StreamController<User?> _changeController;
 
   // ignore: close_sinks
   late StreamController<User?> _idTokenChangedController;
 
-  /// The currently signed in user for this instance.
+  /// Returns the current [User] if they are currently signed-in, or `null` if
+  /// not.
+  ///
+  /// You should not use this getter to determine the users current state,
+  /// instead use [onAuthStateChanged], or [onIdTokenChanged] to
+  /// subscribe to updates.
   User? currentUser;
 
   /// Sends events when the users sign-in state changes.
@@ -85,7 +91,7 @@ class FirebaseAuth {
 
   /// Helper method to update currentUser and events.
   @protected
-  void updateCurrentUserAndEvents(User? user) {
+  void _updateCurrentUserAndEvents(User? user) {
     _userStorage.putValue(
       '${app.options.apiKey}:${app.name}',
       {'currentUser': user?.toMap()},
@@ -96,10 +102,24 @@ class FirebaseAuth {
     _idTokenChangedController.add(user);
   }
 
-  /// Sign in a user using email and password.
+  /// Attempts to sign in a user with the given email address and password.
   ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// TODO: write the codes
+  /// If successful, it also signs the user in into the app and updates
+  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
+  ///
+  /// **Important**: You must enable Email & Password accounts in the Auth
+  /// section of the Firebase console before being able to use them.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `invalid-email`
+  ///   - Thrown if the email address is not valid.
+  /// - `user-disabled`
+  ///   - Thrown if the user corresponding to the given email has been disabled.
+  /// - `user-not-found`
+  ///   - Thrown if there is no user corresponding to the given email.
+  /// - `wrong-password`
+  ///   - Thrown if the password is invalid for the given email, or the account
+  ///     corresponding to the email does not have a password set.
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -109,7 +129,7 @@ class FirebaseAuth {
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response), this);
 
-      updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user);
 
       // Make a credential object based on the current sign-in method.
       return UserCredential._(
@@ -126,17 +146,23 @@ class FirebaseAuth {
             }),
       );
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  /// Create new user using email and password.
+  /// Tries to create a new user account with the given email address and
+  /// password.
   ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `INVALID_EMAIL`
-  /// - `EMAIL_EXISTS`
-  /// - `OPERATION_NOT_ALLOWED`
-  /// - `TOO_MANY_ATTEMPTS_TRY_LATER`
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `email-already-in-use`
+  ///   - Thrown if there already exists an account with the given email address.
+  /// - `invalid-email`
+  ///   - Thrown if the email address is not valid.
+  /// - `operation-not-allowed`
+  ///   - Thrown if email/password accounts are not enabled. Enable
+  ///    email/password accounts in the Firebase Console, under the Auth tab.
+  /// - `weak-password`
+  ///   - Thrown if the password is not strong enough.
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -147,7 +173,7 @@ class FirebaseAuth {
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response), this);
 
-      updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user);
 
       return UserCredential._(
         auth: this,
@@ -163,35 +189,48 @@ class FirebaseAuth {
             }),
       );
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  /// Fetch the list of providers associated with a specified email.
+  /// Returns a list of sign-in methods that can be used to sign in a given
+  /// user (identified by its main email address).
   ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `INVALID_EMAIL`: user doesn't exist
-  /// - `INVALID_IDENTIFIER`: the identifier isn't a valid email
+  /// This method is useful when you support multiple authentication mechanisms
+  /// if you want to implement an email-first authentication flow.
+  ///
+  /// An empty `List` is returned if the user could not be found.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `invalid-email`
+  ///   - Thrown if the email address is not valid.
+  /// - `invalid-identifier`
+  ///   - Thrown if the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
       final providers = await _api.fetchSignInMethodsForEmail(email);
 
       return providers;
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  /// Send a password reset email.
+  /// Sends a password reset email to the given email address.
   ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_EXISTS`: The email address is already in use by another account.
-  /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
+  /// To complete the password reset, call `confirmPasswordReset` with the code supplied
+  /// in the email sent to the user, along with the new password specified by the user.
+  ///
+  /// May throw a [FirebaseAuthException] with the following error codes:
+  /// - `email-exists`
+  ///   - The email address is already in use by another account.
+  /// - `invalid-id-token`
+  ///   - The user's credential is no longer valid. The user must sign in again.
   Future sendPasswordResetEmail(String email) async {
     try {
       await _api.sendPasswordResetEmail(email);
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
@@ -201,8 +240,10 @@ class FirebaseAuth {
   /// check [User.reauthenticateWithCredential].
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `OPERATION_NOT_ALLOWED`: Password sign-in is disabled for this project.
-  /// - `USER_DISABLED`: The user account has been disabled by an administrator.
+  /// - `operation-not-allowed`
+  ///   - Password sign-in is disabled for this project.
+  /// - `user-disabled`
+  ///   - The user account has been disabled by an administrator.
   /// TODO: make sure codes are correct
   Future resetUserPassword({String? newPassword, String? oldPassword}) async {
     try {
@@ -213,27 +254,36 @@ class FirebaseAuth {
         throw FirebaseAuthException(code: 'USER_NOT_FOUND');
       }
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
   /// Send a sign in link to email.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `email-not-found`
+  ///   - user doesn't exist
   Future sendSignInLinkToEmail(String email, [String? continueUrl]) async {
     try {
       await _api.sendSignInLinkToEmail(email, continueUrl);
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  /// Sign in anonymous users.
+  /// Asynchronously creates and becomes an anonymous user.
   ///
-  /// If there's a user already sign-in anonymously, will be returned.
+  /// If there is already an anonymous user signed in, that user will be
+  /// returned instead. If there is any other existing user signed in, that
+  /// user will be signed out.
   ///
-  /// TODO: describe exceptions
+  /// **Important**: You must enable Anonymous accounts in the Auth section
+  /// of the Firebase console before being able to use them.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `operation-not-allowed`
+  ///   - Thrown if anonymous accounts are not enabled. Enable anonymous accounts
+  ///     in the Firebase Console, under the Auth tab.
   Future<UserCredential> signInAnonymously() async {
     const providerId = 'anonymous';
 
@@ -256,7 +306,7 @@ class FirebaseAuth {
       // Map the json response to an actual user.
       final user = User(userData..addAll(response), this);
 
-      updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user);
 
       return UserCredential._(
           auth: this,
@@ -264,7 +314,7 @@ class FirebaseAuth {
           credential: const AuthCredential(
               providerId: providerId, signInMethod: providerId));
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
@@ -286,7 +336,49 @@ class FirebaseAuth {
     throw UnimplementedError('signInWithPop() is not yet implemented.');
   }
 
-  /// TODO
+  /// Asynchronously signs in to Firebase with the given 3rd-party credentials
+  /// (e.g. a Facebook login Access Token, a Google ID Token/Access Token pair,
+  /// etc.) and returns additional identity provider data.
+  ///
+  /// If successful, it also signs the user in into the app and updates
+  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
+  ///
+  /// If the user doesn't have an account already, one will be created
+  /// automatically.
+  ///
+  /// **Important**: You must enable the relevant accounts in the Auth section
+  /// of the Firebase console before being able to use them.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `account-exists-with-different-credential`
+  ///   - Thrown if there already exists an account with the email address
+  ///    asserted by the credential.
+  ///    Resolve this by calling [fetchSignInMethodsForEmail] and then asking
+  ///    the user to sign in using one of the returned providers.
+  ///    Once the user is signed in, the original credential can be linked to
+  ///    the user with [linkWithCredential].
+  /// - `invalid-credential`
+  ///   - Thrown if the credential is malformed or has expired.
+  /// - `operation-not-allowed`
+  ///   - Thrown if the type of account corresponding to the credential is not
+  ///    enabled. Enable the account type in the Firebase Console, under the
+  ///    Auth tab.
+  /// - `user-disabled`
+  ///   - Thrown if the user corresponding to the given credential has been
+  ///    disabled.
+  /// - `user-not-found`
+  ///   - Thrown if signing in with a credential from [EmailAuthProvider.credential]
+  ///    and there is no user corresponding to the given email.
+  /// - `wrong-password`
+  ///   - Thrown if signing in with a credential from [EmailAuthProvider.credential]
+  ///    and the password is invalid for the given email, or if the account
+  ///    corresponding to the email does not have a password set.
+  /// - `invalid-verification-code`
+  ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
+  ///    verification code of the credential is not valid.
+  /// - `invalid-verification-id`
+  ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
+  ///    verification ID of the credential is not valid.id.
   Future<UserCredential> signInWithCredential(
     AuthCredential credential,
   ) async {
@@ -307,7 +399,7 @@ class FirebaseAuth {
     // Map the json response to an actual user.
     final user = User(userData.toJson()..addAll(response.toJson()), this);
 
-    updateCurrentUserAndEvents(user);
+    _updateCurrentUserAndEvents(user);
 
     return UserCredential._(
       auth: this,
@@ -374,15 +466,17 @@ class FirebaseAuth {
       final response = await _api.getCurrentUser(idToken);
       return response.toJson();
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  /// Sign user out by cleaning currentUser, local persistence and all streams.
+  /// Signs out the current user.
   ///
+  /// If successful, it also updates
+  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
   Future<void> signOut() async {
     try {
-      updateCurrentUserAndEvents(null);
+      _updateCurrentUserAndEvents(null);
     } catch (exception) {
       log('$exception', name: 'FirebaseAuth/signOut');
 
@@ -390,28 +484,16 @@ class FirebaseAuth {
     }
   }
 
-  /// Refresh a user ID token using the refreshToken,
-  /// will refresh even if the token hasn't expired.
-  @protected
-  Future<String?> refreshIdToken() async {
-    try {
-      if (currentUser != null) {
-        return await _api.refreshIdToken(currentUser!.refreshToken!);
-      } else {
-        throw FirebaseAuthException(code: 'NOT_SIGNED_IN');
-      }
-    } on HttpException catch (_) {
-      rethrow;
-    } catch (exception) {
-      rethrow;
-    }
-  }
-
-  /// Use the emulator to perform all requests,
-  /// check your terminal for the port being used.
+  /// Changes this instance to point to an Auth emulator running locally.
+  ///
+  /// Set the [host] and [port] of the local emulator, such as "localhost"
+  /// with port 9099
+  ///
+  /// Note: Must be called immediately, prior to accessing auth methods.
+  /// Do not use with production credentials as emulator traffic is not encrypted.
   ///
   /// You must start the emulator in order to use it,
-  /// the mthod will throw if there's no running emulator,
+  /// the method will throw a [SocketException] if there's no running emulator,
   /// see:
   /// https://firebase.google.com/docs/emulator-suite/install_and_configure#install_the_local_emulator_suite
   Future<Map> useAuthEmulator(
@@ -419,13 +501,12 @@ class FirebaseAuth {
     try {
       return await _api.useEmulator(host, port);
     } catch (e) {
-      throw getException(e);
+      throw _getException(e);
     }
   }
 
-  ///
   @protected
-  Exception getException(Object e) {
+  Exception _getException(Object e) {
     if (e is idp.DetailedApiRequestError) {
       var errorCode = e.message ?? '';
 

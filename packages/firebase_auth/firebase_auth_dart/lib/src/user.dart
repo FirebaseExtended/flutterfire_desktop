@@ -112,7 +112,7 @@ class User {
       // await reload();
       throw UnimplementedError();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -129,7 +129,7 @@ class User {
       await _auth._api.delete(_idToken, uid);
       await _auth.signOut();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -160,7 +160,7 @@ class User {
 
   Future _refreshIdToken(bool forceRefresh) async {
     if (forceRefresh || _idToken.expirationTime.isBefore(DateTime.now())) {
-      _user['idToken'] = await _auth.refreshIdToken();
+      _user['idToken'] = await _refreshIdToken(true);
       _auth._idTokenChangedController.add(this);
     }
   }
@@ -209,7 +209,7 @@ class User {
       }
     } catch (e) {
       // TODO
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -258,7 +258,7 @@ class User {
       }
     } catch (e) {
       // TODO
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -267,7 +267,7 @@ class User {
     _assertSignedOut(_auth);
 
     _user.addAll(await _auth._reloadCurrentUser(_idToken));
-    _auth.updateCurrentUserAndEvents(_auth.currentUser);
+    _auth._updateCurrentUserAndEvents(_auth.currentUser);
   }
 
   /// Updates the user's email address.
@@ -289,7 +289,7 @@ class User {
       await _auth._api.updateEmail(newEmail, _idToken, uid);
       await reload();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -306,7 +306,7 @@ class User {
     try {
       await _auth._api.sendEmailVerification(_idToken);
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -325,7 +325,7 @@ class User {
       await _auth._api.updatePassword(newPassword, _idToken);
       await reload();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -341,7 +341,7 @@ class User {
           .updateProfile({'displayName': displayName}, _idToken, uid);
       await reload();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -356,7 +356,7 @@ class User {
       await _auth._api.updateProfile({'photoURL': photoURL}, _idToken, uid);
       await reload();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
@@ -372,7 +372,7 @@ class User {
       await _auth._api.updateProfile(newProfile, _idToken, uid);
       await reload();
     } catch (e) {
-      throw _auth.getException(e);
+      throw _auth._getException(e);
     }
   }
 
