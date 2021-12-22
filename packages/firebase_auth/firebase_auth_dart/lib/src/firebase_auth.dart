@@ -77,16 +77,18 @@ class FirebaseAuth {
   /// Sends events when the users sign-in state changes.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<User?> authStateChanges() {
-    return _changeController.stream;
+  Stream<User?> authStateChanges() async* {
+    yield currentUser;
+    yield* _changeController.stream;
   }
 
   /// Sends events for changes to the signed-in user's ID token,
   /// which includes sign-in, sign-out, and token refresh events.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<User?> idTokenChanges() {
-    return _idTokenChangedController.stream;
+  Stream<User?> idTokenChanges() async* {
+    yield currentUser;
+    yield* _idTokenChangedController.stream;
   }
 
   /// Helper method to update currentUser and events.
