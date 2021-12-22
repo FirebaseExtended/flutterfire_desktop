@@ -38,10 +38,10 @@ FirebaseAuth auth = FirebaseAuth.instanceFor(app: secondaryApp);
 
 You can listen to changes in authentication states through the following streams:
 
-1. `onAuthStateChanged()`: fires event upon changes in `User` state, on sign in and sign out.
+1. `authStateChanges()`: fires event upon changes in `User` state, on sign in and sign out.
    ```dart
    FirebaseAuth.instance
-  .onAuthStateChanged()
+  .authStateChanges()
   .listen((User? user) {
     if (user == null) {
       print('User is currently signed out!');
@@ -50,10 +50,10 @@ You can listen to changes in authentication states through the following streams
     }
   });
    ```
-2. `onIdTokenChanged()`: in addition to listening to the changes in `User` state, it also fires events when the current user's token changes.
+2. `idTokenChanges()`: in addition to listening to the changes in `User` state, it also fires events when the current user's token changes.
    ```dart
    FirebaseAuth.instance
-  .onIdTokenChanged()
+  .idTokenChanges()
   .listen((User? user) {
     if (user == null) {
       print('User is currently signed out!');
@@ -152,7 +152,7 @@ The User class is returned from any authentication state listeners, or as part o
 
     ```dart
     FirebaseAuth.instance
-      .onAuthStateChanged()
+      .authStateChanges()
       .listen((User? user) {
         if (user != null) {
           print(user.uid);
