@@ -218,7 +218,7 @@ class FirebaseAuth {
 
   /// Sends a password reset email to the given email address.
   ///
-  /// To complete the password reset, call `confirmPasswordReset` with the code supplied
+  /// To complete the password reset, call [confirmPasswordReset] with the code supplied
   /// in the email sent to the user, along with the new password specified by the user.
   ///
   /// May throw a [FirebaseAuthException] with the following error codes:
@@ -226,9 +226,36 @@ class FirebaseAuth {
   ///   - The email address is already in use by another account.
   /// - `invalid-id-token`
   ///   - The user's credential is no longer valid. The user must sign in again.
-  Future sendPasswordResetEmail(String email) async {
+  Future sendPasswordResetEmail(
+      {required String email, String? continueUrl}) async {
     try {
       await _api.sendPasswordResetEmail(email);
+    } catch (e) {
+      throw _getException(e);
+    }
+  }
+
+  /// Completes the password reset process, given a confirmation code and new
+  /// password.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `expired-action-code`
+  ///   - Thrown if the action code has expired.
+  /// - `invalid-action-code`
+  ///   - Thrown if the action code is invalid. This can happen if the code is
+  ///    malformed or has already been used.
+  /// - `user-disabled`
+  ///   - Thrown if the user corresponding to the given action code has been
+  ///    disabled.
+  /// - `user-not-found`
+  ///   - Thrown if there is no user corresponding to the action code. This may
+  ///    have happened if the user was deleted between when the action code was
+  ///    issued and when this method was called.
+  /// - `weak-password`
+  ///   - Thrown if the new password is not strong enough.
+  Future confirmPasswordReset(String code, String newPassword) async {
+    try {
+      await _api.confirmPasswordReset(code, newPassword);
     } catch (e) {
       throw _getException(e);
     }
