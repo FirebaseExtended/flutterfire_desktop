@@ -90,8 +90,8 @@ void main() {
     );
   }
 
-  late StreamQueue<User?> onAuthStateChanged;
-  late StreamQueue<User?> onIdTokenChanged;
+  late StreamQueue<User?> authStateChanges;
+  late StreamQueue<User?> idTokenChanges;
   group('$FirebaseAuth', () {
     setUpAll(() async {
       const options = FirebaseOptions(
@@ -107,8 +107,8 @@ void main() {
 
       await auth.useAuthEmulator();
 
-      onAuthStateChanged = StreamQueue(auth.authStateChanges());
-      onIdTokenChanged = StreamQueue(auth.idTokenChanges());
+      authStateChanges = StreamQueue(auth.authStateChanges());
+      idTokenChanges = StreamQueue(auth.idTokenChanges());
     });
 
     setUp(() async {
@@ -141,8 +141,8 @@ void main() {
 
         expect(credential, isA<UserCredential>());
         expect(credential.user!.email, equals(mockEmail));
-        expect(await onAuthStateChanged.next, isA<User>());
-        expect(await onIdTokenChanged.next, isA<User>());
+        expect(await authStateChanges.next, isA<User>());
+        expect(await idTokenChanges.next, isA<User>());
 
         await auth.signOut();
       });
@@ -160,8 +160,8 @@ void main() {
         await auth.signOut();
 
         expect(auth.currentUser, isNull);
-        expect(await onAuthStateChanged.next, isNull);
-        expect(await onIdTokenChanged.next, isNull);
+        expect(await authStateChanges.next, isNull);
+        expect(await idTokenChanges.next, isNull);
       });
     });
 
@@ -174,8 +174,8 @@ void main() {
         expect((await auth.currentUser!.getIdTokenResult()).signInProvider,
             'anonymous');
 
-        expect(await onAuthStateChanged.next, isA<User>());
-        expect(await onIdTokenChanged.next, isA<User>());
+        expect(await authStateChanges.next, isA<User>());
+        expect(await idTokenChanges.next, isA<User>());
       });
       test(
         'sign-up return current user if already sign-in anonymously.',
@@ -193,8 +193,8 @@ void main() {
         await auth.signOut();
 
         expect(auth.currentUser, isNull);
-        expect(await onAuthStateChanged.next, isNull);
-        expect(await onIdTokenChanged.next, isNull);
+        expect(await authStateChanges.next, isNull);
+        expect(await idTokenChanges.next, isNull);
       });
     });
 
