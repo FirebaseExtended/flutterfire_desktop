@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +74,47 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
+  }
+
+  Future _resetPassword() async {
+    String? email;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Send'),
+            ),
+          ],
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Enter your email'),
+              const SizedBox(height: 20),
+              TextFormField(
+                onChanged: (value) {
+                  email = value;
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (email != null) {
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email!);
+        ScaffoldSnackbar.of(context).show('Password reset email is sent');
+      } catch (e) {
+        ScaffoldSnackbar.of(context).show('Error resetting');
+      }
+    }
   }
 
   Future onClick() async {
@@ -204,6 +247,11 @@ class _AuthGateState extends State<AuthGate> {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: _resetPassword,
+                    child: const Text('Forgot password?'),
                   ),
                 ],
               ),

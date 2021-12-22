@@ -35,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
     controller.addListener(_onNameChanged);
 
     FirebaseAuth.instance.userChanges().listen((event) {
-      if (event != null) {
+      if (event != null && mounted) {
         setState(() {
           user = event;
         });
