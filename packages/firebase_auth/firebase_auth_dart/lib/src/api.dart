@@ -95,13 +95,22 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendPasswordResetEmail(String email) async {
+  Future sendPasswordResetEmail(String email, {String? continueUrl}) async {
     await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
-        // TODO have to be sent, otherwise the user won't be redirected to the app.
-        // continueUrl: ,
+        continueUrl: continueUrl,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future confirmPasswordReset(String code, String newPassword) async {
+    await _identityToolkit.resetPassword(
+      idp.IdentitytoolkitRelyingpartyResetPasswordRequest(
+        newPassword: newPassword,
+        oobCode: code,
       ),
     );
   }
