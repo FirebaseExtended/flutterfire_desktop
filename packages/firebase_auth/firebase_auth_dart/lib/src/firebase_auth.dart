@@ -70,14 +70,14 @@ class FirebaseAuth {
   /// not.
   ///
   /// You should not use this getter to determine the users current state,
-  /// instead use [onAuthStateChanged], or [onIdTokenChanged] to
+  /// instead use [authStateChanges], or [idTokenChanges] to
   /// subscribe to updates.
   User? currentUser;
 
   /// Sends events when the users sign-in state changes.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<User?> get onAuthStateChanged {
+  Stream<User?> authStateChanges() {
     return _changeController.stream;
   }
 
@@ -85,7 +85,7 @@ class FirebaseAuth {
   /// which includes sign-in, sign-out, and token refresh events.
   ///
   /// If the value is `null`, there is no signed-in user.
-  Stream<User?> get onIdTokenChanged {
+  Stream<User?> idTokenChanges() {
     return _idTokenChangedController.stream;
   }
 
@@ -105,7 +105,7 @@ class FirebaseAuth {
   /// Attempts to sign in a user with the given email address and password.
   ///
   /// If successful, it also signs the user in into the app and updates
-  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
+  /// any [authStateChanges], or [idTokenChanges] stream listeners.
   ///
   /// **Important**: You must enable Email & Password accounts in the Auth
   /// section of the Firebase console before being able to use them.
@@ -341,7 +341,7 @@ class FirebaseAuth {
   /// etc.) and returns additional identity provider data.
   ///
   /// If successful, it also signs the user in into the app and updates
-  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
+  /// any [authStateChanges], or [idTokenChanges] stream listeners.
   ///
   /// If the user doesn't have an account already, one will be created
   /// automatically.
@@ -473,7 +473,7 @@ class FirebaseAuth {
   /// Signs out the current user.
   ///
   /// If successful, it also updates
-  /// any [onAuthStateChanged], or [onIdTokenChanged] stream listeners.
+  /// any [authStateChanges], or [idTokenChanges] stream listeners.
   Future<void> signOut() async {
     try {
       _updateCurrentUserAndEvents(null);

@@ -107,8 +107,8 @@ void main() {
 
       await auth.useAuthEmulator();
 
-      onAuthStateChanged = StreamQueue(auth.onAuthStateChanged);
-      onIdTokenChanged = StreamQueue(auth.onIdTokenChanged);
+      onAuthStateChanged = StreamQueue(auth.authStateChanges());
+      onIdTokenChanged = StreamQueue(auth.idTokenChanges());
     });
 
     setUp(() async {
@@ -116,9 +116,9 @@ void main() {
 
       fakeAuth = MockFirebaseAuth();
 
-      when(fakeAuth.onAuthStateChanged)
+      when(fakeAuth.authStateChanges())
           .thenAnswer((_) => Stream.fromIterable([user]));
-      when(fakeAuth.onIdTokenChanged)
+      when(fakeAuth.idTokenChanges())
           .thenAnswer((_) => Stream.fromIterable([user]));
       when(fakeAuth.signInAnonymously())
           .thenAnswer((_) => Future<UserCredential>.value(userCred));
@@ -283,7 +283,7 @@ void main() {
         final oldToken = await userCred.user!.getIdToken();
 
         expect(
-          await (await fakeAuth.onIdTokenChanged.last)!.getIdToken(true),
+          await (await fakeAuth.idTokenChanges().last)!.getIdToken(true),
           isNot(equals(oldToken)),
         );
       });
