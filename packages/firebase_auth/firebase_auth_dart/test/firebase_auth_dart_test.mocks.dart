@@ -18,13 +18,13 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 
-class _FakeIdTokenResult_0 extends _i1.Fake implements _i2.IdTokenResult {}
+class _FakeUser_0 extends _i1.Fake implements _i2.User {}
 
-class _FakeUserCredential_1 extends _i1.Fake implements _i2.UserCredential {}
+class _FakeIdTokenResult_1 extends _i1.Fake implements _i2.IdTokenResult {}
 
-class _FakeFirebaseApp_2 extends _i1.Fake implements _i3.FirebaseApp {}
+class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
 
-class _FakeException_3 extends _i1.Fake implements Exception {}
+class _FakeFirebaseApp_3 extends _i1.Fake implements _i3.FirebaseApp {}
 
 class _FakeFirebaseAuth_4 extends _i1.Fake implements _i2.FirebaseAuth {}
 
@@ -52,6 +52,11 @@ class MockUser extends _i1.Mock implements _i2.User {
   String get uid =>
       (super.noSuchMethod(Invocation.getter(#uid), returnValue: '') as String);
   @override
+  _i4.Future<_i2.User> unlink(String? providerId) =>
+      (super.noSuchMethod(Invocation.method(#unlink, [providerId]),
+              returnValue: Future<_i2.User>.value(_FakeUser_0()))
+          as _i4.Future<_i2.User>);
+  @override
   _i4.Future<void> delete() =>
       (super.noSuchMethod(Invocation.method(#delete, []),
           returnValue: Future<void>.value(),
@@ -65,14 +70,14 @@ class MockUser extends _i1.Mock implements _i2.User {
           [bool? forceRefresh = false]) =>
       (super.noSuchMethod(Invocation.method(#getIdTokenResult, [forceRefresh]),
               returnValue:
-                  Future<_i2.IdTokenResult>.value(_FakeIdTokenResult_0()))
+                  Future<_i2.IdTokenResult>.value(_FakeIdTokenResult_1()))
           as _i4.Future<_i2.IdTokenResult>);
   @override
   _i4.Future<_i2.UserCredential> linkWithCredential(
           _i2.AuthCredential? credential) =>
       (super.noSuchMethod(Invocation.method(#linkWithCredential, [credential]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> reauthenticateWithCredential(
@@ -80,7 +85,7 @@ class MockUser extends _i1.Mock implements _i2.User {
       (super.noSuchMethod(
               Invocation.method(#reauthenticateWithCredential, [credential]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> reload() =>
@@ -135,7 +140,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
 
   @override
   _i3.FirebaseApp get app => (super.noSuchMethod(Invocation.getter(#app),
-      returnValue: _FakeFirebaseApp_2()) as _i3.FirebaseApp);
+      returnValue: _FakeFirebaseApp_3()) as _i3.FirebaseApp);
   @override
   set app(_i3.FirebaseApp? _app) =>
       super.noSuchMethod(Invocation.setter(#app, _app),
@@ -145,28 +150,24 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
           returnValueForMissingStub: null);
   @override
-  _i4.Stream<_i2.User?> get onAuthStateChanged =>
-      (super.noSuchMethod(Invocation.getter(#onAuthStateChanged),
-          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
-  @override
-  _i4.Stream<_i2.User?> get onIdTokenChanged =>
-      (super.noSuchMethod(Invocation.getter(#onIdTokenChanged),
-          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
-  @override
   void setApiClient(_i5.Client? client) =>
       super.noSuchMethod(Invocation.method(#setApiClient, [client]),
           returnValueForMissingStub: null);
   @override
-  void updateCurrentUserAndEvents(_i2.User? user) =>
-      super.noSuchMethod(Invocation.method(#updateCurrentUserAndEvents, [user]),
-          returnValueForMissingStub: null);
+  _i4.Stream<_i2.User?> authStateChanges() =>
+      (super.noSuchMethod(Invocation.method(#authStateChanges, []),
+          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
+  @override
+  _i4.Stream<_i2.User?> idTokenChanges() =>
+      (super.noSuchMethod(Invocation.method(#idTokenChanges, []),
+          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
   @override
   _i4.Future<_i2.UserCredential> signInWithEmailAndPassword(
           String? email, String? password) =>
       (super.noSuchMethod(
               Invocation.method(#signInWithEmailAndPassword, [email, password]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> createUserWithEmailAndPassword(
@@ -174,7 +175,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       (super.noSuchMethod(
           Invocation.method(#createUserWithEmailAndPassword, [email, password]),
           returnValue:
-              Future<_i2.UserCredential>.value(_FakeUserCredential_1())) as _i4
+              Future<_i2.UserCredential>.value(_FakeUserCredential_2())) as _i4
           .Future<_i2.UserCredential>);
   @override
   _i4.Future<List<String>> fetchSignInMethodsForEmail(String? email) => (super
@@ -202,13 +203,13 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
   _i4.Future<_i2.UserCredential> signInAnonymously() =>
       (super.noSuchMethod(Invocation.method(#signInAnonymously, []),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> signInWithPopup() =>
       (super.noSuchMethod(Invocation.method(#signInWithPopup, []),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> signInWithCredential(
@@ -216,7 +217,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       (super.noSuchMethod(
               Invocation.method(#signInWithCredential, [credential]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.UserCredential> signInWithEmailLink(
@@ -224,7 +225,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       (super.noSuchMethod(
               Invocation.method(#signInWithEmailLink, [email, emailLink]),
               returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_1()))
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> verifyPhoneNumber({String? phoneNumber}) =>
@@ -239,10 +240,6 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
-  _i4.Future<String?> refreshIdToken() =>
-      (super.noSuchMethod(Invocation.method(#refreshIdToken, []),
-          returnValue: Future<String?>.value()) as _i4.Future<String?>);
-  @override
   _i4.Future<Map<dynamic, dynamic>> useAuthEmulator(
           {String? host = r'localhost', int? port = 9099}) =>
       (super.noSuchMethod(
@@ -250,10 +247,6 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
           returnValue:
               Future<Map<dynamic, dynamic>>.value(<dynamic, dynamic>{})) as _i4
           .Future<Map<dynamic, dynamic>>);
-  @override
-  Exception getException(Object? e) =>
-      (super.noSuchMethod(Invocation.method(#getException, [e]),
-          returnValue: _FakeException_3()) as Exception);
   @override
   String toString() => super.toString();
 }
