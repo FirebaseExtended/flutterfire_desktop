@@ -310,14 +310,16 @@ class User {
     }
   }
 
-  /// Updates the user's password.
+  /// Reset user password.
   ///
-  /// **Important**: this is a security sensitive operation that requires the
-  ///   user to have recently signed in. If this requirement isn't met, ask the
-  ///   user to authenticate again and then call [User.reauthenticateWithCredential].
+  /// Requires tht the user has recently been authenticated,
+  /// check [User.reauthenticateWithCredential].
   ///
-  /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// TODO
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `operation-not-allowed`
+  ///   - Password sign-in is disabled for this project.
+  /// - `user-disabled`
+  ///   - The user account has been disabled by an administrator.
   Future<void> updatePassword(String newPassword) async {
     try {
       _assertSignedOut(_auth);

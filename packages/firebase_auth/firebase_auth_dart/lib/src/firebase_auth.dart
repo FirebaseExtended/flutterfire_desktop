@@ -263,30 +263,6 @@ class FirebaseAuth {
     }
   }
 
-  /// Reset user password.
-  ///
-  /// Requires tht the user has recently been authenticated,
-  /// check [User.reauthenticateWithCredential].
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `operation-not-allowed`
-  ///   - Password sign-in is disabled for this project.
-  /// - `user-disabled`
-  ///   - The user account has been disabled by an administrator.
-  /// TODO: make sure codes are correct
-  Future resetUserPassword({String? newPassword, String? oldPassword}) async {
-    try {
-      if (currentUser != null) {
-        final token = await currentUser!.getIdToken();
-        await _api.resetUserPassword(token);
-      } else {
-        throw FirebaseAuthException(code: 'USER_NOT_FOUND');
-      }
-    } catch (e) {
-      throw _getException(e);
-    }
-  }
-
   /// Send a sign in link to email.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:

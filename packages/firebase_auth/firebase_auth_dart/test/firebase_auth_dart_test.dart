@@ -355,7 +355,7 @@ void main() {
 
         await auth.signInWithEmailAndPassword(mockEmail, 'newPassword');
 
-        // Access token is updated
+        // id token is updated
         expect(await auth.currentUser!.getIdToken(), isNot(equals(oldToken)));
       });
       test('delete()', () async {
