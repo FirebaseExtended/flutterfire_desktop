@@ -150,17 +150,17 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
           returnValueForMissingStub: null);
   @override
-  _i4.Stream<_i2.User?> get onAuthStateChanged =>
-      (super.noSuchMethod(Invocation.getter(#onAuthStateChanged),
-          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
-  @override
-  _i4.Stream<_i2.User?> get onIdTokenChanged =>
-      (super.noSuchMethod(Invocation.getter(#onIdTokenChanged),
-          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
-  @override
   void setApiClient(_i5.Client? client) =>
       super.noSuchMethod(Invocation.method(#setApiClient, [client]),
           returnValueForMissingStub: null);
+  @override
+  _i4.Stream<_i2.User?> authStateChanges() =>
+      (super.noSuchMethod(Invocation.method(#authStateChanges, []),
+          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
+  @override
+  _i4.Stream<_i2.User?> idTokenChanges() =>
+      (super.noSuchMethod(Invocation.method(#idTokenChanges, []),
+          returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
   @override
   _i4.Future<_i2.UserCredential> signInWithEmailAndPassword(
           String? email, String? password) =>

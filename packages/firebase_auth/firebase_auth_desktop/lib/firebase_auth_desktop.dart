@@ -32,7 +32,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     _idTokenChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
 
-    _auth!.onAuthStateChanged.map((auth_dart.User? dartUser) {
+    _auth!.authStateChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -41,7 +41,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       _authStateChangesListeners[app.name]!.add(user);
     });
 
-    _auth!.onIdTokenChanged.map((auth_dart.User? dartUser) {
+    _auth!.idTokenChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
