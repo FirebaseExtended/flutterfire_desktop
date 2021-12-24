@@ -315,6 +315,16 @@ void main() {
               .having((p0) => p0.code, 'invalid oob code', 'invalid-oob-code')),
         );
       });
+      test('verifyPasswordResetCode() throws.', () async {
+        // Mocking, not e2e since the real endpoint would throw on invalid Oob
+        when(fakeAuth.verifyPasswordResetCode(any))
+            .thenAnswer((_) async => mockEmail);
+        await expectLater(
+          fakeAuth.verifyPasswordResetCode(mockOobCode),
+          completion(mockEmail),
+        );
+        verify(fakeAuth.verifyPasswordResetCode(mockOobCode));
+      });
     });
     group('User ', () {
       test('sendEmailVerification()', () async {
