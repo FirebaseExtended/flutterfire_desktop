@@ -95,7 +95,7 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<String?> sendPasswordResetEmail(String email,
+  Future<String> sendPasswordResetEmail(String email,
       {String? continueUrl}) async {
     final _response = await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
@@ -105,12 +105,11 @@ class API {
       ),
     );
 
-    return _response.email;
+    return _response.email!;
   }
 
   /// TODO: write endpoint details
-  Future<String?> confirmPasswordReset(
-      String? code, String? newPassword) async {
+  Future<String> confirmPasswordReset(String? code, String? newPassword) async {
     final _response = await _identityToolkit.resetPassword(
       idp.IdentitytoolkitRelyingpartyResetPasswordRequest(
         newPassword: newPassword,
@@ -118,7 +117,7 @@ class API {
       ),
     );
 
-    return _response.email;
+    return _response.email!;
   }
 
   /// TODO: write endpoint details

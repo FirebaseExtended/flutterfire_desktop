@@ -332,9 +332,12 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<String> verifyPasswordResetCode(String code) {
-    // TODO: implement verifyPasswordResetCode
-    throw UnimplementedError();
+  Future<String> verifyPasswordResetCode(String code) async {
+    try {
+      return await _auth!.verifyPasswordResetCode(code);
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override
