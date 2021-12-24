@@ -228,10 +228,10 @@ class FirebaseAuth {
   ///   - The email address is already in use by another account.
   /// - `invalid-id-token`
   ///   - The user's credential is no longer valid. The user must sign in again.
-  Future sendPasswordResetEmail(
+  Future<String?> sendPasswordResetEmail(
       {required String email, String? continueUrl}) async {
     try {
-      await _api.sendPasswordResetEmail(email);
+      return await _api.sendPasswordResetEmail(email);
     } catch (e) {
       throw _getException(e);
     }
@@ -255,9 +255,10 @@ class FirebaseAuth {
   ///    issued and when this method was called.
   /// - `weak-password`
   ///   - Thrown if the new password is not strong enough.
-  Future confirmPasswordReset(String code, String newPassword) async {
+  Future<String?> confirmPasswordReset(
+      String? code, String? newPassword) async {
     try {
-      await _api.confirmPasswordReset(code, newPassword);
+      return await _api.confirmPasswordReset(code, newPassword);
     } catch (e) {
       throw _getException(e);
     }

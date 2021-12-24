@@ -24,6 +24,7 @@ const mockPassword = 'password';
 const photoURL =
     'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
 const displayName = 'Invertase';
+const mockOobCode = 'code';
 
 http.Response errorResponse(String code) {
   return http.Response(
@@ -288,7 +289,33 @@ void main() {
         );
       });
     });
+    group('Password ', () {
+      test('sendPasswordResetEmail().', () async {
+        await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
 
+        await expectLater(
+          auth.sendPasswordResetEmail(email: mockEmail),
+          completion(mockEmail),
+        );
+      });
+      test('confirmPasswordReset() completes.', () async {
+        // Mocking, not e2e since the real endpoint would throw on invalid Oob
+        when(fakeAuth.confirmPasswordReset(any, any))
+            .thenAnswer((_) async => mockEmail);
+        await expectLater(
+          fakeAuth.confirmPasswordReset(mockOobCode, mockPassword),
+          completion(mockEmail),
+        );
+        verify(fakeAuth.confirmPasswordReset(mockOobCode, mockPassword));
+      });
+      test('confirmPasswordReset() throws.', () async {
+        await expectLater(
+          auth.confirmPasswordReset(mockOobCode, mockPassword),
+          throwsA(isA<FirebaseAuthException>()
+              .having((p0) => p0.code, 'invalid oob code', 'invalid-oob-code')),
+        );
+      });
+    });
     group('User ', () {
       test('sendEmailVerification()', () async {
         when(fakeAuth.currentUser).thenReturn(user);

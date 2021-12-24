@@ -95,24 +95,30 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendPasswordResetEmail(String email, {String? continueUrl}) async {
-    await _identityToolkit.getOobConfirmationCode(
+  Future<String?> sendPasswordResetEmail(String email,
+      {String? continueUrl}) async {
+    final _response = await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
         continueUrl: continueUrl,
       ),
     );
+
+    return _response.email;
   }
 
   /// TODO: write endpoint details
-  Future confirmPasswordReset(String code, String newPassword) async {
-    await _identityToolkit.resetPassword(
+  Future<String?> confirmPasswordReset(
+      String? code, String? newPassword) async {
+    final _response = await _identityToolkit.resetPassword(
       idp.IdentitytoolkitRelyingpartyResetPasswordRequest(
         newPassword: newPassword,
         oobCode: code,
       ),
     );
+
+    return _response.email;
   }
 
   /// TODO: write endpoint details

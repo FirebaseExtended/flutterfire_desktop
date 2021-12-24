@@ -183,24 +183,17 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
               returnValue: Future<List<String>>.value(<String>[]))
       as _i4.Future<List<String>>);
   @override
-  _i4.Future<dynamic> sendPasswordResetEmail(
+  _i4.Future<String?> sendPasswordResetEmail(
           {String? email, String? continueUrl}) =>
       (super.noSuchMethod(
           Invocation.method(#sendPasswordResetEmail, [],
               {#email: email, #continueUrl: continueUrl}),
-          returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
+          returnValue: Future<String?>.value()) as _i4.Future<String?>);
   @override
-  _i4.Future<dynamic> confirmPasswordReset(String? code, String? newPassword) =>
+  _i4.Future<String?> confirmPasswordReset(String? code, String? newPassword) =>
       (super.noSuchMethod(
           Invocation.method(#confirmPasswordReset, [code, newPassword]),
-          returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
-  @override
-  _i4.Future<dynamic> resetUserPassword(
-          {String? newPassword, String? oldPassword}) =>
-      (super.noSuchMethod(
-          Invocation.method(#resetUserPassword, [],
-              {#newPassword: newPassword, #oldPassword: oldPassword}),
-          returnValue: Future<dynamic>.value()) as _i4.Future<dynamic>);
+          returnValue: Future<String?>.value()) as _i4.Future<String?>);
   @override
   _i4.Future<dynamic> sendSignInLinkToEmail(String? email,
           [String? continueUrl]) =>
