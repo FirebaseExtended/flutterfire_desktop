@@ -145,16 +145,20 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   Future<void> sendPasswordResetEmail(String email,
       [ActionCodeSettings? actionCodeSettings]) async {
     try {
-      await _auth!.sendPasswordResetEmail(email);
+      await _auth!.sendPasswordResetEmail(
+          email: email, continueUrl: actionCodeSettings?.url);
     } catch (e) {
       throw mapExceptionType(e);
     }
   }
 
   @override
-  Future<void> confirmPasswordReset(String code, String newPassword) {
-    // TODO: implement confirmPasswordReset
-    throw UnimplementedError();
+  Future<void> confirmPasswordReset(String code, String newPassword) async {
+    try {
+      await _auth!.confirmPasswordReset(code, newPassword);
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override
@@ -328,9 +332,12 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<String> verifyPasswordResetCode(String code) {
-    // TODO: implement verifyPasswordResetCode
-    throw UnimplementedError();
+  Future<String> verifyPasswordResetCode(String code) async {
+    try {
+      return await _auth!.verifyPasswordResetCode(code);
+    } catch (e) {
+      throw mapExceptionType(e);
+    }
   }
 
   @override

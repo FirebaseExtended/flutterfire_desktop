@@ -23,6 +23,8 @@ class API {
   late http.Client _client;
   late idp.RelyingpartyResource _identityToolkit;
 
+  EmulatorConfig? _emulator;
+
   void _setApiClient(http.Client client) {
     _client = client;
     _identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
@@ -95,15 +97,29 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendPasswordResetEmail(String email) async {
-    await _identityToolkit.getOobConfirmationCode(
+  Future<String> sendPasswordResetEmail(String email,
+      {String? continueUrl}) async {
+    final _response = await _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
-        // TODO have to be sent, otherwise the user won't be redirected to the app.
-        // continueUrl: ,
+        continueUrl: continueUrl,
       ),
     );
+
+    return _response.email!;
+  }
+
+  /// TODO: write endpoint details
+  Future<String> confirmPasswordReset(String? code, String? newPassword) async {
+    final _response = await _identityToolkit.resetPassword(
+      idp.IdentitytoolkitRelyingpartyResetPasswordRequest(
+        newPassword: newPassword,
+        oobCode: code,
+      ),
+    );
+
+    return _response.email!;
   }
 
   /// TODO: write endpoint details
@@ -216,12 +232,9 @@ class API {
   /// Refresh a user ID token using the refreshToken,
   /// will refresh even if the token hasn't expired.
   ///
-  Future<String?> refreshIdToken(String refreshToken) async {
+  Future<String?> refreshIdToken(String? refreshToken) async {
     try {
-      return await _exchangeRefreshWithIdToken(
-        refreshToken,
-        _apiKey,
-      );
+      return await _exchangeRefreshWithIdToken(refreshToken);
     } on HttpException catch (_) {
       rethrow;
     } catch (exception) {
@@ -229,19 +242,20 @@ class API {
     }
   }
 
-  Future<String?> _exchangeRefreshWithIdToken(
-    String? refreshToken,
-    String apiKey,
-  ) async {
+  Future<String?> _exchangeRefreshWithIdToken(String? refreshToken) async {
+    final baseUri = _emulator != null
+        ? 'http://${_emulator!.host}:${_emulator!.port}/securetoken.googleapis.com/v1/'
+        : 'https://securetoken.googleapis.com/v1/';
+
     final _response = await http.post(
       Uri.parse(
-        'https://securetoken.googleapis.com/v1/token?key=$apiKey',
+        '${baseUri}token?key=$_apiKey',
       ),
       body: {
         'grant_type': 'refresh_token',
         'refresh_token': refreshToken,
       },
-      headers: {'Content-Typ': 'application/x-www-form-urlencoded'},
+      headers: {'Content-Typ': 'application/json'},
     );
 
     final Map<String, dynamic> _data = json.decode(_response.body);
@@ -292,11 +306,43 @@ class API {
 
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
+
     _identityToolkit = idp.IdentityToolkitApi(
       clientViaApiKey(_apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
+    // set the Flage to true to use the emulator for this instance.
+    _emulator = EmulatorConfig.use(host, '$port');
 
     return emulatorProjectConfig;
   }
+}
+
+/// A type to hold the Auth Emulator configurations.
+class EmulatorConfig {
+  EmulatorConfig._({
+    this.port,
+    this.host,
+    this.requester,
+  });
+
+  /// Initialize the Emulator Config using the host and port printed once running `firebase emulators:start`.
+  factory EmulatorConfig.use(String host, String port) {
+    return EmulatorConfig._(
+        port: port,
+        host: host,
+        requester: idp.IdentityToolkitApi(
+          clientViaApiKey('dummyKey'),
+          rootUrl: 'http://$host:$port/www.googleapis.com/',
+        ).relyingparty);
+  }
+
+  /// The port on which the emulator suite is running.
+  final String? host;
+
+  /// The port on which the emulator suite is running.
+  final String? port;
+
+  /// The IDP requester used to make calls to the emulator suite.
+  final idp.RelyingpartyResource? requester;
 }

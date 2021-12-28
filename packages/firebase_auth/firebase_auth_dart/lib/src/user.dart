@@ -9,11 +9,13 @@ part of firebase_auth_dart;
 /// User object wrapping the responses from identity toolkit.
 class User {
   /// Return a dart user object from Google's identity toolkit response.
-  User(this._user, this._auth) : _idToken = _user['idToken'];
+  User(this._user, this._auth);
 
   final FirebaseAuth _auth;
   final Map<String, dynamic> _user;
-  final String _idToken;
+
+  /// Internally used to read the current idToken.
+  String get _idToken => _user['idToken'];
 
   /// The users display name.
   ///
@@ -160,7 +162,7 @@ class User {
 
   Future _refreshIdToken(bool forceRefresh) async {
     if (forceRefresh || _idToken.expirationTime.isBefore(DateTime.now())) {
-      _user['idToken'] = await _refreshIdToken(true);
+      _user['idToken'] = await _auth._api.refreshIdToken(refreshToken);
       _auth._idTokenChangedController.add(this);
     }
   }
@@ -226,6 +228,9 @@ class User {
       if (credential is EmailAuthCredential) {
         await _auth._api
             .signInWithEmailAndPassword(credential.email, credential.password!);
+
+        await reload();
+
         return UserCredential._(
           auth: _auth,
           credential: credential,
@@ -265,6 +270,8 @@ class User {
   /// Refreshes the current user, if signed in.
   Future<void> reload() async {
     _assertSignedOut(_auth);
+
+    await _refreshIdToken(true);
 
     _user.addAll(await _auth._reloadCurrentUser(_idToken));
     _auth._updateCurrentUserAndEvents(_auth.currentUser);
@@ -310,14 +317,16 @@ class User {
     }
   }
 
-  /// Updates the user's password.
+  /// Reset user password.
   ///
-  /// **Important**: this is a security sensitive operation that requires the
-  ///   user to have recently signed in. If this requirement isn't met, ask the
-  ///   user to authenticate again and then call [User.reauthenticateWithCredential].
+  /// Requires tht the user has recently been authenticated,
+  /// check [User.reauthenticateWithCredential].
   ///
-  /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// TODO
+  /// Throws [FirebaseAuthException] with following possible codes:
+  /// - `operation-not-allowed`
+  ///   - Password sign-in is disabled for this project.
+  /// - `user-disabled`
+  ///   - The user account has been disabled by an administrator.
   Future<void> updatePassword(String newPassword) async {
     try {
       _assertSignedOut(_auth);

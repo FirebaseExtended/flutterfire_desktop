@@ -220,7 +220,7 @@ class FirebaseAuth {
 
   /// Sends a password reset email to the given email address.
   ///
-  /// To complete the password reset, call `confirmPasswordReset` with the code supplied
+  /// To complete the password reset, call [confirmPasswordReset] with the code supplied
   /// in the email sent to the user, along with the new password specified by the user.
   ///
   /// May throw a [FirebaseAuthException] with the following error codes:
@@ -228,33 +228,61 @@ class FirebaseAuth {
   ///   - The email address is already in use by another account.
   /// - `invalid-id-token`
   ///   - The user's credential is no longer valid. The user must sign in again.
-  Future sendPasswordResetEmail(String email) async {
+  Future<String> sendPasswordResetEmail(
+      {required String email, String? continueUrl}) async {
     try {
-      await _api.sendPasswordResetEmail(email);
+      return await _api.sendPasswordResetEmail(email);
     } catch (e) {
       throw _getException(e);
     }
   }
 
-  /// Reset user password.
+  /// Completes the password reset process, given a confirmation code and new
+  /// password.
   ///
-  /// Requires tht the user has recently been authenticated,
-  /// check [User.reauthenticateWithCredential].
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `operation-not-allowed`
-  ///   - Password sign-in is disabled for this project.
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `expired-action-code`
+  ///   - Thrown if the action code has expired.
+  /// - `invalid-action-code`
+  ///   - Thrown if the action code is invalid. This can happen if the code is
+  ///    malformed or has already been used.
   /// - `user-disabled`
-  ///   - The user account has been disabled by an administrator.
-  /// TODO: make sure codes are correct
-  Future resetUserPassword({String? newPassword, String? oldPassword}) async {
+  ///   - Thrown if the user corresponding to the given action code has been
+  ///    disabled.
+  /// - `user-not-found`
+  ///   - Thrown if there is no user corresponding to the action code. This may
+  ///    have happened if the user was deleted between when the action code was
+  ///    issued and when this method was called.
+  /// - `weak-password`
+  ///   - Thrown if the new password is not strong enough.
+  Future<String> confirmPasswordReset(String? code, String? newPassword) async {
     try {
-      if (currentUser != null) {
-        final token = await currentUser!.getIdToken();
-        await _api.resetUserPassword(token);
-      } else {
-        throw FirebaseAuthException(code: 'USER_NOT_FOUND');
-      }
+      return await _api.confirmPasswordReset(code, newPassword);
+    } catch (e) {
+      throw _getException(e);
+    }
+  }
+
+  /// Checks a password reset code sent to the user by email or other
+  /// out-of-band mechanism.
+  ///
+  /// Returns the user's email address if valid.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `expired-action-code`
+  ///   - Thrown if the password reset code has expired.
+  /// - `invalid-action-code`
+  ///   - Thrown if the password reset code is invalid. This can happen if the
+  ///    code is malformed or has already been used.
+  /// - `user-disabled`
+  ///   - Thrown if the user corresponding to the given email has been disabled.
+  /// - `user-not-found`
+  ///   - Thrown if there is no user corresponding to the password reset code.
+  ///    This may have happened if the user was deleted between when the code
+  ///    was issued and when this method was called.
+  Future<String> verifyPasswordResetCode(String? code) async {
+    try {
+      return await _api.confirmPasswordReset(code, null);
     } catch (e) {
       throw _getException(e);
     }
