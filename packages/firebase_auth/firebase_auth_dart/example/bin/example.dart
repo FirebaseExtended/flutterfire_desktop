@@ -28,6 +28,7 @@ Future main(List<String> args) async {
   parser.addCommand('login');
   parser.addCommand('logout');
   parser.addCommand('info');
+  parser.addCommand('update-password');
 
   parser.commands['login']!.addCommand('reset-password').addOption('email');
 
@@ -68,6 +69,10 @@ Future main(List<String> args) async {
     case 'logout':
       await logout(logger, currentUser!.email!);
       break;
+    case 'update-password':
+      await resetPassword(
+          currentUser, logger, secondaryCommand?.arguments?['email']);
+      break;
     default:
   }
 }
@@ -100,7 +105,7 @@ Future<void> resetPassword(
         progress.finish();
 
         stdout.writeln(greenPen(
-            'Password reset email was sent to $email, chck your inbox.'));
+            'Password reset email was sent to $_email, check your inbox.'));
         exitCode = 0;
       } catch (e) {
         progress.finish();
@@ -117,20 +122,38 @@ Future<void> resetPassword(
 
     stdout.write('Current password: ');
     final password = stdin.readLineSync();
+
+    stdout.writeln();
+
     if (password != null) {
-      await currentUser.reauthenticateWithCredential(
-          EmailAuthProvider.credential(
-              email: currentUser.email!, password: password));
-      stdout.write('New password: ');
-      final newPassword = stdin.readLineSync();
-      if (newPassword != null) {
-        await currentUser.updatePassword(newPassword);
+      final progress = logger.progress('Resetting your password');
+      stdout.writeln();
+
+      try {
+        await currentUser.reauthenticateWithCredential(
+            EmailAuthProvider.credential(
+                email: currentUser.email!, password: password));
+
+        stdout.write('New password: ');
+        final newPassword = stdin.readLineSync();
+        if (newPassword != null) {
+          await currentUser.updatePassword(newPassword);
+
+          progress.finish();
+
+          stdout.writeln(greenPen('Password updated successfully.'));
+        }
+      } catch (e) {
+        progress.finish();
+
+        stderr.writeln(redPen(e));
+        exitCode = 2;
       }
     }
 
     stdin.echoMode = true;
     stdin.lineMode = true;
-    exitCode = 0;
+    exit(0);
   }
 }
 
