@@ -22,9 +22,9 @@ environment:
 
 dependencies:
   firebase_auth: ^3.3.1
-  firebase_auth_desktop: ^0.1.1-dev.2
+  firebase_auth_desktop: ^0.1.1-dev.3
   firebase_core: ^1.9.0
-  firebase_core_desktop: ^0.1.1-dev.2
+  firebase_core_desktop: ^0.1.1-dev.3
   flutter:
     sdk: flutter
   flutter_lints: ^1.0.4

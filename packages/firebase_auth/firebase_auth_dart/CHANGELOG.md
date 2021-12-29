@@ -1,3 +1,20 @@
+## 0.1.1-dev.2
+
+> Note: This release has breaking changes.
+
+ - **FIX**: idToken unnecessary refresh and authState changes events (#36).
+ - **FIX**: map exception code to match FlutterFire plugins (#31).
+ - **FEAT**: reset password flow (#34).
+ - **FEAT**: implement more user methods and properties.
+ - **FEAT**: map exceptions between Dart and Platform packages (#27).
+ - **FEAT**: example CLI app.
+ - **DOCS**: README & API docs (#28).
+ - **DOCS**: README & comments (#26).
+ - **CHORE**: publish packages.
+ - **CHORE**: publish packages.
+ - **BREAKING** **REFACTOR**: change auth state streams to methods (#33).
+ - **BREAKING** **REFACTOR**: read error codes from a map instead of static consts.
+
 ## 0.1.1-dev.1
 
 > Note: This release has breaking changes.

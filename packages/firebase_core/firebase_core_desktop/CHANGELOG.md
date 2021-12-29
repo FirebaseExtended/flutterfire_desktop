@@ -1,3 +1,10 @@
+## 0.1.1-dev.3
+
+ - **FEAT**: throw flutterfire exception type on initializeApp.
+ - **DOCS**: README & comments (#26).
+ - **CHORE**: publish packages.
+ - **CHORE**: publish packages.
+
 ## 0.1.1-dev.2
 
  - **FIX**: pub versions (#20).

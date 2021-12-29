@@ -1,3 +1,18 @@
+## 0.1.1-dev.3
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: reset password flow (#34).
+ - **FEAT**: implement more user methods and properties.
+ - **FEAT**: adding updateDisplayName example.
+ - **FEAT**: map exceptions between Dart and Platform packages (#27).
+ - **DOCS**: README & API docs (#28).
+ - **DOCS**: README & comments (#26).
+ - **CHORE**: publish packages.
+ - **CHORE**: remove old example app code.
+ - **CHORE**: publish packages.
+ - **BREAKING** **REFACTOR**: change auth state streams to methods (#33).
+
 ## 0.1.1-dev.2
 
  - **FIX**: pub versions (#20).
