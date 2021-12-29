@@ -131,7 +131,7 @@ class FirebaseAuth {
       String email, String password) async {
     try {
       final response = await _api.signInWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response.idToken!);
+      final userData = await _api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response.toJson()), this);
@@ -428,7 +428,7 @@ class FirebaseAuth {
       throw UnsupportedError('This credential is not supported yet.');
     }
 
-    final userData = await _api.getCurrentUser(response.idToken!);
+    final userData = await _api.getCurrentUser(response.idToken);
 
     // Map the json response to an actual user.
     final user = User(userData.toJson()..addAll(response.toJson()), this);
