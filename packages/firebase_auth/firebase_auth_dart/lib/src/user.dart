@@ -17,6 +17,10 @@ class User {
   /// Internally used to read the current idToken.
   String get _idToken => _user['idToken'];
 
+  void _setIdToken(String? idToken) {
+    _user['idToken'] = idToken;
+  }
+
   /// The users display name.
   ///
   /// Will be `null` if signing in anonymously or via password authentication.
@@ -226,9 +230,10 @@ class User {
       AuthCredential credential) async {
     try {
       if (credential is EmailAuthCredential) {
-        await _auth._api
+        final response = await _auth._api
             .signInWithEmailAndPassword(credential.email, credential.password!);
 
+        _setIdToken(response.idToken);
         await reload();
 
         return UserCredential._(
@@ -243,6 +248,7 @@ class User {
           requestUri: _auth.app.options.authDomain,
         );
 
+        _setIdToken(response.idToken);
         await reload();
 
         return UserCredential._(
@@ -271,8 +277,6 @@ class User {
   Future<void> reload() async {
     _assertSignedOut(_auth);
 
-    await _refreshIdToken(true);
-
     _user.addAll(await _auth._reloadCurrentUser(_idToken));
     _auth._updateCurrentUserAndEvents(_auth.currentUser);
   }
@@ -288,7 +292,7 @@ class User {
   /// user to authenticate again and then call [User.reauthenticateWithCredential].
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `email-not-found`: user doesn't exist
   Future<void> updateEmail(String newEmail) async {
     _assertSignedOut(_auth);
 
@@ -341,11 +345,12 @@ class User {
   /// Update user's displayName.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `email-not-found`: user doesn't exist
   /// TODO
   Future<void> updateDisplayName(String? displayName) async {
     try {
       _assertSignedOut(_auth);
+
       await _auth._api
           .updateProfile({'displayName': displayName}, _idToken, uid);
       await reload();
@@ -357,11 +362,12 @@ class User {
   /// Update user's photoURL.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `email-not-found`: user doesn't exist
   /// TODO
   Future<void> updatePhotoURL(String? photoURL) async {
     try {
       _assertSignedOut(_auth);
+
       await _auth._api.updateProfile({'photoURL': photoURL}, _idToken, uid);
       await reload();
     } catch (e) {
@@ -372,7 +378,7 @@ class User {
   /// Update user's profile.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `EMAIL_NOT_FOUND`: user doesn't exist
+  /// - `email-not-found`: user doesn't exist
   /// TODO
   Future<void> updateProfile(Map<String, dynamic> newProfile) async {
     try {

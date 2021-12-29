@@ -31,7 +31,7 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> signInWithEmailAndPassword(
+  Future<idp.VerifyPasswordResponse> signInWithEmailAndPassword(
       String email, String password) async {
     final _response = await _identityToolkit.verifyPassword(
       idp.IdentitytoolkitRelyingpartyVerifyPasswordRequest(
@@ -41,7 +41,7 @@ class API {
       ),
     );
 
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
