@@ -175,10 +175,10 @@ class FirebaseAuth {
     try {
       final response =
           await _api.createUserWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response['idToken']);
+      final userData = await _api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response), this);
+      final user = User(userData.toJson()..addAll(response.toJson()), this);
 
       _updateCurrentUserAndEvents(user, true);
 
@@ -335,11 +335,10 @@ class FirebaseAuth {
       }
 
       final response = await _api.signInAnonymously();
-      final userData =
-          (await _api.getCurrentUser(response['idToken'])).toJson();
+      final userData = (await _api.getCurrentUser(response.idToken)).toJson();
 
       // Map the json response to an actual user.
-      final user = User(userData..addAll(response), this);
+      final user = User(userData..addAll(response.toJson()), this);
 
       _updateCurrentUserAndEvents(user, true);
 
