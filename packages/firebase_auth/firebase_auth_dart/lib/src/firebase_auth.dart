@@ -93,14 +93,19 @@ class FirebaseAuth {
 
   /// Helper method to update currentUser and events.
   @protected
-  void _updateCurrentUserAndEvents(User? user) {
+  void _updateCurrentUserAndEvents(User? user,
+      [bool authStateChanged = false]) {
     _userStorage.putValue(
       '${app.options.apiKey}:${app.name}',
       {'currentUser': user?.toMap()},
     );
+
     currentUser = user;
 
-    _changeController.add(user);
+    if (authStateChanged) {
+      _changeController.add(user);
+    }
+
     _idTokenChangedController.add(user);
   }
 
@@ -126,12 +131,12 @@ class FirebaseAuth {
       String email, String password) async {
     try {
       final response = await _api.signInWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response['idToken']);
+      final userData = await _api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response), this);
+      final user = User(userData.toJson()..addAll(response.toJson()), this);
 
-      _updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user, true);
 
       // Make a credential object based on the current sign-in method.
       return UserCredential._(
@@ -170,12 +175,12 @@ class FirebaseAuth {
     try {
       final response =
           await _api.createUserWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response['idToken']);
+      final userData = await _api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response), this);
+      final user = User(userData.toJson()..addAll(response.toJson()), this);
 
-      _updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user, true);
 
       return UserCredential._(
         auth: this,
@@ -330,13 +335,12 @@ class FirebaseAuth {
       }
 
       final response = await _api.signInAnonymously();
-      final userData =
-          (await _api.getCurrentUser(response['idToken'])).toJson();
+      final userData = (await _api.getCurrentUser(response.idToken)).toJson();
 
       // Map the json response to an actual user.
-      final user = User(userData..addAll(response), this);
+      final user = User(userData..addAll(response.toJson()), this);
 
-      _updateCurrentUserAndEvents(user);
+      _updateCurrentUserAndEvents(user, true);
 
       return UserCredential._(
           auth: this,
@@ -424,12 +428,12 @@ class FirebaseAuth {
       throw UnsupportedError('This credential is not supported yet.');
     }
 
-    final userData = await _api.getCurrentUser(response.idToken!);
+    final userData = await _api.getCurrentUser(response.idToken);
 
     // Map the json response to an actual user.
     final user = User(userData.toJson()..addAll(response.toJson()), this);
 
-    _updateCurrentUserAndEvents(user);
+    _updateCurrentUserAndEvents(user, true);
 
     return UserCredential._(
       auth: this,
@@ -506,7 +510,7 @@ class FirebaseAuth {
   /// any [authStateChanges], or [idTokenChanges] stream listeners.
   Future<void> signOut() async {
     try {
-      _updateCurrentUserAndEvents(null);
+      _updateCurrentUserAndEvents(null, true);
     } catch (exception) {
       log('$exception', name: 'FirebaseAuth/signOut');
 

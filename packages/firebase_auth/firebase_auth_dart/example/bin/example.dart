@@ -123,10 +123,7 @@ Future<void> resetPassword(
     stdout.write('Current password: ');
     final password = stdin.readLineSync();
 
-    stdout.writeln();
-
     if (password != null) {
-      final progress = logger.progress('Resetting your password');
       stdout.writeln();
 
       try {
@@ -136,6 +133,9 @@ Future<void> resetPassword(
 
         stdout.write('New password: ');
         final newPassword = stdin.readLineSync();
+
+        final progress = logger.progress('Resetting your password');
+
         if (newPassword != null) {
           await currentUser.updatePassword(newPassword);
 
@@ -144,8 +144,6 @@ Future<void> resetPassword(
           stdout.writeln(greenPen('Password updated successfully.'));
         }
       } catch (e) {
-        progress.finish();
-
         stderr.writeln(redPen(e));
         exitCode = 2;
       }

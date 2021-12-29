@@ -31,7 +31,7 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> signInWithEmailAndPassword(
+  Future<idp.VerifyPasswordResponse> signInWithEmailAndPassword(
       String email, String password) async {
     final _response = await _identityToolkit.verifyPassword(
       idp.IdentitytoolkitRelyingpartyVerifyPasswordRequest(
@@ -41,11 +41,11 @@ class API {
       ),
     );
 
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> createUserWithEmailAndPassword(
+  Future<idp.SignupNewUserResponse> createUserWithEmailAndPassword(
       String email, String password) async {
     final _response = await _identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(
@@ -53,16 +53,16 @@ class API {
         password: password,
       ),
     );
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> signInAnonymously() async {
+  Future<idp.SignupNewUserResponse> signInAnonymously() async {
     final _response = await _identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(),
     );
 
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
@@ -123,8 +123,9 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future resetUserPassword(String idToken, {String? newPassword}) async {
-    await _identityToolkit.setAccountInfo(
+  Future<idp.SetAccountInfoResponse> resetUserPassword(String idToken,
+      {String? newPassword}) async {
+    return _identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         password: newPassword,
@@ -133,8 +134,9 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future sendSignInLinkToEmail(String email, String? continueUrl) async {
-    await _identityToolkit.getOobConfirmationCode(
+  Future<idp.GetOobConfirmationCodeResponse> sendSignInLinkToEmail(
+      String email, String? continueUrl) async {
+    return _identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
@@ -145,7 +147,7 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> updateEmail(
+  Future<idp.SetAccountInfoResponse> updateEmail(
       String newEmail, String idToken, String uid) async {
     final _response = await _identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
@@ -154,11 +156,11 @@ class API {
         localId: uid,
       ),
     );
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> updateProfile(
+  Future<idp.SetAccountInfoResponse> updateProfile(
       Map<String, dynamic> newProfile, String idToken, String uid) async {
     final _response = await _identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
@@ -168,11 +170,11 @@ class API {
         localId: uid,
       ),
     );
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
-  Future<Map<String, dynamic>> updatePassword(
+  Future<idp.SetAccountInfoResponse> updatePassword(
       String newPassword, String idToken) async {
     final _response = await _identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
@@ -180,11 +182,11 @@ class API {
         password: newPassword,
       ),
     );
-    return _response.toJson();
+    return _response;
   }
 
   /// TODO: write endpoint details
-  Future<dynamic> linkWithEmail(String idToken,
+  Future<idp.SetAccountInfoResponse> linkWithEmail(String idToken,
       {required EmailAuthCredential credential}) async {
     return _identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
@@ -212,7 +214,7 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.UserInfo> getCurrentUser(String idToken) async {
+  Future<idp.UserInfo> getCurrentUser(String? idToken) async {
     final _response = await _identityToolkit.getAccountInfo(
       idp.IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
     );
@@ -264,8 +266,8 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<void> delete(String idToken, String uid) async {
-    await _identityToolkit.deleteAccount(
+  Future<idp.DeleteAccountResponse> delete(String idToken, String uid) async {
+    return _identityToolkit.deleteAccount(
       idp.IdentitytoolkitRelyingpartyDeleteAccountRequest(
         idToken: idToken,
         localId: uid,
@@ -321,8 +323,8 @@ class API {
 /// A type to hold the Auth Emulator configurations.
 class EmulatorConfig {
   EmulatorConfig._({
-    this.port,
-    this.host,
+    required this.port,
+    required this.host,
     this.requester,
   });
 
@@ -338,10 +340,10 @@ class EmulatorConfig {
   }
 
   /// The port on which the emulator suite is running.
-  final String? host;
+  final String host;
 
   /// The port on which the emulator suite is running.
-  final String? port;
+  final String port;
 
   /// The IDP requester used to make calls to the emulator suite.
   final idp.RelyingpartyResource? requester;
