@@ -5,6 +5,8 @@
 import 'dart:async' as _i4;
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as _i2;
+import 'package:firebase_auth_dart/src/providers/phone_auth.dart' as _i7;
+import 'package:firebase_auth_dart/src/types.dart' as _i6;
 import 'package:firebase_core_dart/firebase_core_dart.dart' as _i3;
 import 'package:http/http.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
@@ -233,12 +235,35 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
                   Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
-  _i4.Future<void> verifyPhoneNumber({String? phoneNumber}) =>
+  _i4.Future<void> verifyPhoneNumber(
+          {String? phoneNumber,
+          _i6.PhoneVerificationFailed? verificationFailed,
+          _i6.PhoneCodeSent? codeSent,
+          _i6.PhoneCodeAutoRetrievalTimeout? codeAutoRetrievalTimeout,
+          String? autoRetrievedSmsCodeForTesting,
+          Duration? timeout = const Duration(seconds: 30),
+          int? forceResendingToken}) =>
       (super.noSuchMethod(
-          Invocation.method(
-              #verifyPhoneNumber, [], {#phoneNumber: phoneNumber}),
+          Invocation.method(#verifyPhoneNumber, [], {
+            #phoneNumber: phoneNumber,
+            #verificationFailed: verificationFailed,
+            #codeSent: codeSent,
+            #codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+            #autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
+            #timeout: timeout,
+            #forceResendingToken: forceResendingToken
+          }),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
+  @override
+  _i4.Future<_i2.UserCredential> signInWithPhoneNumber(
+          {_i7.PhoneAuthCredential? credential}) =>
+      (super.noSuchMethod(
+              Invocation.method(
+                  #signInWithPhoneNumber, [], {#credential: credential}),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
+          as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),

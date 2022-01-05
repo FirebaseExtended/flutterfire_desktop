@@ -18,9 +18,13 @@ import 'package:googleapis_auth/auth_io.dart'
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
+import 'src/api/recaptcha_html.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
+import 'src/providers/phone_auth.dart';
+import 'src/types.dart';
 import 'src/utils/jwt.dart';
+import 'src/utils/open_url.dart';
 
 export 'src/auth_provider.dart';
 export 'src/providers/email_auth.dart';
@@ -30,7 +34,7 @@ export 'src/providers/oauth.dart';
 export 'src/providers/twitter_auth.dart';
 
 part 'src/additional_user_info.dart';
-part 'src/api.dart';
+part 'src/api/api.dart';
 part 'src/auth_credential.dart';
 part 'src/firebase_auth.dart';
 part 'src/firebase_auth_exception.dart';

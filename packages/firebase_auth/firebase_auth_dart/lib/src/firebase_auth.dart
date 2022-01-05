@@ -472,25 +472,38 @@ class FirebaseAuth {
   }
 
   /// TODO
-  Future<void> verifyPhoneNumber({required String phoneNumber}) async {
-    throw UnimplementedError();
+  Future<void> verifyPhoneNumber({
+    required String phoneNumber,
+    required PhoneVerificationFailed verificationFailed,
+    required PhoneCodeSent codeSent,
+    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
+    @visibleForTesting String? autoRetrievedSmsCodeForTesting,
+    Duration timeout = const Duration(seconds: 30),
+    int? forceResendingToken,
+  }) async {
+    return _api.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationFailed: (Object object) {
+        final e = _getException(object);
 
-    // final response = await _api.verifyPhoneNumber(phoneNumber);
+        if (e is FirebaseAuthException) {
+          return verificationFailed(e);
+        } else {
+          throw e;
+        }
+      },
+      codeSent: codeSent,
+      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+    );
+  }
 
-    // log(response.sessionInfo!);
-
-    // final userData = await _api.getCurrentUser(response.idToken!);
-
-    // // Map the json response to an actual user.
-    // final user = User(userData.toJson()..addAll(response.toJson()), this);
-
-    // updateCurrentUserAndEvents(user);
-
-    // return UserCredential._(
-    //   auth: this,
-    //   credential: EmailAuthProvider.credentialWithLink(
-    //       email: email, emailLink: emailLink),
-    // );
+  /// TODO
+  Future<UserCredential> signInWithPhoneNumber(
+      {required PhoneAuthCredential credential}) async {
+    return UserCredential._(
+      auth: this,
+      credential: credential,
+    );
   }
 
   /// Internally used to reload the current user and send events.

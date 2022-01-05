@@ -83,6 +83,91 @@ class API {
     return response;
   }
 
+  Future<void> _sendData(HttpRequest request, Object data,
+      [String contentType = 'text/html']) async {
+    request.response
+      ..statusCode = 200
+      ..headers.set('content-type', contentType)
+      ..write(data);
+    await request.response.close();
+  }
+
+  /// TODO: write endpoint details
+  Future<void> verifyPhoneNumber({
+    required String phoneNumber,
+    required Function(Object) verificationFailed,
+    required PhoneCodeSent codeSent,
+    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
+    @visibleForTesting String? autoRetrievedSmsCodeForTesting,
+    Duration timeout = const Duration(seconds: 30),
+    int? forceResendingToken,
+  }) async {
+    final recaptchaResponse = await _identityToolkit.getRecaptchaParam();
+
+    final completer = Completer<void>();
+    try {
+      if (_emulator != null) {
+        // Send SMS code.
+        final verificationCodeResponse =
+            await _identityToolkit.sendVerificationCode(
+                idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
+          phoneNumber: phoneNumber,
+        ));
+
+        if (verificationCodeResponse.sessionInfo != null) {
+          codeSent(verificationCodeResponse.sessionInfo!, forceResendingToken);
+
+          completer.complete();
+        }
+      } else {
+        final address = InternetAddress.loopbackIPv4;
+        final server = await HttpServer.bind(address, 0);
+        final port = server.port;
+        final redirectUrl = 'http://${address.host}:$port';
+
+        server.listen((HttpRequest request) async {
+          final uri = request.requestedUri;
+
+          if (uri.path == '/' && uri.queryParameters.isEmpty) {
+            return _sendData(
+              request,
+              recaptchaHTML(recaptchaResponse.recaptchaSiteKey,
+                  recaptchaResponse.recaptchaStoken),
+            );
+          } else if (uri.query.contains('response')) {
+            // Send SMS code.
+            final verificationCodeResponse =
+                await _identityToolkit.sendVerificationCode(
+                    idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
+              phoneNumber: phoneNumber,
+              recaptchaToken: uri.queryParameters['response'],
+            ));
+
+            if (verificationCodeResponse.sessionInfo != null) {
+              codeSent(
+                  verificationCodeResponse.sessionInfo!, forceResendingToken);
+            }
+
+            return _sendData(
+              request,
+              successHTML(),
+            )
+                .then(completer.complete)
+                .catchError(completer.completeError)
+                .whenComplete(server.close);
+          }
+        });
+
+        await OpenUrlUtil().openUrl(redirectUrl);
+      }
+    } catch (e) {
+      verificationFailed(e);
+      completer.completeError(e);
+    }
+
+    return completer.future.timeout(const Duration(minutes: 2));
+  }
+
   /// TODO: write endpoint details
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     final _response = await _identityToolkit.createAuthUri(

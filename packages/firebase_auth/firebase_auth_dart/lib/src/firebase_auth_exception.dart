@@ -36,6 +36,7 @@ Map error = {
       "The user's credential is no longer valid. The user must sign in again.",
   'FEDERATED_USER_ID_ALREADY_LINKED':
       'This credential is already associated with a different user account.',
+  'INVALID_PHONE_NUMBER': 'The provided phone number is not valid.',
   'UKNOWN': 'Uknown error happened.',
 };
 
