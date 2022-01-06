@@ -12,13 +12,12 @@ part of firebase_auth_dart;
 /// See: https://cloud.google.com/identity-platform/docs/use-rest-api
 class API {
   // ignore: public_member_api_docs
-  API(this._apiKey, this._projectId, {http.Client? client}) {
-    _client = client ?? clientViaApiKey(_apiKey);
+  API(this._app, {http.Client? client}) {
+    _client = client ?? clientViaApiKey(_app.options.apiKey);
     _identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
-  late final String _apiKey;
-  late final String _projectId;
+  late final FirebaseApp _app;
 
   late http.Client _client;
   late idp.RelyingpartyResource _identityToolkit;
@@ -83,15 +82,6 @@ class API {
     return response;
   }
 
-  Future<void> _sendData(HttpRequest request, Object data,
-      [String contentType = 'text/html']) async {
-    request.response
-      ..statusCode = 200
-      ..headers.set('content-type', contentType)
-      ..write(data);
-    await request.response.close();
-  }
-
   /// TODO: write endpoint details
   Future<void> verifyPhoneNumber({
     required String phoneNumber,
@@ -100,72 +90,85 @@ class API {
     required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
     @visibleForTesting String? autoRetrievedSmsCodeForTesting,
     Duration timeout = const Duration(seconds: 30),
+    RecaptchaTheme recaptchaTheme = RecaptchaTheme.light,
     int? forceResendingToken,
   }) async {
+    final completer = Completer<void>();
+
     final recaptchaResponse = await _identityToolkit.getRecaptchaParam();
 
-    final completer = Completer<void>();
-    try {
-      if (_emulator != null) {
-        // Send SMS code.
-        final verificationCodeResponse =
-            await _identityToolkit.sendVerificationCode(
-                idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
-          phoneNumber: phoneNumber,
-        ));
+    final recaptchaVerifier = RecaptchaVerifier(
+      recaptchaResponse.recaptchaSiteKey,
+      recaptchaResponse.recaptchaStoken,
+      theme: recaptchaTheme,
+    );
 
-        if (verificationCodeResponse.sessionInfo != null) {
-          codeSent(verificationCodeResponse.sessionInfo!, forceResendingToken);
-
-          completer.complete();
+    if (_emulator != null) {
+      await _sendSMSCode(
+        phoneNumber: phoneNumber,
+        codeSent: codeSent,
+        verificationFailed: verificationFailed,
+        forceResendingToken: forceResendingToken,
+      )
+          .onError((_, __) => completer.complete())
+          .whenComplete(OpenUrlUtil().openAppUrl);
+    } else {
+      recaptchaVerifier.excute().listen((recaptchaToken) async {
+        if (recaptchaToken != null) {
+          await _sendSMSCode(
+            phoneNumber: phoneNumber,
+            codeSent: codeSent,
+            verificationFailed: verificationFailed,
+            forceResendingToken: forceResendingToken,
+            recaptchaToken: recaptchaToken,
+          )
+              .onError((_, __) => completer.complete())
+              .whenComplete(OpenUrlUtil().openAppUrl);
         }
-      } else {
-        final address = InternetAddress.loopbackIPv4;
-        final server = await HttpServer.bind(address, 0);
-        final port = server.port;
-        final redirectUrl = 'http://${address.host}:$port';
-
-        server.listen((HttpRequest request) async {
-          final uri = request.requestedUri;
-
-          if (uri.path == '/' && uri.queryParameters.isEmpty) {
-            return _sendData(
-              request,
-              recaptchaHTML(recaptchaResponse.recaptchaSiteKey,
-                  recaptchaResponse.recaptchaStoken),
-            );
-          } else if (uri.query.contains('response')) {
-            // Send SMS code.
-            final verificationCodeResponse =
-                await _identityToolkit.sendVerificationCode(
-                    idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
-              phoneNumber: phoneNumber,
-              recaptchaToken: uri.queryParameters['response'],
-            ));
-
-            if (verificationCodeResponse.sessionInfo != null) {
-              codeSent(
-                  verificationCodeResponse.sessionInfo!, forceResendingToken);
-            }
-
-            return _sendData(
-              request,
-              successHTML(),
-            )
-                .then(completer.complete)
-                .catchError(completer.completeError)
-                .whenComplete(server.close);
-          }
-        });
-
-        await OpenUrlUtil().openUrl(redirectUrl);
-      }
-    } catch (e) {
-      verificationFailed(e);
-      completer.completeError(e);
+      });
     }
 
     return completer.future.timeout(const Duration(minutes: 2));
+  }
+
+  Future<void> _sendSMSCode({
+    required String phoneNumber,
+    required PhoneCodeSent codeSent,
+    required Function(Object) verificationFailed,
+    String? recaptchaToken,
+    int? forceResendingToken,
+  }) async {
+    try {
+      // Send SMS code.
+      final response = await _identityToolkit.sendVerificationCode(
+          idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
+        phoneNumber: phoneNumber,
+        recaptchaToken: recaptchaToken,
+      ));
+
+      if (response.sessionInfo != null) {
+        codeSent(
+          response.sessionInfo!,
+          forceResendingToken,
+        );
+      }
+    } catch (e) {
+      verificationFailed(e);
+      rethrow;
+    }
+  }
+
+  /// TODO: write endpoint details
+  Future<idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberResponse>
+      confirmSMSCode(String smsCode, String verificationId) async {
+    final _response = await _identityToolkit.verifyPhoneNumber(
+      idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
+        code: smsCode,
+        sessionInfo: verificationId,
+      ),
+    );
+
+    return _response;
   }
 
   /// TODO: write endpoint details
@@ -336,7 +339,7 @@ class API {
 
     final _response = await http.post(
       Uri.parse(
-        '${baseUri}token?key=$_apiKey',
+        '${baseUri}token?key=${_app.options.apiKey}',
       ),
       body: {
         'grant_type': 'refresh_token',
@@ -368,7 +371,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/$_projectId/config',
+      path: '/emulator/v1/projects/${_app.options.projectId}/config',
     );
 
     http.Response response;
@@ -395,7 +398,7 @@ class API {
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
 
     _identityToolkit = idp.IdentityToolkitApi(
-      clientViaApiKey(_apiKey),
+      clientViaApiKey(_app.options.apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
     // set the Flage to true to use the emulator for this instance.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas, avoid_returning_this, prefer_relative_imports
+// ignore_for_file: require_trailing_commas, avoid_returning_this, prefer_relative_imports, non_constant_identifier_names
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
@@ -11,7 +11,7 @@ const _kProviderId = 'phone';
 /// This class should be used to either create a new Phone credential with an
 /// verification ID and SMS code.
 ///
-/// Typically this provider will be used when calling [verifyPhoneNumber] to
+/// Typically this provider will be used when calling [FirebaseAuth.verifyPhoneNumber] to
 /// generate a new [PhoneAuthCredential] when a SMS code has been sent.
 class PhoneAuthProvider extends AuthProvider {
   /// Creates a new instance.
