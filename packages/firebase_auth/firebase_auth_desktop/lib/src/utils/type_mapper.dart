@@ -21,6 +21,11 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
       idToken: credential.idToken,
       accessToken: credential.accessToken,
     );
+  } else if (credential is PhoneAuthCredential) {
+    return auth_dart.PhoneAuthProvider.credential(
+      verificationId: credential.verificationId!,
+      smsCode: credential.smsCode!,
+    );
   } else {
     return auth_dart.AuthCredential(
       providerId: credential.providerId,

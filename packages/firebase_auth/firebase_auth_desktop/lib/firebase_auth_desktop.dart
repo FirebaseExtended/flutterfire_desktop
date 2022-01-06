@@ -350,7 +350,15 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       Duration timeout = const Duration(seconds: 30),
       int? forceResendingToken,
       String? autoRetrievedSmsCodeForTesting}) {
-    // TODO: implement verifyPhoneNumber
-    throw UnimplementedError();
+    return _auth!.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationFailed: (e) {
+        // Map exception types.
+        return verificationFailed(
+            FirebaseAuthException(code: e.code, message: e.message));
+      },
+      codeSent: codeSent,
+      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+    );
   }
 }

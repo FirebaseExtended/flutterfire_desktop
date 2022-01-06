@@ -5,10 +5,7 @@ part of firebase_auth_dart;
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
-    _api = API(
-      app.options.apiKey,
-      app.options.projectId,
-    );
+    _api = API(app);
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -407,53 +404,65 @@ class FirebaseAuth {
   ///   - Thrown if signing in with a credential from [EmailAuthProvider.credential]
   ///    and the password is invalid for the given email, or if the account
   ///    corresponding to the email does not have a password set.
-  /// - `invalid-verification-code`
+  /// - `invalid-code`
   ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
   ///    verification code of the credential is not valid.
   /// - `invalid-verification-id`
   ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
-  ///    verification ID of the credential is not valid.id.
+  ///    verification ID of the credential is not valid.
   Future<UserCredential> signInWithCredential(
     AuthCredential credential,
   ) async {
-    idp.VerifyAssertionResponse response;
+    try {
+      Map<String, dynamic> response;
 
-    if (credential is GoogleAuthCredential) {
-      response = await _api.signInWithOAuthCredential(
-        requestUri: app.options.authDomain,
-        providerIdToken: credential.idToken!,
-        providerId: credential.providerId,
+      if (credential is GoogleAuthCredential) {
+        response = (await _api.signInWithOAuthCredential(
+          requestUri: app.options.authDomain,
+          providerIdToken: credential.idToken!,
+          providerId: credential.providerId,
+        ))
+            .toJson();
+      } else if (credential is PhoneAuthCredential) {
+        response = (await _api.confirmSMSCode(
+          credential.smsCode!,
+          credential.verificationId!,
+        ))
+            .toJson();
+      } else {
+        throw UnsupportedError('This credential is not supported yet.');
+      }
+
+      final userData = await _api.getCurrentUser(response['idToken']);
+
+      // Map the json response to an actual user.
+      final user = User(userData.toJson()..addAll(response), this);
+
+      _updateCurrentUserAndEvents(user, true);
+
+      return UserCredential._(
+        auth: this,
+        credential: credential,
+        additionalUserInfo: AdditionalUserInfo(
+          isNewUser: response['isNewUser'] ?? false,
+          providerId: credential.providerId,
+          username: userData.screenName,
+          profile: {
+            'displayName': userData.displayName,
+            'photoUrl': userData.photoUrl
+          },
+        ),
       );
-    } else {
-      throw UnsupportedError('This credential is not supported yet.');
+    } catch (e) {
+      throw _getException(e);
     }
-
-    final userData = await _api.getCurrentUser(response.idToken);
-
-    // Map the json response to an actual user.
-    final user = User(userData.toJson()..addAll(response.toJson()), this);
-
-    _updateCurrentUserAndEvents(user, true);
-
-    return UserCredential._(
-      auth: this,
-      credential: credential,
-      additionalUserInfo: AdditionalUserInfo(
-        isNewUser: response.isNewUser ?? false,
-        providerId: response.providerId,
-        username: response.screenName,
-        profile: {
-          'displayName': response.displayName,
-          'photoUrl': response.photoUrl
-        },
-      ),
-    );
   }
 
   /// TODO
   Future<UserCredential> signInWithEmailLink(
       String email, String emailLink) async {
-    throw UnimplementedError();
+    throw UnimplementedError('signInWithEmailLink() is not yet implemented.');
+
     // final response = await _api.signInWithEmailLink(
     //     email, Uri.parse(emailLink).queryParameters['oobCode']!);
 
@@ -471,7 +480,39 @@ class FirebaseAuth {
     // );
   }
 
-  /// TODO
+  /// Starts a phone number verification process for the given phone number.
+  ///
+  /// This method is used to verify that the user-provided phone number belongs
+  /// to the user. Firebase sends a code via SMS message to the phone number,
+  /// where you must then prompt the user to enter the code. The code can be
+  /// combined with the verification ID to create a [PhoneAuthProvider.credential]
+  /// which you can then use to sign the user in, or link with their account (
+  /// see [signInWithCredential] or [User.linkWithCredential]).
+  ///
+  /// No duplicated SMS will be sent out unless a `forceResendingToken` is
+  /// provided.
+  ///
+  /// - `phoneNumber`: The phone number for the account the user is signing up
+  ///   for or signing into. Make sure to pass in a phone number with country
+  ///   code prefixed with plus sign ('+').
+  ///
+  /// - `verificationFailed`: Triggered when an error occurred during phone number
+  ///   verification. A [FirebaseAuthException] is provided when this is
+  ///   triggered.
+  ///
+  /// - `codeSent`: Triggered when an SMS has been sent to the users phone, and
+  ///   will include a `verificationId` and `forceResendingToken`.
+  ///
+  /// - `timeout`: The maximum amount of time you are willing to wait for SMS
+  ///   auto-retrieval to be completed by the library. Maximum allowed value
+  ///   is 2 minutes.
+  ///
+  /// - `codeAutoRetrievalTimeout`: Triggered when SMS auto-retrieval times out and
+  ///   provide a `verificationId`.
+  ///
+  /// - `forceResendingToken`: The `forceResendingToken` obtained from `codeSent`
+  ///   callback to force re-sending another verification SMS before the
+  ///   auto-retrieval timeout.
   Future<void> verifyPhoneNumber({
     required String phoneNumber,
     required PhoneVerificationFailed verificationFailed,
@@ -494,16 +535,17 @@ class FirebaseAuth {
       },
       codeSent: codeSent,
       codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+      autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
+      timeout: timeout,
+      forceResendingToken: forceResendingToken,
     );
   }
 
-  /// TODO
+  /// TODO(pr-mais): implement this method on web platforms.
   Future<UserCredential> signInWithPhoneNumber(
       {required PhoneAuthCredential credential}) async {
-    return UserCredential._(
-      auth: this,
-      credential: credential,
-    );
+    throw UnimplementedError(
+        'signInWithPhoneNumber() is not yet implemented for web.');
   }
 
   /// Internally used to reload the current user and send events.
