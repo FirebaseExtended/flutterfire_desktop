@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'api/recaptcha_html.dart';
+import 'recaptcha_html.dart';
 import 'utils/open_url.dart';
 
 /// The theme of the rendered recaptcha widget.
@@ -38,7 +38,7 @@ class RecaptchaVerifier {
   ///
   /// Each event represents the current state of the verification in the broswer.
   ///
-  /// On desktop platfroms calling this method will fire up the default broswer,
+  /// On desktop platforms calling this method will fire up the default browser,
   /// in most cases the recaptcha will happen in few seconds without user interaction,
   /// but sometimes will show the recaptcha widget.
   Stream<String?> excute() async* {

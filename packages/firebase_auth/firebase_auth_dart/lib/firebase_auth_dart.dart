@@ -35,7 +35,7 @@ export 'src/providers/phone_auth.dart';
 export 'src/providers/twitter_auth.dart';
 
 part 'src/additional_user_info.dart';
-part 'src/api/api.dart';
+part 'src/api.dart';
 part 'src/auth_credential.dart';
 part 'src/firebase_auth.dart';
 part 'src/firebase_auth_exception.dart';
