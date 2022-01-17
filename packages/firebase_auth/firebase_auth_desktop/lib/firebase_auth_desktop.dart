@@ -13,10 +13,11 @@ import 'package:firebase_auth_platform_interface/firebase_auth_platform_interfac
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
 
-import 'src/utils/type_mapper.dart';
-
-part 'src/firebase_auth_user.dart';
-part 'src/firebase_auth_user_credential.dart';
+import 'src/confirmation_result.dart';
+import 'src/firebase_auth_user.dart';
+import 'src/firebase_auth_user_credential.dart';
+import 'src/recaptcha_verifier.dart';
+import 'src/utils/desktop_utils.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
@@ -59,6 +60,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
     FirebaseAuthPlatform.instance = FirebaseAuthDesktop.instance;
+    RecaptchaVerifierFactoryPlatform.instance =
+        RecaptchaVerifierFactoryDesktop.instance;
   }
 
   /// Stub initializer to allow creating an instance without
@@ -116,7 +119,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -125,7 +128,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return await _auth!.fetchSignInMethodsForEmail(email);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -148,7 +151,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       await _auth!.sendPasswordResetEmail(
           email: email, continueUrl: actionCodeSettings?.url);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -157,7 +160,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.confirmPasswordReset(code, newPassword);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -170,7 +173,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.createUserWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -220,7 +223,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.sendSignInLinkToEmail(email);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -255,7 +258,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInAnonymously(),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -269,7 +272,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
             .signInWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -288,15 +291,23 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
         await _auth!.signInWithEmailLink(email, emailLink),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<ConfirmationResultPlatform> signInWithPhoneNumber(String phoneNumber,
-      RecaptchaVerifierFactoryPlatform applicationVerifier) {
-    // TODO: implement signInWithPhoneNumber
-    throw UnimplementedError();
+      RecaptchaVerifierFactoryPlatform applicationVerifier) async {
+    try {
+      final recaptchaVerifier = applicationVerifier.delegate;
+
+      return ConfirmationResultDesktop(
+        this,
+        await _auth!.signInWithPhoneNumber(phoneNumber, recaptchaVerifier),
+      );
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   @override
@@ -316,7 +327,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       await _auth!.signOut();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -327,7 +338,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
       return;
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -336,7 +347,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return await _auth!.verifyPasswordResetCode(code);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -350,15 +361,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       Duration timeout = const Duration(seconds: 30),
       int? forceResendingToken,
       String? autoRetrievedSmsCodeForTesting}) {
-    return _auth!.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationFailed: (e) {
-        // Map exception types.
-        return verificationFailed(
-            FirebaseAuthException(code: e.code, message: e.message));
-      },
-      codeSent: codeSent,
-      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-    );
+    throw UnimplementedError(
+        'verifyPhoneNumber() is not implemented for Web and Desktop based platforms.');
   }
 }

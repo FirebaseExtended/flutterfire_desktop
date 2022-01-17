@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 // ignore_for_file: require_trailing_commas
 
 part of firebase_auth_dart;
@@ -5,7 +9,7 @@ part of firebase_auth_dart;
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
-    _api = API(app);
+    _api = API(app.options.apiKey, app.options.projectId);
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -42,7 +46,7 @@ class FirebaseAuth {
   /// Change the HTTP client for the purpose of testing.
   @visibleForTesting
   void setApiClient(http.Client client) {
-    _api._setApiClient(client);
+    _api.setApiClient(client);
   }
 
   StorageBox<Object> get _userStorage =>
@@ -488,64 +492,16 @@ class FirebaseAuth {
   /// combined with the verification ID to create a [PhoneAuthProvider.credential]
   /// which you can then use to sign the user in, or link with their account (
   /// see [signInWithCredential] or [User.linkWithCredential]).
-  ///
-  /// No duplicated SMS will be sent out unless a `forceResendingToken` is
-  /// provided.
-  ///
-  /// - `phoneNumber`: The phone number for the account the user is signing up
-  ///   for or signing into. Make sure to pass in a phone number with country
-  ///   code prefixed with plus sign ('+').
-  ///
-  /// - `verificationFailed`: Triggered when an error occurred during phone number
-  ///   verification. A [FirebaseAuthException] is provided when this is
-  ///   triggered.
-  ///
-  /// - `codeSent`: Triggered when an SMS has been sent to the users phone, and
-  ///   will include a `verificationId` and `forceResendingToken`.
-  ///
-  /// - `timeout`: The maximum amount of time you are willing to wait for SMS
-  ///   auto-retrieval to be completed by the library. Maximum allowed value
-  ///   is 2 minutes.
-  ///
-  /// - `codeAutoRetrievalTimeout`: Triggered when SMS auto-retrieval times out and
-  ///   provide a `verificationId`.
-  ///
-  /// - `forceResendingToken`: The `forceResendingToken` obtained from `codeSent`
-  ///   callback to force re-sending another verification SMS before the
-  ///   auto-retrieval timeout.
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required PhoneVerificationFailed verificationFailed,
-    required PhoneCodeSent codeSent,
-    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
-    @visibleForTesting String? autoRetrievedSmsCodeForTesting,
-    Duration timeout = const Duration(seconds: 30),
-    int? forceResendingToken,
-  }) async {
-    return _api.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationFailed: (Object object) {
-        final e = _getException(object);
-
-        if (e is FirebaseAuthException) {
-          return verificationFailed(e);
-        } else {
-          throw e;
-        }
-      },
-      codeSent: codeSent,
-      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-      autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
-      timeout: timeout,
-      forceResendingToken: forceResendingToken,
-    );
-  }
-
-  /// TODO(pr-mais): implement this method on web platforms.
-  Future<UserCredential> signInWithPhoneNumber(
-      {required PhoneAuthCredential credential}) async {
-    throw UnimplementedError(
-        'signInWithPhoneNumber() is not yet implemented for web.');
+  Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
+      [RecaptchaVerifier? verifier]) async {
+    try {
+      return ConfirmationResult(
+        this,
+        await _api.signInWithPhoneNumber(phoneNumber, verifier),
+      );
+    } catch (e) {
+      throw _getException(e);
+    }
   }
 
   /// Internally used to reload the current user and send events.

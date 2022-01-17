@@ -4,7 +4,22 @@
 
 // ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
-part of firebase_auth_dart;
+library api;
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:googleapis/identitytoolkit/v3.dart' as idp;
+import 'package:googleapis_auth/auth_io.dart'
+    if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
+import 'package:http/http.dart' as http;
+
+import 'providers/email_auth.dart';
+import 'utils/open_url.dart';
+
+part 'recaptcha_verifier.dart';
+part 'recaptcha_html.dart';
 
 /// Pure Dart service layer to perform all requests
 /// with the underlying Identity Toolkit API.
@@ -12,19 +27,30 @@ part of firebase_auth_dart;
 /// See: https://cloud.google.com/identity-platform/docs/use-rest-api
 class API {
   // ignore: public_member_api_docs
-  API(this._app, {http.Client? client}) {
-    _client = client ?? clientViaApiKey(_app.options.apiKey);
+  API(this._apiKey, this._projectId, {http.Client? client}) {
+    _client = client ?? clientViaApiKey(_apiKey);
     _identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
-  late final FirebaseApp _app;
+  late final String _apiKey;
+  late final String _projectId;
 
   late http.Client _client;
   late idp.RelyingpartyResource _identityToolkit;
 
   EmulatorConfig? _emulator;
 
-  void _setApiClient(http.Client client) {
+  RecaptchaVerifier _recaptchaVerifier =
+      RecaptchaVerifier({'theme': RecaptchaTheme.light.name});
+
+  /// Override the default `RecaptchaVerifier` to allow rendering with different theme.
+  // ignore: avoid_setters_without_getters
+  set setRecaptchaVerifier(RecaptchaVerifier recaptchaVerifier) {
+    _recaptchaVerifier = recaptchaVerifier;
+  }
+
+  /// Change the HTTP client for the purpose of testing.
+  void setApiClient(http.Client client) {
     _client = client;
     _identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
   }
@@ -83,60 +109,45 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required Function(Object) verificationFailed,
-    required PhoneCodeSent codeSent,
-    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
-    @visibleForTesting String? autoRetrievedSmsCodeForTesting,
-    Duration timeout = const Duration(seconds: 30),
-    RecaptchaTheme recaptchaTheme = RecaptchaTheme.light,
-    int? forceResendingToken,
-  }) async {
-    final completer = Completer<void>();
+  Future<String> signInWithPhoneNumber(String phoneNumber,
+      [RecaptchaVerifier? verifier,
+      Duration timeout = const Duration(seconds: 30)]) async {
+    verifier ??= _recaptchaVerifier;
+
+    final completer = Completer<String>();
 
     final recaptchaResponse = await _identityToolkit.getRecaptchaParam();
-
-    final recaptchaVerifier = RecaptchaVerifier(
-      recaptchaResponse.recaptchaSiteKey,
-      recaptchaResponse.recaptchaStoken,
-      theme: recaptchaTheme,
-    );
 
     if (_emulator != null) {
       await _sendSMSCode(
         phoneNumber: phoneNumber,
-        codeSent: codeSent,
-        verificationFailed: verificationFailed,
-        forceResendingToken: forceResendingToken,
-      )
-          .onError((_, __) => completer.complete())
-          .whenComplete(OpenUrlUtil().openAppUrl);
-    } else {
-      recaptchaVerifier.excute().listen((recaptchaToken) async {
-        if (recaptchaToken != null) {
-          await _sendSMSCode(
-            phoneNumber: phoneNumber,
-            codeSent: codeSent,
-            verificationFailed: verificationFailed,
-            forceResendingToken: forceResendingToken,
-            recaptchaToken: recaptchaToken,
-          )
-              .onError((_, __) => completer.complete())
-              .whenComplete(OpenUrlUtil().openAppUrl);
-        }
+      ).then(completer.complete).onError((e, __) {
+        completer.completeError(e!);
+      }).whenComplete(() async {
+        await OpenUrlUtil().openAppUrl();
       });
+    } else {
+      final recaptchaToken = await verifier.verify(
+          recaptchaResponse.recaptchaSiteKey,
+          recaptchaResponse.recaptchaStoken);
+      if (recaptchaToken != null) {
+        await _sendSMSCode(
+          phoneNumber: phoneNumber,
+          recaptchaToken: recaptchaToken,
+        ).then(completer.complete).onError((e, __) {
+          completer.completeError(e!);
+        }).whenComplete(() async {
+          await OpenUrlUtil().openAppUrl();
+        });
+      }
     }
 
-    return completer.future.timeout(const Duration(minutes: 2));
+    return completer.future.timeout(timeout);
   }
 
-  Future<void> _sendSMSCode({
+  Future<String?> _sendSMSCode({
     required String phoneNumber,
-    required PhoneCodeSent codeSent,
-    required Function(Object) verificationFailed,
     String? recaptchaToken,
-    int? forceResendingToken,
   }) async {
     try {
       // Send SMS code.
@@ -147,13 +158,9 @@ class API {
       ));
 
       if (response.sessionInfo != null) {
-        codeSent(
-          response.sessionInfo!,
-          forceResendingToken,
-        );
+        return response.sessionInfo;
       }
     } catch (e) {
-      verificationFailed(e);
       rethrow;
     }
   }
@@ -339,7 +346,7 @@ class API {
 
     final _response = await http.post(
       Uri.parse(
-        '${baseUri}token?key=${_app.options.apiKey}',
+        '${baseUri}token?key=${_apiKey}',
       ),
       body: {
         'grant_type': 'refresh_token',
@@ -371,7 +378,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/${_app.options.projectId}/config',
+      path: '/emulator/v1/projects/${_projectId}/config',
     );
 
     http.Response response;
@@ -398,7 +405,7 @@ class API {
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
 
     _identityToolkit = idp.IdentityToolkitApi(
-      clientViaApiKey(_app.options.apiKey),
+      clientViaApiKey(_apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
     // set the Flage to true to use the emulator for this instance.

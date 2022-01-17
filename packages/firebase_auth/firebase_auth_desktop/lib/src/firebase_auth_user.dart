@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
+import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
+import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
+
 // ignore_for_file: require_trailing_commas
 
-part of firebase_auth_desktop;
+import 'firebase_auth_user_credential.dart';
+import 'utils/desktop_utils.dart';
 
 /// Dart delegate implementation of [UserPlatform].
 class User extends UserPlatform {
@@ -39,7 +43,7 @@ class User extends UserPlatform {
 
       return IdTokenResult(idTokenResult.toMap);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -56,7 +60,7 @@ class User extends UserPlatform {
             .linkWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -97,7 +101,7 @@ class User extends UserPlatform {
             mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -109,7 +113,7 @@ class User extends UserPlatform {
     try {
       await _user.reload();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -119,7 +123,7 @@ class User extends UserPlatform {
     try {
       await _user.sendEmailVerification();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -134,7 +138,7 @@ class User extends UserPlatform {
     try {
       return User(auth, await _user.unlink(providerId));
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -143,7 +147,7 @@ class User extends UserPlatform {
     try {
       await _user.updateEmail(newEmail);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -152,7 +156,7 @@ class User extends UserPlatform {
     try {
       await _user.updatePassword(newPassword);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 

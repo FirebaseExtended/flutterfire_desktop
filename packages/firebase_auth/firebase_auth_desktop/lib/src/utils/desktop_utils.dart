@@ -63,10 +63,10 @@ UserMetadata mapUserMetadataFromDart(auth_dart.UserMetadata? metadata) {
 }
 
 /// Map [auth_dart.FirebaseAuthException] to [FirebaseAuthException].
-Exception mapExceptionType(Object e) {
+FirebaseAuthException getFirebaseAuthException(Object e) {
   if (e is auth_dart.FirebaseAuthException) {
     return FirebaseAuthException(code: e.code, message: e.message);
   } else {
-    return Exception(e);
+    throw e;
   }
 }

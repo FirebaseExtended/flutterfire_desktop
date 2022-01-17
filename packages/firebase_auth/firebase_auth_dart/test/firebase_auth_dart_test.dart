@@ -96,17 +96,20 @@ void main() {
   group('$FirebaseAuth', () {
     setUpAll(() async {
       const options = FirebaseOptions(
-        appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-        projectId: 'react-native-firebase-testing',
-        messagingSenderId: '448618578101',
-      );
+          apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+          authDomain: 'react-native-firebase-testing.firebaseapp.com',
+          databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
+          projectId: 'react-native-firebase-testing',
+          storageBucket: 'react-native-firebase-testing.appspot.com',
+          messagingSenderId: '448618578101',
+          appId: '1:448618578101:web:0b650370bb29e29cac3efc',
+          measurementId: 'G-F79DJ0VFGS');
 
       await Firebase.initializeApp(options: options);
 
       auth = FirebaseAuth.instance;
 
-      await auth.useAuthEmulator();
+      //await auth.useAuthEmulator();
 
       authStateChanges = StreamQueue(auth.authStateChanges());
       idTokenChanges = StreamQueue(auth.idTokenChanges());
@@ -224,6 +227,9 @@ void main() {
           ),
         );
       });
+    });
+    group('signInWithPhoneNumber() ', () {
+      // TODO Phone Auth tests
     });
 
     group('Use emulator ', () {

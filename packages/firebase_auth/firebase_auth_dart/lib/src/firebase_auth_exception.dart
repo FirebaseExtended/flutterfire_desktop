@@ -39,6 +39,8 @@ Map error = {
   'INVALID_PHONE_NUMBER': 'The provided phone number is not valid.',
   'INVALID_CODE': 'The provided code is not valid.',
   'UKNOWN': 'Uknown error happened.',
+  'CAPTCHA_CHECK_FAILED':
+      'the reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
 };
 
 /// Wrap the errors from the Identity Platform REST API, usually of type [idp.DetailedApiRequestError]

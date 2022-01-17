@@ -139,11 +139,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-                    Text(user.email ?? 'User'),
+                    Text(user.email ?? user.phoneNumber ?? 'User'),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        if (userProviders.contains('phone'))
+                          const Icon(Icons.phone),
                         if (userProviders.contains('password'))
                           const Icon(Icons.mail),
                         if (userProviders.contains('google.com'))
