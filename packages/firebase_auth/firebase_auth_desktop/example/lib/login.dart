@@ -152,8 +152,6 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  String verificationId = '';
-
   Future<void> onPhoneAuth() async {
     if (mode != AuthMode.phone) {
       setState(() {
@@ -162,60 +160,19 @@ class _AuthGateState extends State<AuthGate> {
     } else {
       try {
         final confirmationResult = await FirebaseAuth.instance
-            .signInWithPhoneNumber(
-                phoneController.text,
-                RecaptchaVerifier(
-                    theme: RecaptchaVerifierTheme.dark,
-                    size: RecaptchaVerifierSize.normal));
-        String? smsCode;
-        // Update the UI - wait for the user to enter the SMS code
-        await showDialog<String>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('SMS code:'),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Sign in'),
-                ),
-                OutlinedButton(
-                  onPressed: () {
-                    smsCode = null;
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-              ],
-              content: Container(
-                padding: const EdgeInsets.all(20),
-                child: TextField(
-                  onChanged: (value) {
-                    smsCode = value;
-                  },
-                  textAlign: TextAlign.center,
-                  autofocus: true,
-                ),
-              ),
-            );
-          },
-        );
+            .signInWithPhoneNumber(phoneController.text);
 
-        if (smsCode == null) {
-          setIsLoading();
-          return;
-        } else {
-          await confirmationResult.confirm(smsCode!);
+        final smsCode = await getSmsCodeFromUser();
+
+        if (smsCode != null) {
+          await confirmationResult.confirm(smsCode);
         }
       } catch (e) {
-        setIsLoading();
-
         setState(() {
           error = '$e';
         });
+      } finally {
+        setIsLoading();
       }
     }
   }
@@ -243,6 +200,48 @@ class _AuthGateState extends State<AuthGate> {
         error = '${e.message}';
       });
     }
+  }
+
+  Future<String?> getSmsCodeFromUser() async {
+    String? smsCode;
+
+    // Update the UI - wait for the user to enter the SMS code
+    await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('SMS code:'),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Sign in'),
+            ),
+            OutlinedButton(
+              onPressed: () {
+                smsCode = null;
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+          content: Container(
+            padding: const EdgeInsets.all(20),
+            child: TextField(
+              onChanged: (value) {
+                smsCode = value;
+              },
+              textAlign: TextAlign.center,
+              autofocus: true,
+            ),
+          ),
+        );
+      },
+    );
+
+    return smsCode;
   }
 
   @override
