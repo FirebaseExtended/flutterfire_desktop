@@ -67,6 +67,7 @@ FirebaseAuthException getFirebaseAuthException(Object e) {
   if (e is auth_dart.FirebaseAuthException) {
     return FirebaseAuthException(code: e.code, message: e.message);
   } else {
+    // ignore: only_throw_errors
     throw e;
   }
 }

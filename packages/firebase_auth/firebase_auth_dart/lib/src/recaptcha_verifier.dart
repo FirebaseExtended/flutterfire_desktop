@@ -64,6 +64,7 @@ class RecaptchaVerifier {
 
         // ignore: avoid_dynamic_calls
         if (parameters.containsKey('callback')) {
+          // ignore: avoid_dynamic_calls
           parameters['callback']();
         }
 
@@ -79,6 +80,7 @@ class RecaptchaVerifier {
           ),
         );
         if (parameters.containsKey('callback-error')) {
+          // ignore: avoid_dynamic_calls
           parameters['callback-error']();
         }
 
@@ -88,8 +90,6 @@ class RecaptchaVerifier {
           return Exception(uri.queryParameters['error-code']);
         });
       }
-    }).onDone(() {
-      print('done');
     });
 
     await OpenUrlUtil().openUrl(redirectUrl);

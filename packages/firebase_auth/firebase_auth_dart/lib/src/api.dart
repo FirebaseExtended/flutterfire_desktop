@@ -346,7 +346,7 @@ class API {
 
     final _response = await http.post(
       Uri.parse(
-        '${baseUri}token?key=${_apiKey}',
+        '${baseUri}token?key=$_apiKey',
       ),
       body: {
         'grant_type': 'refresh_token',
@@ -378,7 +378,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/${_projectId}/config',
+      path: '/emulator/v1/projects/$_projectId/config',
     );
 
     http.Response response;

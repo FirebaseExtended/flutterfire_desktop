@@ -8,11 +8,8 @@ import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
 const _kProviderId = 'phone';
 
-/// This class should be used to either create a new Phone credential with an
+/// This class should be used to either create a new Phone credential with a
 /// verification ID and SMS code.
-///
-/// Typically this provider will be used when calling [FirebaseAuth.verifyPhoneNumber] to
-/// generate a new [PhoneAuthCredential] when a SMS code has been sent.
 class PhoneAuthProvider extends AuthProvider {
   /// Creates a new instance.
   PhoneAuthProvider() : super(_kProviderId);
