@@ -5,8 +5,7 @@
 import 'dart:async' as _i4;
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as _i2;
-import 'package:firebase_auth_dart/src/providers/phone_auth.dart' as _i7;
-import 'package:firebase_auth_dart/src/types.dart' as _i6;
+import 'package:firebase_auth_dart/src/api.dart' as _i6;
 import 'package:firebase_core_dart/firebase_core_dart.dart' as _i3;
 import 'package:http/http.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
@@ -28,7 +27,10 @@ class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
 
 class _FakeFirebaseApp_3 extends _i1.Fake implements _i3.FirebaseApp {}
 
-class _FakeFirebaseAuth_4 extends _i1.Fake implements _i2.FirebaseAuth {}
+class _FakeConfirmationResult_4 extends _i1.Fake
+    implements _i2.ConfirmationResult {}
+
+class _FakeFirebaseAuth_5 extends _i1.Fake implements _i2.FirebaseAuth {}
 
 /// A class which mocks [User].
 ///
@@ -235,35 +237,13 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
                   Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
-  _i4.Future<void> verifyPhoneNumber(
-          {String? phoneNumber,
-          _i6.PhoneVerificationFailed? verificationFailed,
-          _i6.PhoneCodeSent? codeSent,
-          _i6.PhoneCodeAutoRetrievalTimeout? codeAutoRetrievalTimeout,
-          String? autoRetrievedSmsCodeForTesting,
-          Duration? timeout = const Duration(seconds: 30),
-          int? forceResendingToken}) =>
+  _i4.Future<_i2.ConfirmationResult> signInWithPhoneNumber(String? phoneNumber,
+          [_i6.RecaptchaVerifier? verifier]) =>
       (super.noSuchMethod(
-          Invocation.method(#verifyPhoneNumber, [], {
-            #phoneNumber: phoneNumber,
-            #verificationFailed: verificationFailed,
-            #codeSent: codeSent,
-            #codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-            #autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
-            #timeout: timeout,
-            #forceResendingToken: forceResendingToken
-          }),
-          returnValue: Future<void>.value(),
-          returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
-  @override
-  _i4.Future<_i2.UserCredential> signInWithPhoneNumber(
-          {_i7.PhoneAuthCredential? credential}) =>
-      (super.noSuchMethod(
-              Invocation.method(
-                  #signInWithPhoneNumber, [], {#credential: credential}),
-              returnValue:
-                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
-          as _i4.Future<_i2.UserCredential>);
+          Invocation.method(#signInWithPhoneNumber, [phoneNumber, verifier]),
+          returnValue: Future<_i2.ConfirmationResult>.value(
+              _FakeConfirmationResult_4())) as _i4
+          .Future<_i2.ConfirmationResult>);
   @override
   _i4.Future<void> signOut() =>
       (super.noSuchMethod(Invocation.method(#signOut, []),
@@ -291,7 +271,7 @@ class MockUserCredential extends _i1.Mock implements _i2.UserCredential {
 
   @override
   _i2.FirebaseAuth get auth => (super.noSuchMethod(Invocation.getter(#auth),
-      returnValue: _FakeFirebaseAuth_4()) as _i2.FirebaseAuth);
+      returnValue: _FakeFirebaseAuth_5()) as _i2.FirebaseAuth);
   @override
   String toString() => super.toString();
 }
