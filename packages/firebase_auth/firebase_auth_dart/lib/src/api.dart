@@ -128,9 +128,13 @@ class API {
         unawaited(OpenUrlUtil().openAppUrl());
       }
     } else {
-      final recaptchaToken = await verifier.verify(
-          recaptchaResponse.recaptchaSiteKey,
-          recaptchaResponse.recaptchaStoken);
+      final recaptchaToken = await verifier
+          .verify(
+            recaptchaResponse.recaptchaSiteKey,
+            recaptchaResponse.recaptchaStoken,
+            timeout,
+          )
+          .whenComplete(() => unawaited(OpenUrlUtil().openAppUrl()));
       if (recaptchaToken != null) {
         try {
           final verificationId = await _sendSMSCode(
@@ -140,13 +144,11 @@ class API {
           completer.complete(verificationId);
         } catch (e) {
           completer.completeError(e);
-        } finally {
-          unawaited(OpenUrlUtil().openAppUrl());
         }
       }
     }
 
-    return completer.future.timeout(timeout);
+    return completer.future;
   }
 
   Future<String?> _sendSMSCode({

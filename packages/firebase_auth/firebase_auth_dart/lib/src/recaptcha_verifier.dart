@@ -31,7 +31,11 @@ class RecaptchaVerifier {
   /// Each event represents the current state of the verification in the broswer.
   ///
   /// On desktop platforms calling this method will fire up the default browser.
-  Future<String?> verify(String? siteKey, String? siteToken) async {
+  Future<String?> verify(
+    String? siteKey,
+    String? siteToken, [
+    Duration timeout = const Duration(seconds: 30),
+  ]) async {
     final completer = Completer<String?>();
     final address = InternetAddress.loopbackIPv4;
     final server = await HttpServer.bind(address, 0);
@@ -94,7 +98,7 @@ class RecaptchaVerifier {
 
     await OpenUrlUtil().openUrl(redirectUrl);
 
-    return completer.future;
+    return completer.future.timeout(timeout);
   }
 
   Future<void> _sendDataToHTTP(
