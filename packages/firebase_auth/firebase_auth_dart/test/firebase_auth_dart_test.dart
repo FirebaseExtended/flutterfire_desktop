@@ -4,67 +4,17 @@
 
 // ignore_for_file: require_trailing_commas
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'firebase_auth_dart_test.mocks.dart';
 import 'test_utils.dart';
-
-http.Response errorResponse(String code) {
-  return http.Response(
-    json.encode({
-      'error': {'code': 404, 'message': code}
-    }),
-    404,
-    headers: {'content-type': 'application/json'},
-  );
-}
-
-http.Response successResponse(String body) {
-  return http.Response(body, 200,
-      headers: {'content-type': 'application/json'});
-}
-
-Future<http.Response> _mockSuccessRequests(http.Request req) async {
-  String body;
-
-  if (req.url.path.contains('verifyPassword')) {
-    body = json
-        .encode(VerifyPasswordResponse(email: mockEmail, idToken: '').toJson());
-  } else if (req.url.path.contains('signupNewUser')) {
-    body = json
-        .encode(SignupNewUserResponse(email: mockEmail, idToken: '').toJson());
-  } else if (req.url.path.contains('createAuthUri')) {
-    body = json.encode(
-      CreateAuthUriResponse(providerId: 'password', allProviders: ['password'])
-          .toJson(),
-    );
-  } else {
-    return http.Response('Error: Unknown endpoint', 404);
-  }
-
-  return successResponse(body);
-}
-
-Future<http.Response> _mockFailedRequests(http.Request req) async {
-  if (req.url.path.contains('verifyPassword')) {
-    return errorResponse('email-not-found');
-  } else if (req.url.path.contains('createAuthUri')) {
-    return errorResponse('invalid-identifier');
-  } else {
-    return http.Response('Error: Unknown endpoint', 404);
-  }
-}
 
 @GenerateMocks([User, FirebaseAuth, UserCredential])
 void main() {
