@@ -3,12 +3,12 @@
 // that can be found in the LICENSE file.
 
 // ignore_for_file: require_trailing_commas
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
-
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
 import 'package:http/http.dart' as http;
@@ -18,13 +18,7 @@ import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'firebase_auth_dart_test.mocks.dart';
-
-const mockEmail = 'test@test.com';
-const mockPassword = 'password';
-const photoURL =
-    'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
-const displayName = 'Invertase';
-const mockOobCode = 'code';
+import 'test_utils.dart';
 
 http.Response errorResponse(String code) {
   return http.Response(
@@ -79,18 +73,6 @@ void main() {
   final user = MockUser();
   final userCred = MockUserCredential();
 
-  /// Deletes all users from the Auth emulator.
-  Future<void> emulatorClearAllUsers() async {
-    //await realAuth.signOut();
-    await http.delete(
-      Uri.parse(
-          'http://localhost:9099/emulator/v1/projects/react-native-firebase-testing/accounts'),
-      headers: {
-        'Authorization': 'Bearer owner',
-      },
-    );
-  }
-
   late StreamQueue<User?> authStateChanges;
   late StreamQueue<User?> idTokenChanges;
   group('$FirebaseAuth', () {
@@ -109,7 +91,7 @@ void main() {
 
       auth = FirebaseAuth.instance;
 
-      //await auth.useAuthEmulator();
+      await auth.useAuthEmulator();
 
       authStateChanges = StreamQueue(auth.authStateChanges());
       idTokenChanges = StreamQueue(auth.idTokenChanges());
@@ -229,7 +211,53 @@ void main() {
       });
     });
     group('signInWithPhoneNumber() ', () {
-      // TODO Phone Auth tests
+      test('should fail with invalid phone number', () async {
+        Future<Exception> getError() async {
+          final completer = Completer<FirebaseAuthException>();
+
+          unawaited(
+            FirebaseAuth.instance
+                .signInWithPhoneNumber('foo')
+                .then((_) => completer
+                    .completeError(Exception('Should not have been called')))
+                .catchError((e, _) => completer.complete(e)),
+          );
+
+          return completer.future;
+        }
+
+        final e = await getError();
+        expect(e, isA<FirebaseAuthException>());
+
+        final exception = e as FirebaseAuthException;
+        expect(exception.code, equals('invalid-phone-number'));
+      });
+
+      test('should verify phone number', () async {
+        const testPhoneNumber = '+447444555666';
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            FirebaseAuth.instance
+                .signInWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(credential, isA<UserCredential>());
+      });
     });
 
     group('Use emulator ', () {
