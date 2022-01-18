@@ -99,6 +99,7 @@ void main() {
 
     setUp(() async {
       await emulatorClearAllUsers();
+      await ensureSignedOut();
 
       fakeAuth = MockFirebaseAuth();
 
@@ -133,7 +134,6 @@ void main() {
         await auth.signOut();
       });
       test('should throw.', () async {
-        await emulatorClearAllUsers();
         expect(
           () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
           throwsA(isA<FirebaseAuthException>()
@@ -189,23 +189,35 @@ void main() {
       test('Twitter', () {});
       test('Facebook', () {});
     });
-
-    group('Fetch providers list ', () {
-      test('for email with pssaword provider.', () async {
-        auth.setApiClient(MockClient(_mockSuccessRequests));
-
-        final providersList = await auth.fetchSignInMethodsForEmail(mockEmail);
-
-        expect(providersList, ['password']);
+    group('fetchSignInMethodsForEmail() ', () {
+      setUp(() async {
+        await auth.createUserWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        );
+      });
+      test('email with pssaword provider.', () async {
+        await expectLater(
+          auth.fetchSignInMethodsForEmail(mockEmail),
+          completion(['password']),
+        );
       });
 
-      test('for empty email throws.', () {
-        auth.setApiClient(MockClient(_mockFailedRequests));
+      test('invalid email throws.', () {
+        expect(
+          () => auth.fetchSignInMethodsForEmail('foo'),
+          throwsA(
+            isA<FirebaseAuthException>().having((p0) => p0.code,
+                'invalid identifier code', 'invalid-identifier'),
+          ),
+        );
+      });
+      test('empty email throws.', () {
         expect(
           () => auth.fetchSignInMethodsForEmail(''),
           throwsA(
             isA<FirebaseAuthException>().having((p0) => p0.code,
-                'invalid identifier code', 'invalid-identifier'),
+                'invalid identifier code', 'missing-identifier'),
           ),
         );
       });
@@ -216,7 +228,7 @@ void main() {
           final completer = Completer<FirebaseAuthException>();
 
           unawaited(
-            FirebaseAuth.instance
+            auth
                 .signInWithPhoneNumber('foo')
                 .then((_) => completer
                     .completeError(Exception('Should not have been called')))
@@ -240,7 +252,7 @@ void main() {
           final completer = Completer<ConfirmationResult>();
 
           unawaited(
-            FirebaseAuth.instance
+            auth
                 .signInWithPhoneNumber(testPhoneNumber)
                 .then(completer.complete)
                 .catchError((e, _) => completer.completeError(e)),

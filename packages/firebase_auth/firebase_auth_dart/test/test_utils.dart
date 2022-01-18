@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:http/http.dart' as http;
 
 const mockEmail = 'test@test.com';
@@ -44,4 +45,10 @@ Future<String?> emulatorPhoneVerificationCode(String phoneNumber) async {
     (verificationCode) => verificationCode['phoneNumber'] == phoneNumber,
     orElse: () => {'code': 'NOT_FOUND'},
   )['code'];
+}
+
+Future<void> ensureSignedOut() async {
+  if (FirebaseAuth.instance.currentUser != null) {
+    await FirebaseAuth.instance.signOut();
+  }
 }
