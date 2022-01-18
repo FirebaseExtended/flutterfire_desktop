@@ -76,12 +76,22 @@ class _AuthGateState extends State<AuthGate> {
     });
   }
 
+  void resetError() {
+    if (error.isNotEmpty) {
+      setState(() {
+        error = '';
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
   }
 
   Future _resetPassword() async {
+    resetError();
+
     String? email;
     await showDialog(
       context: context,
@@ -123,6 +133,8 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future onClick() async {
+    resetError();
+
     if (formKey.currentState?.validate() ?? false) {
       setIsLoading();
 
@@ -153,6 +165,8 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> onPhoneAuth() async {
+    resetError();
+
     if (mode != AuthMode.phone) {
       setState(() {
         mode = AuthMode.phone;
@@ -178,6 +192,8 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future onGoogleSignIn() async {
+    resetError();
+
     try {
       // Trigger the authentication flow
       final googleUser = await GoogleSignIn().signIn();
@@ -203,6 +219,8 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<String?> getSmsCodeFromUser() async {
+    resetError();
+
     String? smsCode;
 
     // Update the UI - wait for the user to enter the SMS code
