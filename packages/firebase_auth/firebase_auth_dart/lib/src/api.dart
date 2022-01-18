@@ -119,26 +119,30 @@ class API {
     final recaptchaResponse = await _identityToolkit.getRecaptchaParam();
 
     if (_emulator != null) {
-      await _sendSMSCode(
-        phoneNumber: phoneNumber,
-      ).then(completer.complete).onError((e, __) {
-        completer.completeError(e!);
-      }).whenComplete(() async {
-        await OpenUrlUtil().openAppUrl();
-      });
+      try {
+        final verificationId = await _sendSMSCode(phoneNumber: phoneNumber);
+        completer.complete(verificationId);
+      } catch (e) {
+        completer.completeError(e);
+      } finally {
+        unawaited(OpenUrlUtil().openAppUrl());
+      }
     } else {
       final recaptchaToken = await verifier.verify(
           recaptchaResponse.recaptchaSiteKey,
           recaptchaResponse.recaptchaStoken);
       if (recaptchaToken != null) {
-        await _sendSMSCode(
-          phoneNumber: phoneNumber,
-          recaptchaToken: recaptchaToken,
-        ).then(completer.complete).onError((e, __) {
-          completer.completeError(e!);
-        }).whenComplete(() async {
-          await OpenUrlUtil().openAppUrl();
-        });
+        try {
+          final verificationId = await _sendSMSCode(
+            phoneNumber: phoneNumber,
+            recaptchaToken: recaptchaToken,
+          );
+          completer.complete(verificationId);
+        } catch (e) {
+          completer.completeError(e);
+        } finally {
+          unawaited(OpenUrlUtil().openAppUrl());
+        }
       }
     }
 
