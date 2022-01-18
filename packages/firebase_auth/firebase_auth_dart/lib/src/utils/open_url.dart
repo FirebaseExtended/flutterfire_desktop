@@ -4,16 +4,29 @@ import 'dart:io';
 class OpenUrlUtil {
   /// Triggers the default broswer to open a URL.
   Future<ProcessResult> openUrl(String url) {
-    return Process.run(_command, [url], runInShell: true);
+    return Process.run(_command, [..._urlArguments, url]);
   }
 
   /// Triggers the default browser to open a URL.
   Future<ProcessResult> openAppUrl() {
     return Process.run(
       _command,
-      [_excutable],
-      runInShell: true,
+      [..._prefixAppArguments, _excutable, ..._suffixAppArguments],
     );
+  }
+
+  String get _command {
+    if (Platform.isWindows) {
+      return 'powershell';
+    } else if (Platform.isLinux) {
+      return 'xdg-open';
+    } else if (Platform.isMacOS) {
+      return 'open';
+    } else {
+      throw UnsupportedError(
+        'Operating system not supported ${Platform.operatingSystem}',
+      );
+    }
   }
 
   String get _excutable {
@@ -25,24 +38,32 @@ class OpenUrlUtil {
       return '${Platform.resolvedExecutable.split('.app')[0]}.app';
     } else {
       throw UnsupportedError(
-        'Operating system not supported by the open_url '
-        'package: ${Platform.operatingSystem}',
+        'Operating system not supported ${Platform.operatingSystem}',
       );
     }
   }
 
-  String get _command {
+  List<String> get _urlArguments {
     if (Platform.isWindows) {
-      return 'start';
-    } else if (Platform.isLinux) {
-      return 'xdg-open';
-    } else if (Platform.isMacOS) {
-      return 'open';
+      return ['start-process'];
     } else {
-      throw UnsupportedError(
-        'Operating system not supported by the open_url '
-        'package: ${Platform.operatingSystem}',
-      );
+      return [];
+    }
+  }
+
+  List<String> get _prefixAppArguments {
+    if (Platform.isWindows) {
+      return ['start-process', '-FilePath'];
+    } else {
+      return [];
+    }
+  }
+
+  List<String> get _suffixAppArguments {
+    if (Platform.isWindows) {
+      return ['-NoNewWindow'];
+    } else {
+      return [];
     }
   }
 }
