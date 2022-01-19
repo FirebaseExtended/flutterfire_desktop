@@ -67,12 +67,6 @@ String responseHTML(String title, String message) {
       </head>
       <body>
         <p>$message</p>
-        <script>
-          setTimeout(function () {
-            // only works on some browsers
-            window.close();
-          }, 6000)
-        </script>
       </body>
     </html>''';
 }
