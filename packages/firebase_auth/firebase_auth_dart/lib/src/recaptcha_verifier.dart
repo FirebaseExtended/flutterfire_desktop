@@ -60,7 +60,7 @@ class RecaptchaVerifier {
           request,
           responseHTML(
             'Success',
-            'Successful verification! you may close this window now.',
+            'Successful verification!',
           ),
         );
 
@@ -79,7 +79,7 @@ class RecaptchaVerifier {
         await _sendDataToHTTP(
           request,
           responseHTML(
-            'Error',
+            'Captcha check failed.',
             uri.queryParameters['error-code']!,
           ),
         );
