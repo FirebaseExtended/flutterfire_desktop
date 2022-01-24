@@ -5,9 +5,9 @@
 import 'dart:async' as _i4;
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as _i2;
-import 'package:firebase_auth_dart/src/api.dart' as _i6;
+import 'package:firebase_auth_dart/src/api/api.dart' as _i5;
 import 'package:firebase_core_dart/firebase_core_dart.dart' as _i3;
-import 'package:http/http.dart' as _i5;
+import 'package:http/http.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: avoid_redundant_argument_values
@@ -25,10 +25,10 @@ class _FakeIdTokenResult_1 extends _i1.Fake implements _i2.IdTokenResult {}
 
 class _FakeUserCredential_2 extends _i1.Fake implements _i2.UserCredential {}
 
-class _FakeFirebaseApp_3 extends _i1.Fake implements _i3.FirebaseApp {}
-
-class _FakeConfirmationResult_4 extends _i1.Fake
+class _FakeConfirmationResult_3 extends _i1.Fake
     implements _i2.ConfirmationResult {}
+
+class _FakeFirebaseApp_4 extends _i1.Fake implements _i3.FirebaseApp {}
 
 class _FakeFirebaseAuth_5 extends _i1.Fake implements _i2.FirebaseAuth {}
 
@@ -92,6 +92,15 @@ class MockUser extends _i1.Mock implements _i2.User {
                   Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
+  _i4.Future<_i2.ConfirmationResult> linkWithPhoneNumber(
+          String? phoneNumber, _i5.RecaptchaVerifier? applicationVerifier) =>
+      (super.noSuchMethod(
+              Invocation.method(
+                  #linkWithPhoneNumber, [phoneNumber, applicationVerifier]),
+              returnValue: Future<_i2.ConfirmationResult>.value(
+                  _FakeConfirmationResult_3()))
+          as _i4.Future<_i2.ConfirmationResult>);
+  @override
   _i4.Future<void> reload() =>
       (super.noSuchMethod(Invocation.method(#reload, []),
           returnValue: Future<void>.value(),
@@ -144,7 +153,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
 
   @override
   _i3.FirebaseApp get app => (super.noSuchMethod(Invocation.getter(#app),
-      returnValue: _FakeFirebaseApp_3()) as _i3.FirebaseApp);
+      returnValue: _FakeFirebaseApp_4()) as _i3.FirebaseApp);
   @override
   set app(_i3.FirebaseApp? _app) =>
       super.noSuchMethod(Invocation.setter(#app, _app),
@@ -154,7 +163,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
           returnValueForMissingStub: null);
   @override
-  void setApiClient(_i5.Client? client) =>
+  void setApiClient(_i6.Client? client) =>
       super.noSuchMethod(Invocation.method(#setApiClient, [client]),
           returnValueForMissingStub: null);
   @override
@@ -238,11 +247,11 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
           as _i4.Future<_i2.UserCredential>);
   @override
   _i4.Future<_i2.ConfirmationResult> signInWithPhoneNumber(String? phoneNumber,
-          [_i6.RecaptchaVerifier? verifier]) =>
+          [_i5.RecaptchaVerifier? verifier]) =>
       (super.noSuchMethod(
           Invocation.method(#signInWithPhoneNumber, [phoneNumber, verifier]),
           returnValue: Future<_i2.ConfirmationResult>.value(
-              _FakeConfirmationResult_4())) as _i4
+              _FakeConfirmationResult_3())) as _i4
           .Future<_i2.ConfirmationResult>);
   @override
   _i4.Future<void> signOut() =>
