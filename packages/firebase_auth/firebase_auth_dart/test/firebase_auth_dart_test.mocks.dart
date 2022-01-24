@@ -92,8 +92,8 @@ class MockUser extends _i1.Mock implements _i2.User {
                   Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
   @override
-  _i4.Future<_i2.ConfirmationResult> linkWithPhoneNumber(
-          String? phoneNumber, _i5.RecaptchaVerifier? applicationVerifier) =>
+  _i4.Future<_i2.ConfirmationResult> linkWithPhoneNumber(String? phoneNumber,
+          [_i5.RecaptchaVerifier? applicationVerifier]) =>
       (super.noSuchMethod(
               Invocation.method(
                   #linkWithPhoneNumber, [phoneNumber, applicationVerifier]),

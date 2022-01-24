@@ -275,8 +275,8 @@ class User {
   }
 
   /// Link the current user with the given phone number.
-  Future<ConfirmationResult> linkWithPhoneNumber(
-      String phoneNumber, RecaptchaVerifier applicationVerifier) async {
+  Future<ConfirmationResult> linkWithPhoneNumber(String phoneNumber,
+      [RecaptchaVerifier? applicationVerifier]) async {
     try {
       return ConfirmationResult(
           _auth,

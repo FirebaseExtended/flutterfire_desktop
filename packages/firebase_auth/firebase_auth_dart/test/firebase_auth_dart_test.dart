@@ -213,6 +213,66 @@ void main() {
 
         expect(credential, isA<UserCredential>());
       });
+      test('should link anonymous with phone number', () async {
+        const testPhoneNumber = '+447444555666';
+        await auth.signInAnonymously();
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            auth.currentUser
+                ?.linkWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(credential, isA<UserCredential>());
+      });
+      test('should link email with phone number', () async {
+        const testPhoneNumber = '+447444555666';
+
+        await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            auth.currentUser
+                ?.linkWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(
+          credential.user?.providerData.map((e) => e.providerId).toList(),
+          unorderedEquals(['password', 'phone']),
+        );
+      });
+    });
+    group('unlink()', () {
+      //TODO: implement and test unlink
+      test('should unlink phone number', () async {});
     });
 
     group('Use emulator ', () {
