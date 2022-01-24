@@ -16,13 +16,13 @@ import 'package:googleapis/identitytoolkit/v3.dart' as idp;
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import 'src/api.dart';
+import 'src/api/api.dart' show API, APIConfig, RecaptchaVerifier;
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
 import 'src/utils/jwt.dart';
 
-export 'src/api.dart';
+export 'src/api/api.dart' show RecaptchaVerifier;
 export 'src/auth_provider.dart';
 export 'src/providers/email_auth.dart';
 export 'src/providers/facebook_auth.dart';

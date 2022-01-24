@@ -63,12 +63,6 @@ void main() {
       when(fakeAuth.currentUser).thenReturn(user);
     });
 
-    setUpAll(() {
-      // Avoid HTTP error 400 mocked returns
-      // TODO(pr-mais): once done create mock clients
-      HttpOverrides.global = null;
-    });
-
     group('Email and password ', () {
       test('sign-in updates currentUser and events.', () async {
         final credential = await auth.createUserWithEmailAndPassword(

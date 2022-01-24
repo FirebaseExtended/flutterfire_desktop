@@ -14,46 +14,82 @@ import 'package:googleapis/identitytoolkit/v3.dart' as idp;
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
-import 'providers/email_auth.dart';
-import 'utils/open_url.dart';
+import '../providers/email_auth.dart';
+import '../utils/open_url.dart';
 
-part 'recaptcha_verifier.dart';
-part 'recaptcha_html.dart';
+part 'authentication/recaptcha.dart';
+part 'authentication/recaptcha_html.dart';
+part 'authentication/phone.dart';
+
+/// A return type from Idp authentication requests, must be extended by any other response
+/// type for any operation that requires idToken.
+@protected
+class IdTokenResponse {
+  /// Construct a new [IdTokenResponse].
+  IdTokenResponse({required this.idToken, required this.refreshToken});
+
+  /// The idToken returned from a successful authentication operation, valid only for 1 hour.
+  final String idToken;
+
+  /// Th refreshToken returned from a successful authentication operation, used to request new
+  /// [idToken] if it has expired or force refreshed.
+  final String refreshToken;
+
+  /// Json representation of this object.
+  Map<String, dynamic> toJson() {
+    return {
+      'idToken': idToken,
+      'refreshToken': refreshToken,
+    };
+  }
+}
+
+/// Configurations necessary for making all idp requests.
+@protected
+class APIConfig {
+  /// Construct [APIConfig].
+  APIConfig(this.apiKey, this.projectId);
+
+  final String apiKey;
+  final String projectId;
+}
 
 /// Pure Dart service layer to perform all requests
 /// with the underlying Identity Toolkit API.
 ///
 /// See: https://cloud.google.com/identity-platform/docs/use-rest-api
+@protected
 class API {
   // ignore: public_member_api_docs
-  API(this._apiKey, this._projectId, {http.Client? client}) {
-    _client = client ?? clientViaApiKey(_apiKey);
+  API(this.apiConfig, {http.Client? client}) {
+    _client = client ?? clientViaApiKey(apiConfig.apiKey);
     _identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
-  late final String _apiKey;
-  late final String _projectId;
+  /// The API configurations of this instance.
+  final APIConfig apiConfig;
 
   late http.Client _client;
-  late idp.RelyingpartyResource _identityToolkit;
-
-  EmulatorConfig? _emulator;
-
-  RecaptchaVerifier _recaptchaVerifier =
-      RecaptchaVerifier({'theme': RecaptchaTheme.light.name});
-
-  /// Override the default `RecaptchaVerifier` to allow rendering with different theme.
-  // ignore: avoid_setters_without_getters
-  set setRecaptchaVerifier(RecaptchaVerifier recaptchaVerifier) {
-    _recaptchaVerifier = recaptchaVerifier;
-  }
 
   /// Change the HTTP client for the purpose of testing.
   void setApiClient(http.Client client) {
     _client = client;
     _identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
   }
+
+  late idp.RelyingpartyResource _identityToolkit;
+
+  EmulatorConfig? _emulator;
+
+  PhoneAuthAPI? _phoneAuthApiDelegate;
+
+  /// A delegate used to perform all requests for phone authentication.
+  ///
+  /// Will lazily be initialized on first call.
+  PhoneAuthAPI get phoneAuthApiDelegate =>
+      _phoneAuthApiDelegate ??= PhoneAuthAPI(this);
 
   /// TODO: write endpoint details
   Future<idp.VerifyPasswordResponse> signInWithEmailAndPassword(
@@ -95,11 +131,16 @@ class API {
       {String? idToken,
       required String providerId,
       required String providerIdToken,
-      String? requestUri}) async {
+      required String requestUri}) async {
+    var uri = Uri.parse(requestUri);
+    if (!uri.isScheme('https')) {
+      uri = uri.replace(scheme: 'https');
+    }
+
     final response = await _identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
-        requestUri: requestUri,
+        requestUri: uri.toString(),
         postBody: 'id_token=$providerIdToken&'
             'providerId=$providerId',
       ),
@@ -109,75 +150,14 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<String> signInWithPhoneNumber(String phoneNumber,
-      [RecaptchaVerifier? verifier,
-      Duration timeout = const Duration(seconds: 30)]) async {
-    verifier ??= _recaptchaVerifier;
-
-    final completer = Completer<String>();
-
-    final recaptchaResponse = await _identityToolkit.getRecaptchaParam();
-
-    if (_emulator != null) {
-      try {
-        final verificationId = await _sendSMSCode(phoneNumber: phoneNumber);
-        completer.complete(verificationId);
-      } catch (e) {
-        completer.completeError(e);
-      } finally {
-        unawaited(OpenUrlUtil().openAppUrl());
-      }
-    } else {
-      final recaptchaToken = await verifier
-          .verify(
-            recaptchaResponse.recaptchaSiteKey,
-            recaptchaResponse.recaptchaStoken,
-            timeout,
-          )
-          .whenComplete(() => unawaited(OpenUrlUtil().openAppUrl()));
-      if (recaptchaToken != null) {
-        try {
-          final verificationId = await _sendSMSCode(
-            phoneNumber: phoneNumber,
-            recaptchaToken: recaptchaToken,
-          );
-          completer.complete(verificationId);
-        } catch (e) {
-          completer.completeError(e);
-        }
-      }
-    }
-
-    return completer.future;
-  }
-
-  Future<String?> _sendSMSCode({
-    required String phoneNumber,
-    String? recaptchaToken,
-  }) async {
-    try {
-      // Send SMS code.
-      final response = await _identityToolkit.sendVerificationCode(
-          idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
-        phoneNumber: phoneNumber,
-        recaptchaToken: recaptchaToken,
-      ));
-
-      if (response.sessionInfo != null) {
-        return response.sessionInfo;
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// TODO: write endpoint details
   Future<idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberResponse>
-      confirmSMSCode(String smsCode, String verificationId) async {
+      linkWithPhoneNumber(String smsCode, String verificationId,
+          [String? idToken]) async {
     final _response = await _identityToolkit.verifyPhoneNumber(
       idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
         code: smsCode,
         sessionInfo: verificationId,
+        idToken: idToken,
       ),
     );
 
@@ -352,7 +332,7 @@ class API {
 
     final _response = await http.post(
       Uri.parse(
-        '${baseUri}token?key=$_apiKey',
+        '${baseUri}token?key=${apiConfig.apiKey}',
       ),
       body: {
         'grant_type': 'refresh_token',
@@ -384,7 +364,7 @@ class API {
       scheme: 'http',
       host: host,
       port: port,
-      path: '/emulator/v1/projects/$_projectId/config',
+      path: '/emulator/v1/projects/${apiConfig.projectId}/config',
     );
 
     http.Response response;
@@ -411,7 +391,7 @@ class API {
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
 
     _identityToolkit = idp.IdentityToolkitApi(
-      clientViaApiKey(_apiKey),
+      clientViaApiKey(apiConfig.apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
     // set the Flage to true to use the emulator for this instance.

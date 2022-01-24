@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
+// ignore_for_file: require_trailing_commas
+
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
-
-// ignore_for_file: require_trailing_commas
 
 import 'firebase_auth_user_credential.dart';
 import 'utils/desktop_utils.dart';
@@ -66,9 +66,12 @@ class User extends UserPlatform {
 
   @override
   Future<ConfirmationResultPlatform> linkWithPhoneNumber(String phoneNumber,
-      RecaptchaVerifierFactoryPlatform applicationVerifier) {
-    // TODO: implement linkWithPhoneNumber
-    throw UnimplementedError();
+      RecaptchaVerifierFactoryPlatform applicationVerifier) async {
+    try {
+      return auth.signInWithPhoneNumber(phoneNumber, applicationVerifier);
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   @override

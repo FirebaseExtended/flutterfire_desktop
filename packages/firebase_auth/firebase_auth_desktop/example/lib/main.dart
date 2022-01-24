@@ -29,7 +29,7 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
 
   await Firebase.initializeApp(options: firebaseOptions);
-  //await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
 
   await GoogleSignInDart.register(
     clientId:

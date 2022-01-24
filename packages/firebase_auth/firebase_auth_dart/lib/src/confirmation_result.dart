@@ -23,16 +23,16 @@ class ConfirmationResult {
   /// that was sent to the user's mobile device.
   Future<UserCredential> confirm(String verificationCode) async {
     try {
-      final response = (await _auth._api.confirmSMSCode(
+      final response = await _auth._api.phoneAuthApiDelegate.confirmSMSCode(
         verificationCode,
         verificationId,
-      ))
-          .toJson();
+        _auth.currentUser?._idToken,
+      );
 
-      final userData = await _auth._api.getCurrentUser(response['idToken']);
+      final userData = await _auth._api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response), _auth);
+      final user = User(userData.toJson()..addAll(response.toJson()), _auth);
 
       _auth._updateCurrentUserAndEvents(user, true);
 
@@ -45,7 +45,7 @@ class ConfirmationResult {
         auth: _auth,
         credential: credential,
         additionalUserInfo: AdditionalUserInfo(
-          isNewUser: response['isNewUser'] ?? false,
+          isNewUser: response.isNewUser ?? false,
           providerId: credential.providerId,
           username: userData.screenName,
           profile: {

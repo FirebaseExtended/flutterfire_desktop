@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'animated_error.dart';
+import 'sms_dialog.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -82,11 +83,6 @@ class _AuthGateState extends State<AuthGate> {
         error = '';
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   Future _resetPassword() async {
@@ -176,7 +172,7 @@ class _AuthGateState extends State<AuthGate> {
         final confirmationResult = await FirebaseAuth.instance
             .signInWithPhoneNumber(phoneController.text);
 
-        final smsCode = await getSmsCodeFromUser();
+        final smsCode = await SMSDialog.of(context).show();
 
         if (smsCode != null) {
           await confirmationResult.confirm(smsCode);
@@ -216,50 +212,6 @@ class _AuthGateState extends State<AuthGate> {
         error = '${e.message}';
       });
     }
-  }
-
-  Future<String?> getSmsCodeFromUser() async {
-    resetError();
-
-    String? smsCode;
-
-    // Update the UI - wait for the user to enter the SMS code
-    await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('SMS code:'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Sign in'),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                smsCode = null;
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-          content: Container(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              onChanged: (value) {
-                smsCode = value;
-              },
-              textAlign: TextAlign.center,
-              autofocus: true,
-            ),
-          ),
-        );
-      },
-    );
-
-    return smsCode;
   }
 
   @override
@@ -306,7 +258,7 @@ class _AuthGateState extends State<AuthGate> {
                     TextFormField(
                       controller: phoneController,
                       decoration: const InputDecoration(
-                        hintText: '+1-123456',
+                        hintText: '+16505550101',
                         labelText: 'Phone number',
                       ),
                       validator: (value) =>

@@ -48,7 +48,7 @@ class RecaptchaVerifier {
       if (uri.path == '/' && uri.queryParameters.isEmpty) {
         await _sendDataToHTTP(
           request,
-          recaptchaHTML(
+          _recaptchaHTML(
             siteKey,
             siteToken,
             theme: parameters['theme'],
@@ -58,7 +58,7 @@ class RecaptchaVerifier {
       } else if (uri.query.contains('response')) {
         await _sendDataToHTTP(
           request,
-          responseHTML(
+          _responseHTML(
             'Success',
             'Successful verification!',
           ),
@@ -78,7 +78,7 @@ class RecaptchaVerifier {
       } else if (uri.query.contains('error-code')) {
         await _sendDataToHTTP(
           request,
-          responseHTML(
+          _responseHTML(
             'Captcha check failed.',
             uri.queryParameters['error-code']!,
           ),

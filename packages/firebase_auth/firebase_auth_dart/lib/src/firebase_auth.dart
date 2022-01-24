@@ -9,7 +9,7 @@ part of firebase_auth_dart;
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
-    _api = API(app.options.apiKey, app.options.projectId);
+    _api = API(APIConfig(app.options.apiKey, app.options.projectId));
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -421,16 +421,13 @@ class FirebaseAuth {
       Map<String, dynamic> response;
 
       if (credential is GoogleAuthCredential) {
+        assert(app.options.authDomain != null,
+            'You should provide authDomain when trying to add Google as auth provider.');
+
         response = (await _api.signInWithOAuthCredential(
-          requestUri: app.options.authDomain,
+          requestUri: app.options.authDomain!,
           providerIdToken: credential.idToken!,
           providerId: credential.providerId,
-        ))
-            .toJson();
-      } else if (credential is PhoneAuthCredential) {
-        response = (await _api.confirmSMSCode(
-          credential.smsCode!,
-          credential.verificationId!,
         ))
             .toJson();
       } else {
@@ -497,7 +494,8 @@ class FirebaseAuth {
     try {
       return ConfirmationResult(
         this,
-        await _api.signInWithPhoneNumber(phoneNumber, verifier),
+        await _api.phoneAuthApiDelegate
+            .signInWithPhoneNumber(phoneNumber, verifier),
       );
     } catch (e) {
       throw _getException(e);

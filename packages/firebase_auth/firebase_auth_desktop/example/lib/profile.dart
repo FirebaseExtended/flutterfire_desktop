@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'login.dart';
+import 'sms_dialog.dart';
 
 /// Displayed as a profile image if the user doesn't have one.
 const placeholderImage =
@@ -158,6 +161,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                     const SizedBox(height: 40),
+                    if (!userProviders.contains('phone'))
+                      TextButton(
+                        onPressed: _linkWithPhone,
+                        child: const Text('Link with phone number'),
+                      ),
+                    const SizedBox(height: 10),
                     TextButton(
                       onPressed: _signOut,
                       child: const Text('Sign out'),
@@ -184,6 +193,22 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _linkWithPhone() async {
+    try {
+      final confirmationResult = await user.linkWithPhoneNumber('+16505550101');
+
+      final smsCode = await SMSDialog.of(context).show();
+
+      if (smsCode != null) {
+        await confirmationResult.confirm(smsCode);
+      }
+    } catch (e) {
+      log('$e');
+    } finally {
+      setIsLoading();
+    }
   }
 
   /// Example code for sign out.
