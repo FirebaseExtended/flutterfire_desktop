@@ -23,10 +23,10 @@ class ConfirmationResult {
   /// that was sent to the user's mobile device.
   Future<UserCredential> confirm(String verificationCode) async {
     try {
-      final response = await _auth._api.phoneAuthApiDelegate.confirmSMSCode(
-        verificationCode,
-        verificationId,
-        _auth.currentUser?._idToken,
+      final response = await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+        smsCode: verificationCode,
+        verificationId: verificationId,
+        idToken: _auth.currentUser?._idToken,
       );
 
       final userData = await _auth._api.getCurrentUser(response.idToken);

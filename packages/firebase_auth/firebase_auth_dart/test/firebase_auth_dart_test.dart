@@ -4,7 +4,6 @@
 
 // ignore_for_file: require_trailing_commas
 import 'dart:async';
-import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';

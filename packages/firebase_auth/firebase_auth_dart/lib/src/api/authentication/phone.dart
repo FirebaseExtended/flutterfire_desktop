@@ -4,28 +4,24 @@ part of api;
 
 /// A return type from Idp phone authentication requests.
 @protected
-class SignInWithPhoneNumberResponse extends IdTokenResponse {
+class SignInWithPhoneNumberResponse {
   /// Construct a new [IdTokenResponse].
   SignInWithPhoneNumberResponse({
-    required String idToken,
-    required String refreshToken,
     required this.phoneNumber,
-    this.isNewUser,
-  }) : super(idToken: idToken, refreshToken: refreshToken);
+    required this.verificationId,
+  });
 
   /// The phone number used to sign in.
   final String phoneNumber;
 
-  /// Wether this user is using phone authentication for the first time or is a returning user.
-  final bool? isNewUser;
+  /// The Id returned after SMS code is sent to the phone number.
+  final String verificationId;
 
-  @override
+  /// Json representation of this object.
   Map<String, dynamic> toJson() {
     return {
-      'idToken': idToken,
-      'refreshToken': refreshToken,
       'phoneNumber': phoneNumber,
-      'isNewUser': isNewUser,
+      'verificationId': verificationId,
     };
   }
 }
@@ -49,45 +45,68 @@ class PhoneAuthAPI {
   }
 
   /// TODO: write endpoint details
-  Future<String> signInWithPhoneNumber(
-    String phoneNumber, [
+  Future<SignInWithPhoneNumberResponse> signInWithPhoneNumber(
+    String phoneNumber, {
+    String? idToken,
     RecaptchaVerifier? verifier,
-    Duration timeout = const Duration(seconds: 30),
-  ]) async {
+  }) async {
     Future<String> _verifyAction;
 
     if (api._emulator != null) {
-      _verifyAction = _verifyEmulator(phoneNumber, timeout);
+      _verifyAction = _verifyEmulator(phoneNumber);
     } else {
       verifier ??= _recaptchaVerifier;
-      _verifyAction = _verify(phoneNumber, verifier, timeout);
+      _verifyAction = _verify(phoneNumber, verifier);
     }
 
-    return _verifyAction;
+    return SignInWithPhoneNumberResponse(
+      phoneNumber: phoneNumber,
+      verificationId: await _verifyAction,
+    );
   }
 
   /// TODO: write endpoint details
-  Future<SignInWithPhoneNumberResponse> confirmSMSCode(
-      String smsCode, String verificationId,
-      [String? idToken]) async {
-    final _response = await api._identityToolkit.verifyPhoneNumber(
+  Future<SignInWithPhoneNumberResponse> linkWithPhoneNumber(
+    String idToken,
+    String phoneNumber, {
+    RecaptchaVerifier? verifier,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final signInResponse = await signInWithPhoneNumber(
+      phoneNumber,
+      idToken: idToken,
+      verifier: verifier,
+    );
+
+    return SignInWithPhoneNumberResponse(
+      phoneNumber: phoneNumber,
+      verificationId: signInResponse.verificationId,
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future<idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberResponse>
+      verifyPhoneNumber({
+    String? phoneNumber,
+    String? smsCode,
+    String? verificationId,
+    String? idToken,
+    String? temporaryProof,
+  }) async {
+    final response = await api._identityToolkit.verifyPhoneNumber(
       idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
         code: smsCode,
         sessionInfo: verificationId,
         idToken: idToken,
+        phoneNumber: phoneNumber,
+        temporaryProof: temporaryProof,
       ),
     );
 
-    return SignInWithPhoneNumberResponse(
-      idToken: _response.idToken!,
-      phoneNumber: _response.phoneNumber!,
-      refreshToken: _response.refreshToken!,
-      isNewUser: _response.isNewUser,
-    );
+    return response;
   }
 
-  Future<String> _verify(
-      String phoneNumber, RecaptchaVerifier verifier, Duration timeout) async {
+  Future<String> _verify(String phoneNumber, RecaptchaVerifier verifier) async {
     final completer = Completer<String>();
 
     final recaptchaResponse = await api._identityToolkit.getRecaptchaParam();
@@ -96,7 +115,6 @@ class PhoneAuthAPI {
         .verify(
           recaptchaResponse.recaptchaSiteKey,
           recaptchaResponse.recaptchaStoken,
-          timeout,
         )
         .whenComplete(() => unawaited(OpenUrlUtil().openAppUrl()));
     if (recaptchaToken != null) {
@@ -114,7 +132,7 @@ class PhoneAuthAPI {
     return completer.future;
   }
 
-  Future<String> _verifyEmulator(String phoneNumber, Duration timeout) async {
+  Future<String> _verifyEmulator(String phoneNumber) async {
     final completer = Completer<String>();
 
     try {

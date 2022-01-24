@@ -214,7 +214,6 @@ class User {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      // TODO
       throw _auth._getException(e);
     }
   }
@@ -271,7 +270,21 @@ class User {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      // TODO
+      throw _auth._getException(e);
+    }
+  }
+
+  /// Link the current user with the given phone number.
+  Future<ConfirmationResult> linkWithPhoneNumber(
+      String phoneNumber, RecaptchaVerifier applicationVerifier) async {
+    try {
+      return ConfirmationResult(
+          _auth,
+          (await _auth._api.phoneAuthApiDelegate.linkWithPhoneNumber(
+                  _idToken, phoneNumber,
+                  verifier: applicationVerifier))
+              .verificationId);
+    } catch (e) {
       throw _auth._getException(e);
     }
   }
@@ -312,8 +325,8 @@ class User {
   /// The verification process is completed by calling `applyActionCode`.
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
-  /// - `USER_NOT_FOUND`: no user record corresponding to this identifier. The user may have been deleted.
+  /// - `invalid-id-token`: user's credential is no longer valid. The user must sign in again.
+  /// - `user-not-found`: no user record corresponding to this identifier. The user may have been deleted.
   Future<void> sendEmailVerification() async {
     _assertSignedOut(_auth);
 

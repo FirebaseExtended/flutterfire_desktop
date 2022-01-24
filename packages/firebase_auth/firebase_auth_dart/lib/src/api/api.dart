@@ -52,7 +52,10 @@ class APIConfig {
   /// Construct [APIConfig].
   APIConfig(this.apiKey, this.projectId);
 
+  /// The API Key associated with the Firebase project used for initialization.
   final String apiKey;
+
+  /// The project Id associated with the Firebase project used for initialization.
   final String projectId;
 }
 

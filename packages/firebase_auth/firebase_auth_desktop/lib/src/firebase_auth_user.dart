@@ -7,6 +7,7 @@
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 
+import 'confirmation_result.dart';
 import 'firebase_auth_user_credential.dart';
 import 'utils/desktop_utils.dart';
 
@@ -68,7 +69,11 @@ class User extends UserPlatform {
   Future<ConfirmationResultPlatform> linkWithPhoneNumber(String phoneNumber,
       RecaptchaVerifierFactoryPlatform applicationVerifier) async {
     try {
-      return auth.signInWithPhoneNumber(phoneNumber, applicationVerifier);
+      final recaptchaVerifier = applicationVerifier.delegate;
+      return ConfirmationResultDesktop(
+        auth,
+        await _user.linkWithPhoneNumber(phoneNumber, recaptchaVerifier),
+      );
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
