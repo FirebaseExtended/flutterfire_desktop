@@ -17,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import 'src/api/api.dart' show API, APIConfig, RecaptchaVerifier;
+import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
@@ -24,6 +25,7 @@ import 'src/utils/jwt.dart';
 
 export 'src/api/api.dart' show RecaptchaVerifier;
 export 'src/auth_provider.dart';
+export 'src/firebase_auth_exception.dart';
 export 'src/providers/email_auth.dart';
 export 'src/providers/facebook_auth.dart';
 export 'src/providers/google_auth.dart';
@@ -35,7 +37,6 @@ part 'src/additional_user_info.dart';
 part 'src/auth_credential.dart';
 part 'src/confirmation_result.dart';
 part 'src/firebase_auth.dart';
-part 'src/firebase_auth_exception.dart';
 part 'src/id_token_result.dart';
 part 'src/user.dart';
 part 'src/user_credential.dart';

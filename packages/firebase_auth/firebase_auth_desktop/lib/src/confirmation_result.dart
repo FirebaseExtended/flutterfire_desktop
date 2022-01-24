@@ -1,6 +1,7 @@
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 
+import '../src/utils/desktop_utils.dart';
 import 'firebase_auth_user_credential.dart';
 
 /// The desktop delegate implementation for [ConfirmationResultPlatform].
@@ -14,6 +15,10 @@ class ConfirmationResultDesktop extends ConfirmationResultPlatform {
 
   @override
   Future<UserCredentialPlatform> confirm(String verificationCode) async {
-    return UserCredential(_auth, await _result.confirm(verificationCode));
+    try {
+      return UserCredential(_auth, await _result.confirm(verificationCode));
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 }

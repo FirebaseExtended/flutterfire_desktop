@@ -78,10 +78,7 @@ class PhoneAuthAPI {
       verifier: verifier,
     );
 
-    return SignInWithPhoneNumberResponse(
-      phoneNumber: phoneNumber,
-      verificationId: signInResponse.verificationId,
-    );
+    return signInResponse;
   }
 
   /// TODO: write endpoint details
@@ -93,17 +90,25 @@ class PhoneAuthAPI {
     String? idToken,
     String? temporaryProof,
   }) async {
-    final response = await api._identityToolkit.verifyPhoneNumber(
-      idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
-        code: smsCode,
-        sessionInfo: verificationId,
-        idToken: idToken,
-        phoneNumber: phoneNumber,
-        temporaryProof: temporaryProof,
-      ),
-    );
+    try {
+      final response = await api._identityToolkit.verifyPhoneNumber(
+        idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
+          code: smsCode,
+          sessionInfo: verificationId,
+          idToken: idToken,
+          phoneNumber: phoneNumber,
+          temporaryProof: temporaryProof,
+        ),
+      );
 
-    return response;
+      if (response.temporaryProof != null) {
+        throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
+      }
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<String> _verify(String phoneNumber, RecaptchaVerifier verifier) async {

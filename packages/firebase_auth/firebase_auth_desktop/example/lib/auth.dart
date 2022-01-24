@@ -128,7 +128,7 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future onClick() async {
+  Future _emailAuth() async {
     resetError();
 
     if (formKey.currentState?.validate() ?? false) {
@@ -146,7 +146,7 @@ class _AuthGateState extends State<AuthGate> {
             password: passwordController.text,
           );
         } else {
-          await onPhoneAuth();
+          await _onPhoneAuth();
         }
       } on FirebaseAuthException catch (e) {
         setIsLoading();
@@ -160,7 +160,25 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future<void> onPhoneAuth() async {
+  Future<void> _anonymousAuth() async {
+    setIsLoading();
+
+    try {
+      await _auth.signInAnonymously();
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = '${e.message}';
+      });
+    } catch (e) {
+      setState(() {
+        error = '$e';
+      });
+    } finally {
+      setIsLoading();
+    }
+  }
+
+  Future<void> _onPhoneAuth() async {
     resetError();
 
     if (mode != AuthMode.phone) {
@@ -187,7 +205,7 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future onGoogleSignIn() async {
+  Future _onGoogleSignIn() async {
     resetError();
 
     try {
@@ -254,6 +272,12 @@ class _AuthGateState extends State<AuthGate> {
                         ),
                       ],
                     ),
+                  const SizedBox(height: 10),
+                  if (mode != AuthMode.phone)
+                    TextButton(
+                      onPressed: _resetPassword,
+                      child: const Text('Forgot password?'),
+                    ),
                   if (mode == AuthMode.phone)
                     TextFormField(
                       controller: phoneController,
@@ -269,7 +293,7 @@ class _AuthGateState extends State<AuthGate> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: isLoading ? null : onClick,
+                      onPressed: isLoading ? null : _emailAuth,
                       child: isLoading
                           ? const CircularProgressIndicator.adaptive()
                           : Text(mode.label),
@@ -283,7 +307,7 @@ class _AuthGateState extends State<AuthGate> {
                       Theme.of(context).brightness == Brightness.dark
                           ? Buttons.Google
                           : Buttons.GoogleDark,
-                      onPressed: onGoogleSignIn,
+                      onPressed: _onGoogleSignIn,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -342,9 +366,19 @@ class _AuthGateState extends State<AuthGate> {
                       ),
                     ),
                   const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: _resetPassword,
-                    child: const Text('Forgot password?'),
+                  RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyText1,
+                      children: [
+                        const TextSpan(text: 'Or '),
+                        TextSpan(
+                          text: 'continue as guest',
+                          style: const TextStyle(color: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = _anonymousAuth,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -7,7 +7,7 @@ import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:yaru/yaru.dart';
 
-import 'login.dart';
+import 'auth.dart';
 import 'profile.dart';
 
 /// Initialize with a secondary app until dart-only initialization is merged.

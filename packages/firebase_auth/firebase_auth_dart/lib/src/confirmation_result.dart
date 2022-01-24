@@ -29,6 +29,10 @@ class ConfirmationResult {
         idToken: _auth.currentUser?._idToken,
       );
 
+      if (response.temporaryProof != null) {
+        throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
+      }
+
       final userData = await _auth._api.getCurrentUser(response.idToken);
 
       // Map the json response to an actual user.

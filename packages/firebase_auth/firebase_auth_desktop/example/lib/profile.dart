@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'login.dart';
+import 'auth.dart';
 import 'sms_dialog.dart';
 
 /// Displayed as a profile image if the user doesn't have one.
@@ -205,7 +205,8 @@ class _ProfilePageState extends State<ProfilePage> {
       if (smsCode != null) {
         await confirmationResult.confirm(smsCode);
       }
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      ScaffoldSnackbar.of(context).show('${e.message}');
       log('$e');
     } finally {
       setIsLoading();

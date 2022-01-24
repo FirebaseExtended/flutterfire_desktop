@@ -16,12 +16,13 @@ import 'package:googleapis_auth/auth_io.dart'
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import '../providers/email_auth.dart';
+import '../../src/firebase_auth_exception.dart';
+import '../../src/providers/email_auth.dart';
 import '../utils/open_url.dart';
 
+part 'authentication/phone.dart';
 part 'authentication/recaptcha.dart';
 part 'authentication/recaptcha_html.dart';
-part 'authentication/phone.dart';
 
 /// A return type from Idp authentication requests, must be extended by any other response
 /// type for any operation that requires idToken.

@@ -1,6 +1,6 @@
-part of firebase_auth_dart;
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 
-/// All possible error codes returned from Identity Platform REST API [idp].
+/// All possible error codes returned from Identity Platform REST API.
 Map error = {
   'EMAIL_NOT_FOUND': 'There is no registered user corresponding to this email.',
   'INVALID_PASSWORD': 'The password of this user is invalid.',
@@ -40,10 +40,11 @@ Map error = {
   'INVALID_CODE': 'The provided code is not valid.',
   'UKNOWN': 'Uknown error happened.',
   'CAPTCHA_CHECK_FAILED':
-      'the reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
+      'The reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
+  'NEED_CONFIRMATION': 'Account exists with different credential.',
 };
 
-/// Wrap the errors from the Identity Platform REST API, usually of type [idp.DetailedApiRequestError]
+/// Wrap the errors from the Identity Platform REST API, usually of type `DetailedApiRequestError`
 /// in a in a Firebase-friendly format to users.
 class FirebaseAuthException extends FirebaseException implements Exception {
   // ignore: public_member_api_docs
