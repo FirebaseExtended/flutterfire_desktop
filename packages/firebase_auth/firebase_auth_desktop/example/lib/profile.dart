@@ -166,6 +166,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         onPressed: _linkWithPhone,
                         child: const Text('Link with phone number'),
                       ),
+                    const SizedBox(height: 40),
+                    if (userProviders.contains('phone'))
+                      TextButton(
+                        onPressed: _reauthenticate,
+                        child: const Text('Reauthenticate my phone'),
+                      ),
                     const SizedBox(height: 10),
                     TextButton(
                       onPressed: _signOut,
@@ -205,6 +211,40 @@ class _ProfilePageState extends State<ProfilePage> {
       if (smsCode != null) {
         await confirmationResult.confirm(smsCode);
       }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldSnackbar.of(context).show('${e.message}');
+      log('$e');
+    } finally {
+      setIsLoading();
+    }
+  }
+
+  Future<void> _reauthenticate() async {
+    try {
+      final oldToken = await user.getIdToken();
+
+      final res = await FirebaseAuth.instance
+          .signInWithPhoneNumber(user.phoneNumber ?? '');
+
+      // ignore: use_build_context_synchronously
+      final smsCode = await SMSDialog.of(context).show();
+
+      if (smsCode != null) {
+        final userCred = await user.reauthenticateWithCredential(
+          PhoneAuthProvider.credential(
+            verificationId: res.verificationId,
+            smsCode: smsCode,
+          ),
+        );
+
+        setState(() {
+          user = userCred.user!;
+        });
+      }
+
+      final newToken = await user.getIdToken();
+
+      log('OLD: $oldToken \nNEW: $newToken');
     } on FirebaseAuthException catch (e) {
       ScaffoldSnackbar.of(context).show('${e.message}');
       log('$e');

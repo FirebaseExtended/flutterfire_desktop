@@ -238,6 +238,14 @@ class User {
         return UserCredential._(
           auth: _auth,
           credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: false,
+            profile: {
+              'displayName': response.displayName,
+              'photoURL': response.photoUrl
+            },
+            providerId: credential.providerId,
+          ),
         );
       } else if (credential is GoogleAuthCredential) {
         assert(_auth.app.options.authDomain != null,
@@ -264,6 +272,26 @@ class User {
             },
             providerId: response.providerId,
             username: response.screenName,
+          ),
+        );
+      } else if (credential is PhoneAuthCredential) {
+        final response =
+            await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+          phoneNumber: phoneNumber,
+          smsCode: credential.smsCode,
+          idToken: _idToken,
+          verificationId: credential.verificationId,
+        );
+
+        _setIdToken(response.idToken);
+        await reload();
+
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            providerId: credential.providerId,
           ),
         );
       } else {
