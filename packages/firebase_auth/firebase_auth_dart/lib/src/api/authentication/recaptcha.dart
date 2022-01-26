@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-part of api;
+import 'dart:async';
+import 'dart:io';
+
+import '../../utils/open_url.dart';
+import 'recaptcha_html.dart';
 
 /// The theme of the rendered recaptcha widget.
 enum RecaptchaTheme {
@@ -48,7 +52,7 @@ class RecaptchaVerifier {
       if (uri.path == '/' && uri.queryParameters.isEmpty) {
         await _sendDataToHTTP(
           request,
-          _recaptchaHTML(
+          recaptchaHTML(
             siteKey,
             siteToken,
             theme: parameters['theme'],
@@ -58,7 +62,7 @@ class RecaptchaVerifier {
       } else if (uri.query.contains('response')) {
         await _sendDataToHTTP(
           request,
-          _responseHTML(
+          responseHTML(
             'Success',
             'Successful verification!',
           ),
@@ -78,7 +82,7 @@ class RecaptchaVerifier {
       } else if (uri.query.contains('error-code')) {
         await _sendDataToHTTP(
           request,
-          _responseHTML(
+          responseHTML(
             'Captcha check failed.',
             uri.queryParameters['error-code']!,
           ),

@@ -190,7 +190,8 @@ class _AuthGateState extends State<AuthGate> {
         final confirmationResult = await FirebaseAuth.instance
             .signInWithPhoneNumber(phoneController.text);
 
-        final smsCode = await SMSDialog.of(context).show();
+        final smsCode =
+            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
 
         if (smsCode != null) {
           await confirmationResult.confirm(smsCode);

@@ -169,9 +169,13 @@ class User extends UserPlatform {
   }
 
   @override
-  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) {
-    // TODO: implement updatePhoneNumber
-    throw UnimplementedError();
+  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) async {
+    try {
+      final credentials = mapPhoneCredentialFromPlatform(phoneCredential);
+      await _user.updatePhoneNumber(credentials);
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   /// Update the user name.

@@ -21,17 +21,21 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
       idToken: credential.idToken,
       accessToken: credential.accessToken,
     );
-  } else if (credential is PhoneAuthCredential) {
-    return auth_dart.PhoneAuthProvider.credential(
-      verificationId: credential.verificationId!,
-      smsCode: credential.smsCode!,
-    );
   } else {
     return auth_dart.AuthCredential(
       providerId: credential.providerId,
       signInMethod: credential.signInMethod,
     );
   }
+}
+
+/// Map from [PhoneAuthCredential] to [auth_dart.PhoneAuthCredential].
+auth_dart.PhoneAuthCredential mapPhoneCredentialFromPlatform(
+    PhoneAuthCredential credential) {
+  return auth_dart.PhoneAuthProvider.credential(
+    verificationId: credential.verificationId!,
+    smsCode: credential.smsCode!,
+  );
 }
 
 /// Map from [auth_dart.AuthCredential] to [AuthCredential].

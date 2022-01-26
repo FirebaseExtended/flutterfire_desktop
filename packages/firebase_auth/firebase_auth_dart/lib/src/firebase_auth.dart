@@ -494,9 +494,12 @@ class FirebaseAuth {
     try {
       return ConfirmationResult(
         this,
-        (await _api.phoneAuthApiDelegate
-                .signInWithPhoneNumber(phoneNumber, verifier: verifier))
-            .verificationId,
+        (await _api.phoneAuthApiDelegate.signInWithPhoneNumber(
+          phoneNumber,
+          verifier: verifier,
+          idToken: await currentUser?.getIdToken(),
+        ))
+            .verificationId!,
       );
     } catch (e) {
       throw _getException(e);

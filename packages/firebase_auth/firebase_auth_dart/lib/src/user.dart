@@ -227,6 +227,8 @@ class User {
   ///
   Future<UserCredential> reauthenticateWithCredential(
       AuthCredential credential) async {
+    _assertSignedOut(_auth);
+
     try {
       if (credential is EmailAuthCredential) {
         final response = await _auth._api
@@ -311,7 +313,7 @@ class User {
           (await _auth._api.phoneAuthApiDelegate.linkWithPhoneNumber(
                   _idToken, phoneNumber,
                   verifier: applicationVerifier))
-              .verificationId);
+              .verificationId!);
     } catch (e) {
       throw _auth._getException(e);
     }
@@ -380,6 +382,31 @@ class User {
       _assertSignedOut(_auth);
 
       await _auth._api.updatePassword(newPassword, _idToken);
+      await reload();
+    } catch (e) {
+      throw _auth._getException(e);
+    }
+  }
+
+  /// Updates the user's phone number.
+  ///
+  /// A credential can be created by verifying a phone number via
+  /// [FirebaseAuth.signInWithPhoneNumber].
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `invalid-verification-code`
+  ///   - Thrown if the verification code of the credential is not valid.
+  /// - `invalid-verification-id`
+  ///   - Thrown if the verification ID of the credential is not valid.
+  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) async {
+    _assertSignedOut(_auth);
+
+    try {
+      await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+        idToken: _idToken,
+        smsCode: phoneCredential.smsCode,
+        verificationId: phoneCredential.verificationId,
+      );
       await reload();
     } catch (e) {
       throw _auth._getException(e);

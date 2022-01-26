@@ -1,27 +1,49 @@
 // ignore_for_file: require_trailing_commas
+import 'dart:async';
 
-part of api;
+import 'package:googleapis/identitytoolkit/v3.dart' as idp;
+import 'package:meta/meta.dart';
+
+import '../../firebase_auth_exception.dart';
+import '../../utils/open_url.dart';
+import '../api.dart';
+import 'recaptcha.dart';
 
 /// A return type from Idp phone authentication requests.
-@protected
+@internal
 class SignInWithPhoneNumberResponse {
   /// Construct a new [IdTokenResponse].
   SignInWithPhoneNumberResponse({
     required this.phoneNumber,
-    required this.verificationId,
+    this.verificationId,
+    this.idToken,
+    this.temporaryProof,
+    this.isNewUser,
   });
 
   /// The phone number used to sign in.
   final String phoneNumber;
 
+  /// Fresh idToken after sign in with phone number is verified.
+  final String? idToken;
+
   /// The Id returned after SMS code is sent to the phone number.
-  final String verificationId;
+  final String? verificationId;
+
+  /// If not null, it indicates that the phone number is assigned to another account under different credentials.
+  final String? temporaryProof;
+
+  /// Wether this user is newly registered or not.
+  final bool? isNewUser;
 
   /// Json representation of this object.
   Map<String, dynamic> toJson() {
     return {
       'phoneNumber': phoneNumber,
       'verificationId': verificationId,
+      'idToken': idToken,
+      'temporaryProof': temporaryProof,
+      'isNewUser': isNewUser,
     };
   }
 }
@@ -30,10 +52,10 @@ class SignInWithPhoneNumberResponse {
 @internal
 class PhoneAuthAPI {
   /// Construct a new [PhoneAuthAPI].
-  PhoneAuthAPI(this.api);
+  PhoneAuthAPI(this._api);
 
   /// The [API] instance containing required configurations to make the requests.
-  API api;
+  final API _api;
 
   RecaptchaVerifier _recaptchaVerifier =
       RecaptchaVerifier({'theme': RecaptchaTheme.light.name});
@@ -52,7 +74,7 @@ class PhoneAuthAPI {
   }) async {
     Future<String> _verifyAction;
 
-    if (api._emulator != null) {
+    if (_api.apiConfig.emulator != null) {
       _verifyAction = _verifyEmulator(phoneNumber);
     } else {
       verifier ??= _recaptchaVerifier;
@@ -62,6 +84,7 @@ class PhoneAuthAPI {
     return SignInWithPhoneNumberResponse(
       phoneNumber: phoneNumber,
       verificationId: await _verifyAction,
+      idToken: idToken,
     );
   }
 
@@ -82,8 +105,7 @@ class PhoneAuthAPI {
   }
 
   /// TODO: write endpoint details
-  Future<idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberResponse>
-      verifyPhoneNumber({
+  Future<SignInWithPhoneNumberResponse> verifyPhoneNumber({
     String? phoneNumber,
     String? smsCode,
     String? verificationId,
@@ -91,7 +113,7 @@ class PhoneAuthAPI {
     String? temporaryProof,
   }) async {
     try {
-      final response = await api._identityToolkit.verifyPhoneNumber(
+      final response = await _api.identityToolkit.verifyPhoneNumber(
         idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
           code: smsCode,
           sessionInfo: verificationId,
@@ -105,7 +127,12 @@ class PhoneAuthAPI {
         throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
       }
 
-      return response;
+      return SignInWithPhoneNumberResponse(
+        phoneNumber: response.phoneNumber!,
+        idToken: response.idToken,
+        temporaryProof: response.temporaryProof,
+        isNewUser: response.isNewUser,
+      );
     } catch (e) {
       rethrow;
     }
@@ -114,7 +141,7 @@ class PhoneAuthAPI {
   Future<String> _verify(String phoneNumber, RecaptchaVerifier verifier) async {
     final completer = Completer<String>();
 
-    final recaptchaResponse = await api._identityToolkit.getRecaptchaParam();
+    final recaptchaResponse = await _api.identityToolkit.getRecaptchaParam();
 
     final recaptchaToken = await verifier
         .verify(
@@ -156,7 +183,7 @@ class PhoneAuthAPI {
       {required String phoneNumber, String? recaptchaToken}) async {
     try {
       // Send SMS code.
-      final response = await api._identityToolkit.sendVerificationCode(
+      final response = await _api.identityToolkit.sendVerificationCode(
         idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
           phoneNumber: phoneNumber,
           recaptchaToken: recaptchaToken,

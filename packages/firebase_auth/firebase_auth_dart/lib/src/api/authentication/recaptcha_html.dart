@@ -4,9 +4,7 @@
 
 // ignore_for_file: public_member_api_docs, require_trailing_commas
 
-part of api;
-
-String _recaptchaHTML(String? siteKey, String? token,
+String recaptchaHTML(String? siteKey, String? token,
     {String? theme, String? size}) {
   return '''
   <!DOCTYPE html>
@@ -60,7 +58,7 @@ String _recaptchaHTML(String? siteKey, String? token,
   </html>''';
 }
 
-String _responseHTML(String title, String message) {
+String responseHTML(String title, String message) {
   return '''
   <!DOCTYPE html>
   <html>

@@ -4,8 +4,6 @@
 
 // ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
-library api;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -16,13 +14,8 @@ import 'package:googleapis_auth/auth_io.dart'
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import '../../src/firebase_auth_exception.dart';
 import '../../src/providers/email_auth.dart';
-import '../utils/open_url.dart';
-
-part 'authentication/phone.dart';
-part 'authentication/recaptcha.dart';
-part 'authentication/recaptcha_html.dart';
+import 'authentication/phone.dart';
 
 /// A return type from Idp authentication requests, must be extended by any other response
 /// type for any operation that requires idToken.
@@ -58,6 +51,16 @@ class APIConfig {
 
   /// The project Id associated with the Firebase project used for initialization.
   final String projectId;
+
+  EmulatorConfig? _emulator;
+
+  /// Get the current [EmulatorConfig] or null.
+  EmulatorConfig? get emulator => _emulator;
+
+  /// Set a new [EmulatorConfig] or null.
+  void setEmulator(String host, int port) {
+    _emulator = EmulatorConfig.use(host, port);
+  }
 }
 
 /// Pure Dart service layer to perform all requests
@@ -69,7 +72,7 @@ class API {
   // ignore: public_member_api_docs
   API(this.apiConfig, {http.Client? client}) {
     _client = client ?? clientViaApiKey(apiConfig.apiKey);
-    _identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
+    identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
   /// The API configurations of this instance.
@@ -80,12 +83,12 @@ class API {
   /// Change the HTTP client for the purpose of testing.
   void setApiClient(http.Client client) {
     _client = client;
-    _identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
+    identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
   }
 
-  late idp.RelyingpartyResource _identityToolkit;
-
-  EmulatorConfig? _emulator;
+  /// Identity platform [idp.RelyingpartyResource] initialized with this instance [APIConfig].
+  @internal
+  late idp.RelyingpartyResource identityToolkit;
 
   PhoneAuthAPI? _phoneAuthApiDelegate;
 
@@ -98,7 +101,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.VerifyPasswordResponse> signInWithEmailAndPassword(
       String email, String password) async {
-    final _response = await _identityToolkit.verifyPassword(
+    final _response = await identityToolkit.verifyPassword(
       idp.IdentitytoolkitRelyingpartyVerifyPasswordRequest(
         returnSecureToken: true,
         password: password,
@@ -112,7 +115,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SignupNewUserResponse> createUserWithEmailAndPassword(
       String email, String password) async {
-    final _response = await _identityToolkit.signupNewUser(
+    final _response = await identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(
         email: email,
         password: password,
@@ -123,7 +126,7 @@ class API {
 
   /// TODO: write endpoint details
   Future<idp.SignupNewUserResponse> signInAnonymously() async {
-    final _response = await _identityToolkit.signupNewUser(
+    final _response = await identityToolkit.signupNewUser(
       idp.IdentitytoolkitRelyingpartySignupNewUserRequest(),
     );
 
@@ -141,7 +144,7 @@ class API {
       uri = uri.replace(scheme: 'https');
     }
 
-    final response = await _identityToolkit.verifyAssertion(
+    final response = await identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: uri.toString(),
@@ -154,23 +157,8 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberResponse>
-      linkWithPhoneNumber(String smsCode, String verificationId,
-          [String? idToken]) async {
-    final _response = await _identityToolkit.verifyPhoneNumber(
-      idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
-        code: smsCode,
-        sessionInfo: verificationId,
-        idToken: idToken,
-      ),
-    );
-
-    return _response;
-  }
-
-  /// TODO: write endpoint details
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
-    final _response = await _identityToolkit.createAuthUri(
+    final _response = await identityToolkit.createAuthUri(
       idp.IdentitytoolkitRelyingpartyCreateAuthUriRequest(
         identifier: email,
         // TODO hmm?
@@ -184,7 +172,7 @@ class API {
   /// TODO: write endpoint details
   Future<String> sendPasswordResetEmail(String email,
       {String? continueUrl}) async {
-    final _response = await _identityToolkit.getOobConfirmationCode(
+    final _response = await identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
@@ -197,7 +185,7 @@ class API {
 
   /// TODO: write endpoint details
   Future<String> confirmPasswordReset(String? code, String? newPassword) async {
-    final _response = await _identityToolkit.resetPassword(
+    final _response = await identityToolkit.resetPassword(
       idp.IdentitytoolkitRelyingpartyResetPasswordRequest(
         newPassword: newPassword,
         oobCode: code,
@@ -210,7 +198,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> resetUserPassword(String idToken,
       {String? newPassword}) async {
-    return _identityToolkit.setAccountInfo(
+    return identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         password: newPassword,
@@ -221,7 +209,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.GetOobConfirmationCodeResponse> sendSignInLinkToEmail(
       String email, String? continueUrl) async {
-    return _identityToolkit.getOobConfirmationCode(
+    return identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
@@ -234,7 +222,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> updateEmail(
       String newEmail, String idToken, String uid) async {
-    final _response = await _identityToolkit.setAccountInfo(
+    final _response = await identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         email: newEmail,
         idToken: idToken,
@@ -247,7 +235,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> updateProfile(
       Map<String, dynamic> newProfile, String idToken, String uid) async {
-    final _response = await _identityToolkit.setAccountInfo(
+    final _response = await identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         displayName: newProfile['displayName'],
         photoUrl: newProfile['photoURL'],
@@ -261,7 +249,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> updatePassword(
       String newPassword, String idToken) async {
-    final _response = await _identityToolkit.setAccountInfo(
+    final _response = await identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         password: newPassword,
@@ -273,7 +261,7 @@ class API {
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> linkWithEmail(String idToken,
       {required EmailAuthCredential credential}) async {
-    return _identityToolkit.setAccountInfo(
+    return identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         email: credential.email,
@@ -287,7 +275,7 @@ class API {
       {required String providerIdToken,
       required String providerId,
       String? requestUri}) async {
-    final response = await _identityToolkit.verifyAssertion(
+    final response = await identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: requestUri,
@@ -300,7 +288,7 @@ class API {
 
   /// TODO: write endpoint details
   Future<idp.UserInfo> getCurrentUser(String? idToken) async {
-    final _response = await _identityToolkit.getAccountInfo(
+    final _response = await identityToolkit.getAccountInfo(
       idp.IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
     );
 
@@ -309,7 +297,7 @@ class API {
 
   /// TODO: write endpoint details
   Future<String?> sendEmailVerification(String idToken) async {
-    final _response = await _identityToolkit.getOobConfirmationCode(
+    final _response = await identityToolkit.getOobConfirmationCode(
       idp.Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
     );
 
@@ -330,8 +318,8 @@ class API {
   }
 
   Future<String?> _exchangeRefreshWithIdToken(String? refreshToken) async {
-    final baseUri = _emulator != null
-        ? 'http://${_emulator!.host}:${_emulator!.port}/securetoken.googleapis.com/v1/'
+    final baseUri = apiConfig.emulator != null
+        ? 'http://${apiConfig.emulator!.host}:${apiConfig.emulator!.port}/securetoken.googleapis.com/v1/'
         : 'https://securetoken.googleapis.com/v1/';
 
     final _response = await http.post(
@@ -352,7 +340,7 @@ class API {
 
   /// TODO: write endpoint details
   Future<idp.DeleteAccountResponse> delete(String idToken, String uid) async {
-    return _identityToolkit.deleteAccount(
+    return identityToolkit.deleteAccount(
       idp.IdentitytoolkitRelyingpartyDeleteAccountRequest(
         idToken: idToken,
         localId: uid,
@@ -394,12 +382,13 @@ class API {
     // 3. Update the requester to use emulator
     final rootUrl = 'http://$host:$port/www.googleapis.com/';
 
-    _identityToolkit = idp.IdentityToolkitApi(
+    identityToolkit = idp.IdentityToolkitApi(
       clientViaApiKey(apiConfig.apiKey),
       rootUrl: rootUrl,
     ).relyingparty;
-    // set the Flage to true to use the emulator for this instance.
-    _emulator = EmulatorConfig.use(host, '$port');
+
+    // set the the emulator config for this instance.
+    apiConfig.setEmulator(host, port);
 
     return emulatorProjectConfig;
   }
@@ -414,7 +403,7 @@ class EmulatorConfig {
   });
 
   /// Initialize the Emulator Config using the host and port printed once running `firebase emulators:start`.
-  factory EmulatorConfig.use(String host, String port) {
+  factory EmulatorConfig.use(String host, int port) {
     return EmulatorConfig._(
         port: port,
         host: host,
@@ -428,7 +417,7 @@ class EmulatorConfig {
   final String host;
 
   /// The port on which the emulator suite is running.
-  final String port;
+  final int port;
 
   /// The IDP requester used to make calls to the emulator suite.
   final idp.RelyingpartyResource? requester;

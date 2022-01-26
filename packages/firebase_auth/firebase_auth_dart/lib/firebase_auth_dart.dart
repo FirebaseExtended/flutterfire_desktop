@@ -16,14 +16,15 @@ import 'package:googleapis/identitytoolkit/v3.dart' as idp;
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import 'src/api/api.dart' show API, APIConfig, RecaptchaVerifier;
+import 'src/api/api.dart' show API, APIConfig;
+import 'src/api/authentication/recaptcha.dart';
 import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
 import 'src/utils/jwt.dart';
 
-export 'src/api/api.dart' show RecaptchaVerifier;
+export 'src/api/authentication/recaptcha.dart';
 export 'src/auth_provider.dart';
 export 'src/firebase_auth_exception.dart';
 export 'src/providers/email_auth.dart';

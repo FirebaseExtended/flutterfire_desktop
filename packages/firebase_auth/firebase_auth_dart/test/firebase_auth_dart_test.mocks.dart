@@ -5,9 +5,11 @@
 import 'dart:async' as _i4;
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as _i2;
-import 'package:firebase_auth_dart/src/api/api.dart' as _i5;
+import 'package:firebase_auth_dart/src/api/authentication/recaptcha.dart'
+    as _i5;
+import 'package:firebase_auth_dart/src/providers/phone_auth.dart' as _i6;
 import 'package:firebase_core_dart/firebase_core_dart.dart' as _i3;
-import 'package:http/http.dart' as _i6;
+import 'package:http/http.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: avoid_redundant_argument_values
@@ -121,6 +123,13 @@ class MockUser extends _i1.Mock implements _i2.User {
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
+  _i4.Future<void> updatePhoneNumber(
+          _i6.PhoneAuthCredential? phoneCredential) =>
+      (super.noSuchMethod(
+          Invocation.method(#updatePhoneNumber, [phoneCredential]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
+  @override
   _i4.Future<void> updateDisplayName(String? displayName) =>
       (super.noSuchMethod(Invocation.method(#updateDisplayName, [displayName]),
           returnValue: Future<void>.value(),
@@ -163,7 +172,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
           returnValueForMissingStub: null);
   @override
-  void setApiClient(_i6.Client? client) =>
+  void setApiClient(_i7.Client? client) =>
       super.noSuchMethod(Invocation.method(#setApiClient, [client]),
           returnValueForMissingStub: null);
   @override

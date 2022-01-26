@@ -169,8 +169,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 40),
                     if (userProviders.contains('phone'))
                       TextButton(
-                        onPressed: _reauthenticate,
-                        child: const Text('Reauthenticate my phone'),
+                        onPressed: _updatePhoneNumber,
+                        child: const Text('Update my phone'),
                       ),
                     const SizedBox(height: 10),
                     TextButton(
@@ -203,13 +203,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _linkWithPhone() async {
     try {
-      final confirmationResult = await user.linkWithPhoneNumber('+16505550101');
+      final phoneNumber =
+          await ExampleDialog.of(context).show('Phone number:', 'Link');
 
-      // ignore: use_build_context_synchronously
-      final smsCode = await SMSDialog.of(context).show();
+      if (phoneNumber != null) {
+        final confirmationResult =
+            await user.linkWithPhoneNumber('+16505550101');
 
-      if (smsCode != null) {
-        await confirmationResult.confirm(smsCode);
+        final smsCode =
+            // ignore: use_build_context_synchronously
+            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
+
+        if (smsCode != null) {
+          await confirmationResult.confirm(smsCode);
+        }
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldSnackbar.of(context).show('${e.message}');
@@ -219,32 +226,31 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _reauthenticate() async {
+  Future<void> _updatePhoneNumber() async {
     try {
-      final oldToken = await user.getIdToken();
+      final phoneNumber =
+          await ExampleDialog.of(context).show('Phone number:', 'Get SMS');
 
-      final res = await FirebaseAuth.instance
-          .signInWithPhoneNumber(user.phoneNumber ?? '');
+      if (phoneNumber != null) {
+        final res =
+            await FirebaseAuth.instance.signInWithPhoneNumber(phoneNumber);
 
-      // ignore: use_build_context_synchronously
-      final smsCode = await SMSDialog.of(context).show();
+        // ignore: use_build_context_synchronously
+        final smsCode =
+            // ignore: use_build_context_synchronously
+            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
 
-      if (smsCode != null) {
-        final userCred = await user.reauthenticateWithCredential(
-          PhoneAuthProvider.credential(
-            verificationId: res.verificationId,
-            smsCode: smsCode,
-          ),
-        );
+        if (smsCode != null) {
+          await user.updatePhoneNumber(
+            PhoneAuthProvider.credential(
+              verificationId: res.verificationId,
+              smsCode: smsCode,
+            ),
+          );
 
-        setState(() {
-          user = userCred.user!;
-        });
+          log('${user.phoneNumber}');
+        }
       }
-
-      final newToken = await user.getIdToken();
-
-      log('OLD: $oldToken \nNEW: $newToken');
     } on FirebaseAuthException catch (e) {
       ScaffoldSnackbar.of(context).show('${e.message}');
       log('$e');

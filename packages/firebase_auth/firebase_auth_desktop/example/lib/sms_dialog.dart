@@ -2,20 +2,26 @@
 
 import 'package:flutter/material.dart';
 
-class SMSDialog {
-  const SMSDialog._(this.context);
+class ExampleDialog {
+  ExampleDialog._(this.context);
 
-  factory SMSDialog.of(BuildContext context) {
-    return SMSDialog._(context);
+  factory ExampleDialog.of(BuildContext context) {
+    return ExampleDialog._(context);
   }
 
   final BuildContext context;
 
-  Future<String?> show() async {
+  late String title;
+  late String buttonLabel;
+
+  Future<String?> show(String title, String buttonLabel) async {
+    this.title = title;
+    this.buttonLabel = buttonLabel;
+
     return getSmsCodeFromUser(context);
   }
 
-  static Future<String?> getSmsCodeFromUser(BuildContext context) async {
+  Future<String?> getSmsCodeFromUser(BuildContext context) async {
     String? smsCode;
 
     // Update the UI - wait for the user to enter the SMS code
@@ -24,13 +30,13 @@ class SMSDialog {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text('SMS code:'),
+          title: Text(title),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Sign in'),
+              child: Text(buttonLabel),
             ),
             OutlinedButton(
               onPressed: () {
