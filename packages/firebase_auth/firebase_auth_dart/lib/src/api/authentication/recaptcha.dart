@@ -38,7 +38,7 @@ class RecaptchaVerifier {
   Future<String?> verify(
     String? siteKey,
     String? siteToken, [
-    Duration timeout = const Duration(seconds: 30),
+    Duration timeout = const Duration(seconds: 60),
   ]) async {
     final completer = Completer<String?>();
     final address = InternetAddress.loopbackIPv4;
@@ -76,8 +76,6 @@ class RecaptchaVerifier {
           parameters['callback']();
         }
 
-        await server.close();
-
         completer.complete(_verificationId);
       } else if (uri.query.contains('error-code')) {
         await _sendDataToHTTP(
@@ -87,12 +85,11 @@ class RecaptchaVerifier {
             uri.queryParameters['error-code']!,
           ),
         );
+
         if (parameters.containsKey('callback-error')) {
           // ignore: avoid_dynamic_calls
           parameters['callback-error']();
         }
-
-        await server.close();
 
         completer.completeError((e) {
           return Exception(uri.queryParameters['error-code']);
@@ -102,7 +99,9 @@ class RecaptchaVerifier {
 
     await OpenUrlUtil().openUrl(redirectUrl);
 
-    return completer.future.timeout(timeout);
+    return completer.future
+        .whenComplete(() async => server.close())
+        .timeout(timeout);
   }
 
   Future<void> _sendDataToHTTP(

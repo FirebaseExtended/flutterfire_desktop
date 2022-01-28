@@ -18,41 +18,43 @@ String recaptchaHTML(String? siteKey, String? token,
         <title>reCAPTCHA check</title>
         <script type="text/javascript">
               var callback = function (token) {
-                    var url = window.location.href += ('?response=' + token)
-                    window.location = url
-                    console.log(token);
-                    console.log(window.location);
+                  var url = window.location.href + ('?response=' + token)
+                  window.location.href = url
               };
 
               var errorCallback = function (token) {
-                    var url = window.location.href += ('?error-code=CAPTCHA_CHECK_FAILED')
-                    window.location = url
-                    console.log(token);
-                    console.log(window.location);
+                  var url = window.location.href + ('?error-code=CAPTCHA_CHECK_FAILED')
+                  window.location.href = url
               };
 
               var expiredCallback = function (token) {
-                    var url = window.location.href += ('?error-code=CAPTCHA_CHECK_FAILED')
-                    window.location = url
-                    console.log(token);
-                    console.log(window.location);
+                  var url = window.location.href + ('?error-code=CAPTCHA_CHECK_FAILED')
+                  window.location.href = url
               };
 
-              var onloadCallback = function () {
-                    grecaptcha.execute();
+              var onloadCallback = function() {
+                grecaptcha.render('g-recaptcha', {
+                  'sitekey' : "$siteKey",
+                  'theme': "$theme",
+                  'size': "$size",
+                  'callback': "callback",
+                  'expired-callback': "expiredCallback",
+                  'error-callback': "errorCallback"
+                });
               };
-
         </script>
-        <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback" async defer></script>
+        
   </head>
 
   <body>
         <div class="mdl-card firebase-container">
-              <div class="g-recaptcha" data-sitekey="$siteKey" data-callback="callback"
-                    data-error-callback="errorCallback" data-expired-callback="expiredCallback" data-size="$size"
-                    data-theme="$theme">
+              <div id="g-recaptcha">
               </div>
         </div>
+
+        <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit"
+            async defer>
+        </script>
   </body>
 
   </html>''';
