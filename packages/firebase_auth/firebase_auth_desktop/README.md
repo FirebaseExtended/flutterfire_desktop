@@ -21,7 +21,7 @@ First, please make sure you initialize Firebase for Dart by following the guide 
     ```
 ## Usage
 
-This package is a platfrom implementation of [`firebase_auth`](https://pub.dev/packages/firebase_auth), check the [full Usage documentation on the official guide](https://firebase.flutter.dev/docs/auth/usage).
+This package is a platform implementation of [`firebase_auth`](https://pub.dev/packages/firebase_auth), check the [full Usage documentation on the official guide](https://firebase.flutter.dev/docs/auth/usage).
 
 ## Issue and Feedback
 
