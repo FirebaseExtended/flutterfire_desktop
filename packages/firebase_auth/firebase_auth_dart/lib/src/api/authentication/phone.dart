@@ -189,9 +189,7 @@ class PhoneAuthAPI {
         ),
       );
 
-      if (response.sessionInfo != null) {
-        return response.sessionInfo;
-      }
+      return response.sessionInfo;
     } catch (e) {
       rethrow;
     }
