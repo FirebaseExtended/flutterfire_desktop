@@ -18,7 +18,7 @@ enum RecaptchaTheme {
 }
 
 /// Initiate and setup recaptcha flow on Desktop platforms.
- class RecaptchaVerifier {
+class RecaptchaVerifier {
   // ignore: public_member_api_docs
   RecaptchaVerifier(this.parameters);
 
