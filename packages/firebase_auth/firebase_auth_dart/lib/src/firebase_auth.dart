@@ -490,7 +490,7 @@ class FirebaseAuth {
   /// which you can then use to sign the user in, or link with their account (
   /// see [signInWithCredential] or [User.linkWithCredential]).
   Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
-      [RecaptchaVerifier? verifier]) async {
+      [verifier.RecaptchaVerifier? verifier]) async {
     try {
       final signInResponse =
           await _api.phoneAuthApiDelegate.signInWithPhoneNumber(

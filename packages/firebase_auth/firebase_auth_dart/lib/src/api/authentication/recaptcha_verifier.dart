@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import '../../utils/open_url.dart';
@@ -17,7 +18,7 @@ enum RecaptchaTheme {
   dark
 }
 
-/// Initiate and setup recaptcha flow on Desktop platforms.
+/// Initiate and setup recaptcha flow.
 class RecaptchaVerifier {
   // ignore: public_member_api_docs
   RecaptchaVerifier(this.parameters);
@@ -46,6 +47,8 @@ class RecaptchaVerifier {
 
     server.listen((request) async {
       final uri = request.requestedUri;
+
+      log(uri.path);
 
       if (uri.path == '/' && uri.queryParameters.isEmpty) {
         await _sendDataToHTTP(

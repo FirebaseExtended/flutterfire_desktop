@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../../firebase_auth_exception.dart';
 import '../api.dart';
-import 'recaptcha.dart';
+import 'recaptcha_verifier.dart';
 
 /// A return type from Idp phone authentication requests.
 @internal
@@ -65,7 +65,13 @@ class PhoneAuthAPI {
     _recaptchaVerifier = recaptchaVerifier;
   }
 
-  /// TODO: write endpoint details
+  /// Sign in using Phone Number with a recaptcha verifier.
+  ///
+  /// If the emulator is running, the verification will be skipped.
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `verification-canceled`
+  ///   - The user canceled the verification process
   Future<SignInWithPhoneNumberResponse> signInWithPhoneNumber(
     String phoneNumber, {
     String? idToken,
