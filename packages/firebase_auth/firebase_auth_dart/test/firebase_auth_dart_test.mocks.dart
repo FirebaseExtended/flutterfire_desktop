@@ -5,7 +5,7 @@
 import 'dart:async' as _i4;
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as _i2;
-import 'package:firebase_auth_dart/src/api/authentication/recaptcha.dart'
+import 'package:firebase_auth_dart/src/api/authentication/recaptcha_verifier.dart'
     as _i5;
 import 'package:firebase_auth_dart/src/providers/phone_auth.dart' as _i6;
 import 'package:firebase_core_dart/firebase_core_dart.dart' as _i3;
