@@ -5,7 +5,6 @@ import 'package:googleapis/identitytoolkit/v3.dart' as idp;
 import 'package:meta/meta.dart';
 
 import '../../firebase_auth_exception.dart';
-import '../../utils/open_url.dart';
 import '../api.dart';
 import 'recaptcha.dart';
 
@@ -143,21 +142,24 @@ class PhoneAuthAPI {
 
     final recaptchaResponse = await _api.identityToolkit.getRecaptchaParam();
 
-    final recaptchaToken = await verifier
-        .verify(
-          recaptchaResponse.recaptchaSiteKey,
-          recaptchaResponse.recaptchaStoken,
-        );
-    if (recaptchaToken != null) {
-      try {
-        final verificationId = await _sendSMSCode(
-          phoneNumber: phoneNumber,
-          recaptchaToken: recaptchaToken,
-        );
-        completer.complete(verificationId);
-      } catch (e) {
-        completer.completeError(e);
-      }
+    final recaptchaToken = await verifier.verify(
+      recaptchaResponse.recaptchaSiteKey,
+      recaptchaResponse.recaptchaStoken,
+    );
+
+    if (recaptchaToken == null) {
+      throw FirebaseAuthException(code: 'VERIFICATION_CANCELED');
+    }
+
+    try {
+      final verificationId = await _sendSMSCode(
+        phoneNumber: phoneNumber,
+        recaptchaToken: recaptchaToken,
+      );
+
+      completer.complete(verificationId);
+    } catch (e) {
+      completer.completeError(e);
     }
 
     return completer.future;

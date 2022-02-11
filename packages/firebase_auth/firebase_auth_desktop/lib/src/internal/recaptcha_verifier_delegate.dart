@@ -15,10 +15,10 @@ class RecaptchaVerifierDelegate extends RecaptchaVerifier {
   ]) async {
     final result = await DesktopWebviewAuth.recaptchaVerification(
       RecaptchaArgs(siteKey: siteKey!, siteToken: siteToken!),
-      height: 400,
-      width: 400,
+      height: 500,
+      width: 600,
     );
 
-    return result!.verificationId;
+    return result?.verificationId;
   }
 }

@@ -21,7 +21,7 @@ import 'src/utils/desktop_utils.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
-  /// Entry point for the [FirebaseAuthDesktop] classs.
+  /// Entry point for the [FirebaseAuthDesktop] class.
   FirebaseAuthDesktop({required FirebaseApp app})
       : _app = core_dart.Firebase.app(app.name),
         super(appInstance: app) {

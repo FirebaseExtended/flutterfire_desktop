@@ -1,7 +1,7 @@
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 
 /// All possible error codes returned from Identity Platform REST API.
-Map error = {
+const Map error = {
   'EMAIL_NOT_FOUND': 'There is no registered user corresponding to this email.',
   'INVALID_PASSWORD': 'The password of this user is invalid.',
   'USER_DISABLED': 'The user exists but is disabled.',
@@ -42,6 +42,8 @@ Map error = {
   'CAPTCHA_CHECK_FAILED':
       'The reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
   'NEED_CONFIRMATION': 'Account exists with different credential.',
+  'VERIFICATION_CANCELED':
+      'Recaptcha verification process was canceled by user.'
 };
 
 /// Wrap the errors from the Identity Platform REST API, usually of type `DetailedApiRequestError`

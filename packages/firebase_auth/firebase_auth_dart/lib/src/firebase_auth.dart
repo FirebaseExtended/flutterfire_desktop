@@ -492,15 +492,14 @@ class FirebaseAuth {
   Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
       [RecaptchaVerifier? verifier]) async {
     try {
-      return ConfirmationResult(
-        this,
-        (await _api.phoneAuthApiDelegate.signInWithPhoneNumber(
-          phoneNumber,
-          verifier: verifier,
-          idToken: await currentUser?.getIdToken(),
-        ))
-            .verificationId!,
+      final signInResponse =
+          await _api.phoneAuthApiDelegate.signInWithPhoneNumber(
+        phoneNumber,
+        verifier: verifier,
+        idToken: await currentUser?.getIdToken(),
       );
+      final verificationId = signInResponse.verificationId;
+      return ConfirmationResult(this, verificationId!);
     } catch (e) {
       throw _getException(e);
     }
