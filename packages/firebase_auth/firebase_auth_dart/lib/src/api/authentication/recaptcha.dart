@@ -84,12 +84,12 @@ class RecaptchaVerifier {
           ),
         );
 
-        if (parameters.containsKey('callback-error')) {
-          // ignore: avoid_dynamic_calls
-          parameters['callback-error']();
-        }
-
         completer.completeError((e) {
+          if (parameters.containsKey('callback-error')) {
+            // ignore: avoid_dynamic_calls
+            parameters['callback-error'](e);
+          }
+
           return Exception(uri.queryParameters['error-code']);
         });
       }
