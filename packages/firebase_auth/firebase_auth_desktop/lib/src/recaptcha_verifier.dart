@@ -7,6 +7,7 @@
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 
+import 'internal/recaptcha_verifier_delegate.dart';
 import 'utils/desktop_utils.dart';
 
 const String _type = 'recaptcha';
@@ -47,7 +48,7 @@ class RecaptchaVerifierFactoryDesktop extends RecaptchaVerifierFactoryPlatform {
     parameters['size'] = size.name;
     parameters['theme'] = theme.name;
 
-    _delegate = auth_dart.RecaptchaVerifier(parameters);
+    _delegate = RecaptchaVerifierDelegate(parameters);
   }
 
   RecaptchaVerifierFactoryDesktop._() : super();

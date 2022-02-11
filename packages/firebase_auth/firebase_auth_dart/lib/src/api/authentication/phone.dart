@@ -147,8 +147,7 @@ class PhoneAuthAPI {
         .verify(
           recaptchaResponse.recaptchaSiteKey,
           recaptchaResponse.recaptchaStoken,
-        )
-        .whenComplete(() => unawaited(OpenUrlUtil().openAppUrl()));
+        );
     if (recaptchaToken != null) {
       try {
         final verificationId = await _sendSMSCode(
@@ -172,8 +171,6 @@ class PhoneAuthAPI {
       completer.complete(verificationId);
     } catch (e) {
       completer.completeError(e);
-    } finally {
-      unawaited(OpenUrlUtil().openAppUrl());
     }
 
     return completer.future;

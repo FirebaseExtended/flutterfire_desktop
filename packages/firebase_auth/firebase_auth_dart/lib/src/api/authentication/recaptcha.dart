@@ -18,7 +18,7 @@ enum RecaptchaTheme {
 }
 
 /// Initiate and setup recaptcha flow on Desktop platforms.
-class RecaptchaVerifier {
+ class RecaptchaVerifier {
   // ignore: public_member_api_docs
   RecaptchaVerifier(this.parameters);
 
@@ -30,7 +30,7 @@ class RecaptchaVerifier {
   /// The verificationId of this session.
   String? get verificationId => _verificationId;
 
-  /// Kick-off the recaaptcha verifier and listen to changes emitted by [HttpRequest].
+  /// Kick-off the recaptcha verifier and listen to changes emitted by [HttpRequest].
   ///
   /// Each event represents the current state of the verification in the broswer.
   ///
@@ -41,12 +41,10 @@ class RecaptchaVerifier {
     Duration timeout = const Duration(seconds: 60),
   ]) async {
     final completer = Completer<String?>();
-    final address = InternetAddress.loopbackIPv4;
-    final server = await HttpServer.bind(address, 0);
-    final port = server.port;
-    final redirectUrl = 'http://${address.host}:$port';
 
-    server.listen((HttpRequest request) async {
+    final server = await _getServer();
+
+    server.listen((request) async {
       final uri = request.requestedUri;
 
       if (uri.path == '/' && uri.queryParameters.isEmpty) {
@@ -97,11 +95,16 @@ class RecaptchaVerifier {
       }
     });
 
-    await OpenUrlUtil().openUrl(redirectUrl);
+    await OpenUrlUtil().openUrl('http://${server.address.host}:${server.port}');
 
     return completer.future
         .whenComplete(() async => server.close())
         .timeout(timeout);
+  }
+
+  Future<HttpServer> _getServer() async {
+    final address = InternetAddress.loopbackIPv4;
+    return HttpServer.bind(address, 0);
   }
 
   Future<void> _sendDataToHTTP(
