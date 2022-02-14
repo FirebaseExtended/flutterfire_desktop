@@ -1,7 +1,7 @@
-import 'package:desktop_webview_auth/desktop_webview_auth.dart';
+import 'package:desktop_webview_auth/desktop_webview_auth.dart' as webview;
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
-/// Delegate to override the default behavior of RecaptchaVerifier using [DesktopWebviewAuth].
+/// Delegate to override the default behavior of RecaptchaVerifier using [webview.DesktopWebviewAuth].
 class RecaptchaVerifierDelegate extends RecaptchaVerifier {
   /// Construct a delegate and pass empty parameters.
   RecaptchaVerifierDelegate(Map<String, dynamic> parameters)
@@ -9,12 +9,14 @@ class RecaptchaVerifierDelegate extends RecaptchaVerifier {
 
   @override
   Future<String?> verify(
-    String? siteKey,
-    String? siteToken, [
+    RecaptchaArgs args, [
     Duration timeout = const Duration(seconds: 60),
   ]) async {
-    final result = await DesktopWebviewAuth.recaptchaVerification(
-      RecaptchaArgs(siteKey: siteKey!, siteToken: siteToken!),
+    final result = await webview.DesktopWebviewAuth.recaptchaVerification(
+      webview.RecaptchaArgs(
+        siteKey: args.siteKey,
+        siteToken: args.siteToken,
+      ),
       height: 500,
       width: 600,
     );

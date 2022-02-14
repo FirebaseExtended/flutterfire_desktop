@@ -6,7 +6,8 @@ import 'package:meta/meta.dart';
 
 import '../../firebase_auth_exception.dart';
 import '../api.dart';
-import 'recaptcha_verifier.dart';
+import 'recaptcha/recaptcha_args.dart';
+import 'recaptcha/recaptcha_verifier.dart';
 
 /// A return type from Idp phone authentication requests.
 @internal
@@ -56,14 +57,8 @@ class PhoneAuthAPI {
   /// The [API] instance containing required configurations to make the requests.
   final API _api;
 
-  RecaptchaVerifier _recaptchaVerifier =
+  final _recaptchaVerifier =
       RecaptchaVerifier({'theme': RecaptchaTheme.light.name});
-
-  /// Override the default `RecaptchaVerifier` to allow rendering with different theme.
-  // ignore: avoid_setters_without_getters
-  set setRecaptchaVerifier(RecaptchaVerifier recaptchaVerifier) {
-    _recaptchaVerifier = recaptchaVerifier;
-  }
 
   /// Sign in using Phone Number with a recaptcha verifier.
   ///
@@ -72,6 +67,8 @@ class PhoneAuthAPI {
   /// A [FirebaseAuthException] maybe thrown with the following error code:
   /// - `verification-canceled`
   ///   - The user canceled the verification process
+  /// - ``
+  ///   -
   Future<SignInWithPhoneNumberResponse> signInWithPhoneNumber(
     String phoneNumber, {
     String? idToken,
@@ -148,10 +145,12 @@ class PhoneAuthAPI {
 
     final recaptchaResponse = await _api.identityToolkit.getRecaptchaParam();
 
-    final recaptchaToken = await verifier.verify(
-      recaptchaResponse.recaptchaSiteKey,
-      recaptchaResponse.recaptchaStoken,
+    final recaptchaArgs = RecaptchaArgs(
+      siteKey: recaptchaResponse.recaptchaSiteKey!,
+      siteToken: recaptchaResponse.recaptchaStoken!,
     );
+
+    final recaptchaToken = await verifier.verify(recaptchaArgs);
 
     if (recaptchaToken == null) {
       throw FirebaseAuthException(code: 'VERIFICATION_CANCELED');

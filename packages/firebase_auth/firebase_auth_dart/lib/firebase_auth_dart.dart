@@ -17,14 +17,15 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import 'src/api/api.dart' show API, APIConfig;
-import 'src/api/authentication/recaptcha_verifier.dart' as verifier;
+import 'src/api/authentication/recaptcha/recaptcha_verifier.dart' as verifier;
 import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
 import 'src/utils/jwt.dart';
 
-export 'src/api/authentication/recaptcha_verifier.dart';
+export 'src/api/authentication/recaptcha/recaptcha_args.dart';
+export 'src/api/authentication/recaptcha/recaptcha_verifier.dart';
 export 'src/auth_provider.dart';
 export 'src/firebase_auth_exception.dart';
 export 'src/providers/email_auth.dart';
