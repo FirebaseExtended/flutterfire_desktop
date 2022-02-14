@@ -3,18 +3,27 @@ import 'dart:io';
 import 'recaptcha_args.dart';
 import 'recaptcha_html.dart';
 
+/// Request recaptcha verification on the local server.
 class RecaptchaVerificationServer {
-  final RecaptchaArgs args;
-  late void Function(Exception e) _onError;
-  late final HttpServer _server;
-  late final String url;
-
+  /// Construct a new recaptcha verification server using the passed recaptcha arguments.
   RecaptchaVerificationServer(this.args);
 
+  /// Recaptcha verification arguments needed to render recaptcha widget.
+  final RecaptchaArgs args;
+
+  /// The url on which the server is currently running.
+  late final String url;
+
+  late void Function(Exception e) _onError;
+  late final HttpServer _server;
+
+  /// Pass a new callback to run on errors.
+  // ignore: avoid_setters_without_getters
   set onError(void Function(Exception e) callback) {
     _onError = callback;
   }
 
+  /// Start a local server.
   Future<void> start() async {
     final address = InternetAddress.loopbackIPv4;
     _server = await HttpServer.bind(address, 0);
@@ -35,7 +44,7 @@ class RecaptchaVerificationServer {
             ..write(body);
         }
 
-        await req.response.close();
+        await res.close();
       } on Exception catch (e) {
         _onError(e);
       }
@@ -44,6 +53,7 @@ class RecaptchaVerificationServer {
     url = 'http://${address.host}:${_server.port}';
   }
 
+  /// Close the currently running server.
   Future<void> close() async {
     await _server.close();
   }

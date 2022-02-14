@@ -1,17 +1,14 @@
+/// Recaptcha verification arguments needed to render recaptcha widget.
 class RecaptchaArgs {
-  final String siteKey;
-  final String siteToken;
-
+  /// Construct new RecaptchaArgs.
   RecaptchaArgs({
     required this.siteKey,
     required this.siteToken,
   });
 
-  @override
-  Map<String, String?> toJson() {
-    return {
-      'siteKey': siteKey,
-      'siteToken': siteToken,
-    };
-  }
+  /// Site key registered at recaptcha.
+  final String siteKey;
+
+  /// The stoken field for the recaptcha widget, used to request captcha challenge.
+  final String siteToken;
 }
