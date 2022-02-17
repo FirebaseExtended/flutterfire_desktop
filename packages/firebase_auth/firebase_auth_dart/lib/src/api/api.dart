@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:googleapis/identitytoolkit/v3.dart' as idp;
+import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
 import 'package:http/http.dart' as http;

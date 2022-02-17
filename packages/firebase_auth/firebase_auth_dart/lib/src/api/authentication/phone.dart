@@ -1,7 +1,7 @@
 // ignore_for_file: require_trailing_commas
 import 'dart:async';
 
-import 'package:googleapis/identitytoolkit/v3.dart' as idp;
+import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
 import 'package:meta/meta.dart';
 
 import '../../firebase_auth_exception.dart';

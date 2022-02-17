@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   firebase_core_dart: ^0.1.1-dev.2
-  googleapis: ^5.0.1
+  firebaseapis: ^0.1.1
   googleapis_auth: ^1.1.0
   http: ^0.13.4
   meta: ^1.3.0

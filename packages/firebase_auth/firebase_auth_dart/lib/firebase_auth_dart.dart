@@ -12,7 +12,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:googleapis/identitytoolkit/v3.dart' as idp;
+import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 

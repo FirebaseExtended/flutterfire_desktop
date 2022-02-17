@@ -277,11 +277,7 @@ void main() {
 
     group('Use emulator ', () {
       test('returns project config.', () async {
-        expect(
-          await auth.useAuthEmulator(),
-          isA<Map>().having((p0) => p0.containsKey('signIn'),
-              'returns project emulator config', true),
-        );
+        expect(auth.useAuthEmulator(), completes);
       });
     });
 
