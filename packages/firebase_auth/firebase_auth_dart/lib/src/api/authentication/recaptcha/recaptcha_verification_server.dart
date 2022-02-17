@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'recaptcha_args.dart';
@@ -15,12 +16,20 @@ class RecaptchaVerificationServer {
   late final String url;
 
   late void Function(Exception e) _onError;
+  late void Function(String? res) _onResponse;
+
   late final HttpServer _server;
 
   /// Pass a new callback to run on errors.
   // ignore: avoid_setters_without_getters
   set onError(void Function(Exception e) callback) {
     _onError = callback;
+  }
+
+  /// Pass a new callback to run on errors.
+  // ignore: avoid_setters_without_getters
+  set onResponse(void Function(String? res) callback) {
+    _onResponse = callback;
   }
 
   /// Start a local server.
@@ -66,6 +75,10 @@ class RecaptchaVerificationServer {
     }
 
     if (uri.query.contains('response')) {
+      Future.microtask(() {
+        _onResponse(uri.queryParameters['response']);
+      });
+
       return responseHTML(
         'Success',
         'Successful verification!',

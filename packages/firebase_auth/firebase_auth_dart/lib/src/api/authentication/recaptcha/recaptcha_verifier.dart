@@ -45,61 +45,9 @@ class RecaptchaVerifier {
     final server = RecaptchaVerificationServer(args);
 
     server.onError = completer.completeError;
+    server.onResponse = completer.complete;
 
     await server.start();
-
-    // server.listen((request) async {
-    //   final uri = request.requestedUri;
-
-    //   log(uri.path);
-
-    //   if (uri.path == '/' && uri.queryParameters.isEmpty) {
-    //     await _sendDataToHTTP(
-    //       request,
-    //       recaptchaHTML(
-    //         siteKey,
-    //         siteToken,
-    //         theme: parameters['theme'],
-    //         size: parameters['size'],
-    //       ),
-    //     );
-    //   } else if (uri.query.contains('response')) {
-    //     await _sendDataToHTTP(
-    //       request,
-    //       responseHTML(
-    //         'Success',
-    //         'Successful verification!',
-    //       ),
-    //     );
-
-    //     _verificationId = uri.queryParameters['response'];
-
-    //     // ignore: avoid_dynamic_calls
-    //     if (parameters.containsKey('callback')) {
-    //       // ignore: avoid_dynamic_calls
-    //       parameters['callback']();
-    //     }
-
-    //     completer.complete(_verificationId);
-    //   } else if (uri.query.contains('error-code')) {
-    //     await _sendDataToHTTP(
-    //       request,
-    //       responseHTML(
-    //         'Captcha check failed.',
-    //         uri.queryParameters['error-code']!,
-    //       ),
-    //     );
-
-    //     completer.completeError((e) {
-    //       if (parameters.containsKey('callback-error')) {
-    //         // ignore: avoid_dynamic_calls
-    //         parameters['callback-error'](e);
-    //       }
-
-    //       return Exception(uri.queryParameters['error-code']);
-    //     });
-    //   }
-    // });
 
     await OpenUrlUtil().openUrl(server.url);
 
