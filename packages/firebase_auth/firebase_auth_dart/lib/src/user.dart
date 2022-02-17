@@ -74,11 +74,11 @@ class User {
   List<UserInfo> get providerData {
     // ignore: avoid_dynamic_calls
     return _user['providerUserInfo']
-            ?.map((userInfo) {
+            ?.map((idp.UserInfoProviderUserInfo userInfo) {
+              final userInfoMap = userInfo.toJson().cast<String, String?>()
+                ..addAll({'uid': _user['uid']});
               // ignore: avoid_dynamic_calls
-              userInfo['uid'] = uid;
-              // ignore: avoid_dynamic_calls
-              return UserInfo(userInfo?.cast<String, String?>());
+              return UserInfo(userInfoMap);
             })
             ?.toList()
             ?.cast<UserInfo>() ??
