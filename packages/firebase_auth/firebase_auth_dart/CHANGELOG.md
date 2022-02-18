@@ -1,3 +1,8 @@
+## 0.1.1-dev.3
+
+ - **FEAT**: Phone Authentication (#40).
+ - **DOCS**: desktop auth link.
+
 ## 0.1.1-dev.2
 
 > Note: This release has breaking changes.
