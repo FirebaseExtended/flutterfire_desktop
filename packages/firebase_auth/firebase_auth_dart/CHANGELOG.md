@@ -1,3 +1,7 @@
+## 0.1.1-dev.4
+
+ - **FIX**: providerUserInfo casting type.
+
 ## 0.1.1-dev.3
 
  - **FEAT**: Phone Authentication (#40).

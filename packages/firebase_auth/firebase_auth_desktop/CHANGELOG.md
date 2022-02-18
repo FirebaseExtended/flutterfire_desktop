@@ -1,3 +1,7 @@
+## 0.1.1-dev.5
+
+ - Update a dependency to the latest release.
+
 ## 0.1.1-dev.4
 
  - **FEAT**: Phone Authentication (#40).

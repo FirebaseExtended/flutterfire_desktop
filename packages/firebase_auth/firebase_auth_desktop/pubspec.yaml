@@ -2,7 +2,7 @@ name: firebase_auth_desktop
 description: Desktop implementation of firebase_auth
 homepage: https://firebase.flutter.dev
 repository: https://github.com/invertase/flutterfire_dart
-version: 0.1.1-dev.4
+version: 0.1.1-dev.5
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -11,7 +11,7 @@ environment:
 dependencies:
   desktop_webview_auth: ^0.0.3
   firebase_auth: ^3.3.7
-  firebase_auth_dart: ^0.1.1-dev.3
+  firebase_auth_dart: ^0.1.1-dev.4
   firebase_auth_platform_interface: ^6.1.4
   firebase_core: ^1.12.0
   firebase_core_dart: ^0.1.1-dev.2
