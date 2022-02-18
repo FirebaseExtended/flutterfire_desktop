@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-part of firebase_auth_desktop;
+import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
+import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
+
+import 'firebase_auth_user.dart';
 
 /// Dart delegate implementation of [UserCredentialPlatform].
 class UserCredential extends UserCredentialPlatform {

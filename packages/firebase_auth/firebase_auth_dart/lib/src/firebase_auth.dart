@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 // ignore_for_file: require_trailing_commas
 
 part of firebase_auth_dart;
@@ -5,10 +9,7 @@ part of firebase_auth_dart;
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
-    _api = API(
-      app.options.apiKey,
-      app.options.projectId,
-    );
+    _api = API(APIConfig(app.options.apiKey, app.options.projectId));
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -45,7 +46,7 @@ class FirebaseAuth {
   /// Change the HTTP client for the purpose of testing.
   @visibleForTesting
   void setApiClient(http.Client client) {
-    _api._setApiClient(client);
+    _api.setApiClient(client);
   }
 
   StorageBox<Object> get _userStorage =>
@@ -407,53 +408,62 @@ class FirebaseAuth {
   ///   - Thrown if signing in with a credential from [EmailAuthProvider.credential]
   ///    and the password is invalid for the given email, or if the account
   ///    corresponding to the email does not have a password set.
-  /// - `invalid-verification-code`
+  /// - `invalid-code`
   ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
   ///    verification code of the credential is not valid.
   /// - `invalid-verification-id`
   ///   - Thrown if the credential is a `PhoneAuthProvider.credential` and the
-  ///    verification ID of the credential is not valid.id.
+  ///    verification ID of the credential is not valid.
   Future<UserCredential> signInWithCredential(
     AuthCredential credential,
   ) async {
-    idp.VerifyAssertionResponse response;
+    try {
+      Map<String, dynamic> response;
 
-    if (credential is GoogleAuthCredential) {
-      response = await _api.signInWithOAuthCredential(
-        requestUri: app.options.authDomain,
-        providerIdToken: credential.idToken!,
-        providerId: credential.providerId,
+      if (credential is GoogleAuthCredential) {
+        assert(app.options.authDomain != null,
+            'You should provide authDomain when trying to add Google as auth provider.');
+
+        response = (await _api.signInWithOAuthCredential(
+          requestUri: app.options.authDomain!,
+          providerIdToken: credential.idToken!,
+          providerId: credential.providerId,
+        ))
+            .toJson();
+      } else {
+        throw UnsupportedError('This credential is not supported yet.');
+      }
+
+      final userData = await _api.getCurrentUser(response['idToken']);
+
+      // Map the json response to an actual user.
+      final user = User(userData.toJson()..addAll(response), this);
+
+      _updateCurrentUserAndEvents(user, true);
+
+      return UserCredential._(
+        auth: this,
+        credential: credential,
+        additionalUserInfo: AdditionalUserInfo(
+          isNewUser: response['isNewUser'] ?? false,
+          providerId: credential.providerId,
+          username: userData.screenName,
+          profile: {
+            'displayName': userData.displayName,
+            'photoUrl': userData.photoUrl
+          },
+        ),
       );
-    } else {
-      throw UnsupportedError('This credential is not supported yet.');
+    } catch (e) {
+      throw _getException(e);
     }
-
-    final userData = await _api.getCurrentUser(response.idToken);
-
-    // Map the json response to an actual user.
-    final user = User(userData.toJson()..addAll(response.toJson()), this);
-
-    _updateCurrentUserAndEvents(user, true);
-
-    return UserCredential._(
-      auth: this,
-      credential: credential,
-      additionalUserInfo: AdditionalUserInfo(
-        isNewUser: response.isNewUser ?? false,
-        providerId: response.providerId,
-        username: response.screenName,
-        profile: {
-          'displayName': response.displayName,
-          'photoUrl': response.photoUrl
-        },
-      ),
-    );
   }
 
   /// TODO
   Future<UserCredential> signInWithEmailLink(
       String email, String emailLink) async {
-    throw UnimplementedError();
+    throw UnimplementedError('signInWithEmailLink() is not yet implemented.');
+
     // final response = await _api.signInWithEmailLink(
     //     email, Uri.parse(emailLink).queryParameters['oobCode']!);
 
@@ -471,26 +481,28 @@ class FirebaseAuth {
     // );
   }
 
-  /// TODO
-  Future<void> verifyPhoneNumber({required String phoneNumber}) async {
-    throw UnimplementedError();
-
-    // final response = await _api.verifyPhoneNumber(phoneNumber);
-
-    // log(response.sessionInfo!);
-
-    // final userData = await _api.getCurrentUser(response.idToken!);
-
-    // // Map the json response to an actual user.
-    // final user = User(userData.toJson()..addAll(response.toJson()), this);
-
-    // updateCurrentUserAndEvents(user);
-
-    // return UserCredential._(
-    //   auth: this,
-    //   credential: EmailAuthProvider.credentialWithLink(
-    //       email: email, emailLink: emailLink),
-    // );
+  /// Starts a phone number verification process for the given phone number.
+  ///
+  /// This method is used to verify that the user-provided phone number belongs
+  /// to the user. Firebase sends a code via SMS message to the phone number,
+  /// where you must then prompt the user to enter the code. The code can be
+  /// combined with the verification ID to create a [PhoneAuthProvider.credential]
+  /// which you can then use to sign the user in, or link with their account (
+  /// see [signInWithCredential] or [User.linkWithCredential]).
+  Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
+      [verifier.RecaptchaVerifier? verifier]) async {
+    try {
+      final signInResponse =
+          await _api.phoneAuthApiDelegate.signInWithPhoneNumber(
+        phoneNumber,
+        verifier: verifier,
+        idToken: await currentUser?.getIdToken(),
+      );
+      final verificationId = signInResponse.verificationId;
+      return ConfirmationResult(this, verificationId!);
+    } catch (e) {
+      throw _getException(e);
+    }
   }
 
   /// Internally used to reload the current user and send events.

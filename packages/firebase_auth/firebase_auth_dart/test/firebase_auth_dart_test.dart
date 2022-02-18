@@ -3,74 +3,17 @@
 // that can be found in the LICENSE file.
 
 // ignore_for_file: require_trailing_commas
-import 'dart:convert';
-import 'dart:io';
+import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
-
 import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:googleapis/identitytoolkit/v3.dart' hide UserInfo;
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'firebase_auth_dart_test.mocks.dart';
-
-const mockEmail = 'test@test.com';
-const mockPassword = 'password';
-const photoURL =
-    'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
-const displayName = 'Invertase';
-const mockOobCode = 'code';
-
-http.Response errorResponse(String code) {
-  return http.Response(
-    json.encode({
-      'error': {'code': 404, 'message': code}
-    }),
-    404,
-    headers: {'content-type': 'application/json'},
-  );
-}
-
-http.Response successResponse(String body) {
-  return http.Response(body, 200,
-      headers: {'content-type': 'application/json'});
-}
-
-Future<http.Response> _mockSuccessRequests(http.Request req) async {
-  String body;
-
-  if (req.url.path.contains('verifyPassword')) {
-    body = json
-        .encode(VerifyPasswordResponse(email: mockEmail, idToken: '').toJson());
-  } else if (req.url.path.contains('signupNewUser')) {
-    body = json
-        .encode(SignupNewUserResponse(email: mockEmail, idToken: '').toJson());
-  } else if (req.url.path.contains('createAuthUri')) {
-    body = json.encode(
-      CreateAuthUriResponse(providerId: 'password', allProviders: ['password'])
-          .toJson(),
-    );
-  } else {
-    return http.Response('Error: Unknown endpoint', 404);
-  }
-
-  return successResponse(body);
-}
-
-Future<http.Response> _mockFailedRequests(http.Request req) async {
-  if (req.url.path.contains('verifyPassword')) {
-    return errorResponse('email-not-found');
-  } else if (req.url.path.contains('createAuthUri')) {
-    return errorResponse('invalid-identifier');
-  } else {
-    return http.Response('Error: Unknown endpoint', 404);
-  }
-}
+import 'test_utils.dart';
 
 @GenerateMocks([User, FirebaseAuth, UserCredential])
 void main() {
@@ -79,28 +22,19 @@ void main() {
   final user = MockUser();
   final userCred = MockUserCredential();
 
-  /// Deletes all users from the Auth emulator.
-  Future<void> emulatorClearAllUsers() async {
-    //await realAuth.signOut();
-    await http.delete(
-      Uri.parse(
-          'http://localhost:9099/emulator/v1/projects/react-native-firebase-testing/accounts'),
-      headers: {
-        'Authorization': 'Bearer owner',
-      },
-    );
-  }
-
   late StreamQueue<User?> authStateChanges;
   late StreamQueue<User?> idTokenChanges;
   group('$FirebaseAuth', () {
     setUpAll(() async {
       const options = FirebaseOptions(
-        appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-        projectId: 'react-native-firebase-testing',
-        messagingSenderId: '448618578101',
-      );
+          apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+          authDomain: 'react-native-firebase-testing.firebaseapp.com',
+          databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
+          projectId: 'react-native-firebase-testing',
+          storageBucket: 'react-native-firebase-testing.appspot.com',
+          messagingSenderId: '448618578101',
+          appId: '1:448618578101:web:0b650370bb29e29cac3efc',
+          measurementId: 'G-F79DJ0VFGS');
 
       await Firebase.initializeApp(options: options);
 
@@ -114,6 +48,7 @@ void main() {
 
     setUp(() async {
       await emulatorClearAllUsers();
+      await ensureSignedOut();
 
       fakeAuth = MockFirebaseAuth();
 
@@ -125,12 +60,6 @@ void main() {
           .thenAnswer((_) => Future<UserCredential>.value(userCred));
       when(userCred.user).thenReturn(user);
       when(fakeAuth.currentUser).thenReturn(user);
-    });
-
-    setUpAll(() {
-      // Avoid HTTP error 400 mocked returns
-      // TODO(pr-mais): once done create mock clients
-      HttpOverrides.global = null;
     });
 
     group('Email and password ', () {
@@ -148,7 +77,6 @@ void main() {
         await auth.signOut();
       });
       test('should throw.', () async {
-        await emulatorClearAllUsers();
         expect(
           () => auth.signInWithEmailAndPassword(mockEmail, mockPassword),
           throwsA(isA<FirebaseAuthException>()
@@ -204,35 +132,152 @@ void main() {
       test('Twitter', () {});
       test('Facebook', () {});
     });
-
-    group('Fetch providers list ', () {
-      test('for email with pssaword provider.', () async {
-        auth.setApiClient(MockClient(_mockSuccessRequests));
-
-        final providersList = await auth.fetchSignInMethodsForEmail(mockEmail);
-
-        expect(providersList, ['password']);
+    group('fetchSignInMethodsForEmail() ', () {
+      setUp(() async {
+        await auth.createUserWithEmailAndPassword(
+          mockEmail,
+          mockPassword,
+        );
+      });
+      test('email with pssaword provider.', () async {
+        await expectLater(
+          auth.fetchSignInMethodsForEmail(mockEmail),
+          completion(['password']),
+        );
       });
 
-      test('for empty email throws.', () {
-        auth.setApiClient(MockClient(_mockFailedRequests));
+      test('invalid email throws.', () {
         expect(
-          () => auth.fetchSignInMethodsForEmail(''),
+          () => auth.fetchSignInMethodsForEmail('foo'),
           throwsA(
             isA<FirebaseAuthException>().having((p0) => p0.code,
                 'invalid identifier code', 'invalid-identifier'),
           ),
         );
       });
+      test('empty email throws.', () {
+        expect(
+          () => auth.fetchSignInMethodsForEmail(''),
+          throwsA(
+            isA<FirebaseAuthException>().having((p0) => p0.code,
+                'invalid identifier code', 'missing-identifier'),
+          ),
+        );
+      });
+    });
+    group('signInWithPhoneNumber() ', () {
+      test('should fail with invalid phone number', () async {
+        Future<Exception> getError() async {
+          final completer = Completer<FirebaseAuthException>();
+
+          unawaited(
+            auth
+                .signInWithPhoneNumber('foo')
+                .then((_) => completer
+                    .completeError(Exception('Should not have been called')))
+                .catchError((e, _) => completer.complete(e)),
+          );
+
+          return completer.future;
+        }
+
+        final e = await getError();
+        expect(e, isA<FirebaseAuthException>());
+
+        final exception = e as FirebaseAuthException;
+        expect(exception.code, equals('invalid-phone-number'));
+      });
+
+      test('should verify phone number', () async {
+        const testPhoneNumber = '+447444555666';
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            auth
+                .signInWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(credential, isA<UserCredential>());
+      });
+      test('should link anonymous with phone number', () async {
+        const testPhoneNumber = '+447444555666';
+        await auth.signInAnonymously();
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            auth.currentUser
+                ?.linkWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(credential, isA<UserCredential>());
+      });
+      test('should link email with phone number', () async {
+        const testPhoneNumber = '+447444555666';
+
+        await auth.createUserWithEmailAndPassword(mockEmail, mockPassword);
+
+        Future<ConfirmationResult> getVerificationId() async {
+          final completer = Completer<ConfirmationResult>();
+
+          unawaited(
+            auth.currentUser
+                ?.linkWithPhoneNumber(testPhoneNumber)
+                .then(completer.complete)
+                .catchError((e, _) => completer.completeError(e)),
+          );
+
+          return completer.future;
+        }
+
+        final confirmationResult = await getVerificationId();
+
+        final verificationCode =
+            await emulatorPhoneVerificationCode(testPhoneNumber);
+
+        final credential = await confirmationResult.confirm(verificationCode!);
+
+        expect(
+          credential.user?.providerData.map((e) => e.providerId).toList(),
+          unorderedEquals(['password', 'phone']),
+        );
+      });
+    });
+    group('unlink()', () {
+      //TODO: implement and test unlink
+      test('should unlink phone number', () async {});
     });
 
     group('Use emulator ', () {
       test('returns project config.', () async {
-        expect(
-          await auth.useAuthEmulator(),
-          isA<Map>().having((p0) => p0.containsKey('signIn'),
-              'returns project emulator config', true),
-        );
+        expect(auth.useAuthEmulator(), completes);
       });
     });
 

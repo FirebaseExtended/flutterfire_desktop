@@ -74,11 +74,11 @@ class User {
   List<UserInfo> get providerData {
     // ignore: avoid_dynamic_calls
     return _user['providerUserInfo']
-            ?.map((userInfo) {
+            ?.map((idp.UserInfoProviderUserInfo userInfo) {
+              final userInfoMap = userInfo.toJson().cast<String, String?>()
+                ..addAll({'uid': _user['uid']});
               // ignore: avoid_dynamic_calls
-              userInfo['uid'] = uid;
-              // ignore: avoid_dynamic_calls
-              return UserInfo(userInfo?.cast<String, String?>());
+              return UserInfo(userInfoMap);
             })
             ?.toList()
             ?.cast<UserInfo>() ??
@@ -214,7 +214,6 @@ class User {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      // TODO
       throw _auth._getException(e);
     }
   }
@@ -228,6 +227,8 @@ class User {
   ///
   Future<UserCredential> reauthenticateWithCredential(
       AuthCredential credential) async {
+    _assertSignedOut(_auth);
+
     try {
       if (credential is EmailAuthCredential) {
         final response = await _auth._api
@@ -239,13 +240,24 @@ class User {
         return UserCredential._(
           auth: _auth,
           credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: false,
+            profile: {
+              'displayName': response.displayName,
+              'photoURL': response.photoUrl
+            },
+            providerId: credential.providerId,
+          ),
         );
       } else if (credential is GoogleAuthCredential) {
+        assert(_auth.app.options.authDomain != null,
+            'You should provide authDomain when trying to add Google as auth provider.');
+
         final response = await _auth._api.signInWithOAuthCredential(
           idToken: _idToken,
           providerId: credential.providerId,
           providerIdToken: credential.idToken!,
-          requestUri: _auth.app.options.authDomain,
+          requestUri: _auth.app.options.authDomain!,
         );
 
         _setIdToken(response.idToken);
@@ -264,11 +276,45 @@ class User {
             username: response.screenName,
           ),
         );
+      } else if (credential is PhoneAuthCredential) {
+        final response =
+            await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+          phoneNumber: phoneNumber,
+          smsCode: credential.smsCode,
+          idToken: _idToken,
+          verificationId: credential.verificationId,
+        );
+
+        _setIdToken(response.idToken);
+        await reload();
+
+        return UserCredential._(
+          auth: _auth,
+          credential: credential,
+          additionalUserInfo: AdditionalUserInfo(
+            isNewUser: response.isNewUser ?? false,
+            providerId: credential.providerId,
+          ),
+        );
       } else {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      // TODO
+      throw _auth._getException(e);
+    }
+  }
+
+  /// Link the current user with the given phone number.
+  Future<ConfirmationResult> linkWithPhoneNumber(String phoneNumber,
+      [verifier.RecaptchaVerifier? applicationVerifier]) async {
+    try {
+      return ConfirmationResult(
+          _auth,
+          (await _auth._api.phoneAuthApiDelegate.linkWithPhoneNumber(
+                  _idToken, phoneNumber,
+                  verifier: applicationVerifier))
+              .verificationId!);
+    } catch (e) {
       throw _auth._getException(e);
     }
   }
@@ -309,8 +355,8 @@ class User {
   /// The verification process is completed by calling `applyActionCode`.
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// - `INVALID_ID_TOKEN`: user's credential is no longer valid. The user must sign in again.
-  /// - `USER_NOT_FOUND`: no user record corresponding to this identifier. The user may have been deleted.
+  /// - `invalid-id-token`: user's credential is no longer valid. The user must sign in again.
+  /// - `user-not-found`: no user record corresponding to this identifier. The user may have been deleted.
   Future<void> sendEmailVerification() async {
     _assertSignedOut(_auth);
 
@@ -336,6 +382,31 @@ class User {
       _assertSignedOut(_auth);
 
       await _auth._api.updatePassword(newPassword, _idToken);
+      await reload();
+    } catch (e) {
+      throw _auth._getException(e);
+    }
+  }
+
+  /// Updates the user's phone number.
+  ///
+  /// A credential can be created by verifying a phone number via
+  /// [FirebaseAuth.signInWithPhoneNumber].
+  ///
+  /// A [FirebaseAuthException] maybe thrown with the following error code:
+  /// - `invalid-verification-code`
+  ///   - Thrown if the verification code of the credential is not valid.
+  /// - `invalid-verification-id`
+  ///   - Thrown if the verification ID of the credential is not valid.
+  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) async {
+    _assertSignedOut(_auth);
+
+    try {
+      await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+        idToken: _idToken,
+        smsCode: phoneCredential.smsCode,
+        verificationId: phoneCredential.verificationId,
+      );
       await reload();
     } catch (e) {
       throw _auth._getException(e);

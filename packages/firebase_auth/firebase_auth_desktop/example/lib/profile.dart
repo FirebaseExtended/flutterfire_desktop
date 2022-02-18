@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'login.dart';
+import 'auth.dart';
+import 'sms_dialog.dart';
 
 /// Displayed as a profile image if the user doesn't have one.
 const placeholderImage =
@@ -139,11 +142,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-                    Text(user.email ?? 'User'),
+                    Text(user.email ?? user.phoneNumber ?? 'User'),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        if (userProviders.contains('phone'))
+                          const Icon(Icons.phone),
                         if (userProviders.contains('password'))
                           const Icon(Icons.mail),
                         if (userProviders.contains('google.com'))
@@ -156,6 +161,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                     const SizedBox(height: 40),
+                    if (!userProviders.contains('phone'))
+                      TextButton(
+                        onPressed: _linkWithPhone,
+                        child: const Text('Link with phone number'),
+                      ),
+                    const SizedBox(height: 40),
+                    if (userProviders.contains('phone'))
+                      TextButton(
+                        onPressed: _updatePhoneNumber,
+                        child: const Text('Update my phone'),
+                      ),
+                    const SizedBox(height: 10),
                     TextButton(
                       onPressed: _signOut,
                       child: const Text('Sign out'),
@@ -182,6 +199,64 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _linkWithPhone() async {
+    try {
+      final phoneNumber =
+          await ExampleDialog.of(context).show('Phone number:', 'Link');
+
+      if (phoneNumber != null) {
+        final confirmationResult =
+            await user.linkWithPhoneNumber('+16505550101');
+
+        final smsCode =
+            // ignore: use_build_context_synchronously
+            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
+
+        if (smsCode != null) {
+          await confirmationResult.confirm(smsCode);
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldSnackbar.of(context).show('${e.message}');
+      log('$e');
+    } finally {
+      setIsLoading();
+    }
+  }
+
+  Future<void> _updatePhoneNumber() async {
+    try {
+      final phoneNumber =
+          await ExampleDialog.of(context).show('Phone number:', 'Get SMS');
+
+      if (phoneNumber != null) {
+        final res =
+            await FirebaseAuth.instance.signInWithPhoneNumber(phoneNumber);
+
+        // ignore: use_build_context_synchronously
+        final smsCode =
+            // ignore: use_build_context_synchronously
+            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
+
+        if (smsCode != null) {
+          await user.updatePhoneNumber(
+            PhoneAuthProvider.credential(
+              verificationId: res.verificationId,
+              smsCode: smsCode,
+            ),
+          );
+
+          log('${user.phoneNumber}');
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldSnackbar.of(context).show('${e.message}');
+      log('$e');
+    } finally {
+      setIsLoading();
+    }
   }
 
   /// Example code for sign out.

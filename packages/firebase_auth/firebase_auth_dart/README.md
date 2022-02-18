@@ -73,7 +73,7 @@ To sign-in a user anonymously, call the `signInAnonymously()` method on the Fire
 UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
 ```
 
-The user will persist accross sessions, such as restarting the app, until the user explicitly signs out, or delete the app and its cahces.
+The user will persist across sessions, such as restarting the app, until the user explicitly signs out, or delete the app and its cache.
 
 #### Email/Password Registration & Sign-in
 
@@ -117,9 +117,23 @@ The user will persist accross sessions, such as restarting the app, until the us
 The package supports OAuth sign-in providers such as Google, through `signInWithCredential()` method.
 This method takes a `AuthCredential` object, which requires the providerId and signInMethod.
 
-However, to authenticate via an OAuth provider, you will need some kind of a token returned after the user
+However, to authenticate via an OAuth provider, you will need some kind of token returned after the user
 signs in with the provider to be passed to `signInWithCredential()`, mostly it means using another package to carry this flow for you. Currently, there's no package for any provider that is Dart only and not dependent on the Flutter SDK.
 
+#### Phone Auth
+
+To authenticate users using phone number, you need to enable Phone as a sign-in provider in Firebase Console for your project.
+Once enabled, trigger the auth flow by calling `signInWithPhoneNumber` method. 
+```dart
+// Wait for the user to complete the reCAPTCHA & for an SMS code to be sent.
+ConfirmationResult confirmationResult = await FirebaseAuth.instance.signInWithPhoneNumber('+44 7123 123 456');
+```
+This method will open the default browser of the user
+for reCAPTCHA verification. Once complete, you can then sign the user in by providing the SMS code to the confirm method on the resolved 
+`ConfirmationResult` response:
+```dart
+UserCredential userCredential = await confirmationResult.confirm('123456');
+```
 ### Signing Out
 
 To sign a user out, call the `signOut()` method:
@@ -148,7 +162,7 @@ The User class is returned from any authentication state listeners, or as part o
 
     print(userCredential.user!.uid);
     ```
-3. Via state listner stream:
+3. Via state listener stream:
 
     ```dart
     FirebaseAuth.instance

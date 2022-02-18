@@ -7,16 +7,19 @@ import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:yaru/yaru.dart';
 
-import 'login.dart';
+import 'auth.dart';
 import 'profile.dart';
 
 /// Initialize with a secondary app until dart-only initialization is merged.
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
-      appId: '1:448618578101:ios:0b650370bb29e29cac3efc',
       apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+      authDomain: 'react-native-firebase-testing.firebaseapp.com',
+      databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
       projectId: 'react-native-firebase-testing',
+      storageBucket: 'react-native-firebase-testing.appspot.com',
       messagingSenderId: '448618578101',
-      authDomain: 'https://react-native-firebase-testing.firebaseapp.com',
+      appId: '1:448618578101:web:0b650370bb29e29cac3efc',
+      measurementId: 'G-F79DJ0VFGS',
     );
 
 // Requires that the Firebase Auth emulator is running locally
@@ -26,7 +29,7 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
 
   await Firebase.initializeApp(options: firebaseOptions);
-  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
 
   await GoogleSignInDart.register(
     clientId:

@@ -1,7 +1,7 @@
-part of firebase_auth_dart;
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 
-/// All possible error codes returned from Identity Platform REST API [idp].
-Map error = {
+/// All possible error codes returned from Identity Platform REST API.
+const Map error = {
   'EMAIL_NOT_FOUND': 'There is no registered user corresponding to this email.',
   'INVALID_PASSWORD': 'The password of this user is invalid.',
   'USER_DISABLED': 'The user exists but is disabled.',
@@ -36,10 +36,17 @@ Map error = {
       "The user's credential is no longer valid. The user must sign in again.",
   'FEDERATED_USER_ID_ALREADY_LINKED':
       'This credential is already associated with a different user account.',
+  'INVALID_PHONE_NUMBER': 'The provided phone number is not valid.',
+  'INVALID_CODE': 'The provided code is not valid.',
   'UKNOWN': 'Uknown error happened.',
+  'CAPTCHA_CHECK_FAILED':
+      'The reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
+  'NEED_CONFIRMATION': 'Account exists with different credential.',
+  'VERIFICATION_CANCELED':
+      'Recaptcha verification process was canceled by user.'
 };
 
-/// Wrap the errors from the Identity Platform REST API, usually of type [idp.DetailedApiRequestError]
+/// Wrap the errors from the Identity Platform REST API, usually of type `DetailedApiRequestError`
 /// in a in a Firebase-friendly format to users.
 class FirebaseAuthException extends FirebaseException implements Exception {
   // ignore: public_member_api_docs

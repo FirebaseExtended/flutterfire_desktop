@@ -29,6 +29,15 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
   }
 }
 
+/// Map from [PhoneAuthCredential] to [auth_dart.PhoneAuthCredential].
+auth_dart.PhoneAuthCredential mapPhoneCredentialFromPlatform(
+    PhoneAuthCredential credential) {
+  return auth_dart.PhoneAuthProvider.credential(
+    verificationId: credential.verificationId!,
+    smsCode: credential.smsCode!,
+  );
+}
+
 /// Map from [auth_dart.AuthCredential] to [AuthCredential].
 AuthCredential mapAuthCredentialFromDart(auth_dart.AuthCredential credential) {
   if (credential is auth_dart.EmailAuthCredential) {
@@ -58,10 +67,11 @@ UserMetadata mapUserMetadataFromDart(auth_dart.UserMetadata? metadata) {
 }
 
 /// Map [auth_dart.FirebaseAuthException] to [FirebaseAuthException].
-Exception mapExceptionType(Object e) {
+FirebaseAuthException getFirebaseAuthException(Object e) {
   if (e is auth_dart.FirebaseAuthException) {
     return FirebaseAuthException(code: e.code, message: e.message);
   } else {
-    return Exception(e);
+    // ignore: only_throw_errors
+    throw e;
   }
 }

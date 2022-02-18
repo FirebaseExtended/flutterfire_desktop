@@ -4,7 +4,12 @@
 
 // ignore_for_file: require_trailing_commas
 
-part of firebase_auth_desktop;
+import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
+import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
+
+import 'confirmation_result.dart';
+import 'firebase_auth_user_credential.dart';
+import 'utils/desktop_utils.dart';
 
 /// Dart delegate implementation of [UserPlatform].
 class User extends UserPlatform {
@@ -39,7 +44,7 @@ class User extends UserPlatform {
 
       return IdTokenResult(idTokenResult.toMap);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -56,15 +61,22 @@ class User extends UserPlatform {
             .linkWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<ConfirmationResultPlatform> linkWithPhoneNumber(String phoneNumber,
-      RecaptchaVerifierFactoryPlatform applicationVerifier) {
-    // TODO: implement linkWithPhoneNumber
-    throw UnimplementedError();
+      RecaptchaVerifierFactoryPlatform applicationVerifier) async {
+    try {
+      final recaptchaVerifier = applicationVerifier.delegate;
+      return ConfirmationResultDesktop(
+        auth,
+        await _user.linkWithPhoneNumber(phoneNumber, recaptchaVerifier),
+      );
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   @override
@@ -97,7 +109,7 @@ class User extends UserPlatform {
             mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -109,7 +121,7 @@ class User extends UserPlatform {
     try {
       await _user.reload();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -119,7 +131,7 @@ class User extends UserPlatform {
     try {
       await _user.sendEmailVerification();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -134,7 +146,7 @@ class User extends UserPlatform {
     try {
       return User(auth, await _user.unlink(providerId));
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -143,7 +155,7 @@ class User extends UserPlatform {
     try {
       await _user.updateEmail(newEmail);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -152,14 +164,18 @@ class User extends UserPlatform {
     try {
       await _user.updatePassword(newPassword);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
-  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) {
-    // TODO: implement updatePhoneNumber
-    throw UnimplementedError();
+  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) async {
+    try {
+      final credentials = mapPhoneCredentialFromPlatform(phoneCredential);
+      await _user.updatePhoneNumber(credentials);
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   /// Update the user name.

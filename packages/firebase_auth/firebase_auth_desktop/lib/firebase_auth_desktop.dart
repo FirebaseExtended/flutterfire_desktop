@@ -13,14 +13,15 @@ import 'package:firebase_auth_platform_interface/firebase_auth_platform_interfac
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
 
-import 'src/utils/type_mapper.dart';
-
-part 'src/firebase_auth_user.dart';
-part 'src/firebase_auth_user_credential.dart';
+import 'src/confirmation_result.dart';
+import 'src/firebase_auth_user.dart';
+import 'src/firebase_auth_user_credential.dart';
+import 'src/recaptcha_verifier.dart';
+import 'src/utils/desktop_utils.dart';
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
-  /// Entry point for the [FirebaseAuthDesktop] classs.
+  /// Entry point for the [FirebaseAuthDesktop] class.
   FirebaseAuthDesktop({required FirebaseApp app})
       : _app = core_dart.Firebase.app(app.name),
         super(appInstance: app) {
@@ -32,7 +33,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     _idTokenChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
 
-    _auth!.authStateChanges().map((auth_dart.User? dartUser) {
+    _authDart!.authStateChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -41,7 +42,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       _authStateChangesListeners[app.name]!.add(user);
     });
 
-    _auth!.idTokenChanges().map((auth_dart.User? dartUser) {
+    _authDart!.idTokenChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -59,6 +60,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
     FirebaseAuthPlatform.instance = FirebaseAuthDesktop.instance;
+    RecaptchaVerifierFactoryPlatform.instance =
+        RecaptchaVerifierFactoryDesktop.instance;
   }
 
   /// Stub initializer to allow creating an instance without
@@ -70,19 +73,20 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   /// Instance of auth from Identity Provider API service.
-  auth_dart.FirebaseAuth? get _auth =>
+  auth_dart.FirebaseAuth? get _authDart =>
       _app == null ? null : auth_dart.FirebaseAuth.instanceFor(app: _app!);
+
   final core_dart.FirebaseApp? _app;
 
   @override
   UserPlatform? get currentUser {
-    final dartCurrentUser = _auth!.currentUser;
+    final dartCurrentUser = _authDart!.currentUser;
 
     if (dartCurrentUser == null) {
       return null;
     }
 
-    return User(this, _auth!.currentUser!);
+    return User(this, _authDart!.currentUser!);
   }
 
   static final Map<String, StreamController<UserPlatform?>>
@@ -113,19 +117,19 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.signInWithEmailAndPassword(email, password),
+        await _authDart!.signInWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      return await _auth!.fetchSignInMethodsForEmail(email);
+      return await _authDart!.fetchSignInMethodsForEmail(email);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -145,19 +149,19 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   Future<void> sendPasswordResetEmail(String email,
       [ActionCodeSettings? actionCodeSettings]) async {
     try {
-      await _auth!.sendPasswordResetEmail(
+      await _authDart!.sendPasswordResetEmail(
           email: email, continueUrl: actionCodeSettings?.url);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<void> confirmPasswordReset(String code, String newPassword) async {
     try {
-      await _auth!.confirmPasswordReset(code, newPassword);
+      await _authDart!.confirmPasswordReset(code, newPassword);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -167,10 +171,10 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.createUserWithEmailAndPassword(email, password),
+        await _authDart!.createUserWithEmailAndPassword(email, password),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -218,9 +222,9 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   Future<void> sendSignInLinkToEmail(
       String email, ActionCodeSettings actionCodeSettings) async {
     try {
-      await _auth!.sendSignInLinkToEmail(email);
+      await _authDart!.sendSignInLinkToEmail(email);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -252,10 +256,10 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.signInAnonymously(),
+        await _authDart!.signInAnonymously(),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -265,11 +269,11 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!
+        await _authDart!
             .signInWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -285,18 +289,26 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _auth!.signInWithEmailLink(email, emailLink),
+        await _authDart!.signInWithEmailLink(email, emailLink),
       );
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<ConfirmationResultPlatform> signInWithPhoneNumber(String phoneNumber,
-      RecaptchaVerifierFactoryPlatform applicationVerifier) {
-    // TODO: implement signInWithPhoneNumber
-    throw UnimplementedError();
+      RecaptchaVerifierFactoryPlatform applicationVerifier) async {
+    try {
+      final recaptchaVerifier = applicationVerifier.delegate;
+
+      return ConfirmationResultDesktop(
+        this,
+        await _authDart!.signInWithPhoneNumber(phoneNumber, recaptchaVerifier),
+      );
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   @override
@@ -314,29 +326,29 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> signOut() async {
     try {
-      await _auth!.signOut();
+      await _authDart!.signOut();
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<void> useAuthEmulator(String host, int port) async {
     try {
-      await _auth!.useAuthEmulator();
+      await _authDart!.useAuthEmulator(host: host, port: port);
 
       return;
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
   @override
   Future<String> verifyPasswordResetCode(String code) async {
     try {
-      return await _auth!.verifyPasswordResetCode(code);
+      return await _authDart!.verifyPasswordResetCode(code);
     } catch (e) {
-      throw mapExceptionType(e);
+      throw getFirebaseAuthException(e);
     }
   }
 
@@ -350,7 +362,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       Duration timeout = const Duration(seconds: 30),
       int? forceResendingToken,
       String? autoRetrievedSmsCodeForTesting}) {
-    // TODO: implement verifyPhoneNumber
-    throw UnimplementedError();
+    throw UnimplementedError(
+        'verifyPhoneNumber() is not implemented for Web and Desktop based platforms.');
   }
 }
