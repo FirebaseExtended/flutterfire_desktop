@@ -363,18 +363,8 @@ class API {
 
     try {
       response = await http.get(localEmulator);
-    } on SocketException catch (e) {
-      final socketException = SocketException(
-        'Error happened while trying to connect to the local emulator, '
-        'make sure you have it running, and you provided the correct port.',
-        port: port,
-        osError: e.osError,
-        address: e.address,
-      );
-
-      throw socketException;
     } catch (e) {
-      rethrow;
+      return {};
     }
 
     final Map emulatorProjectConfig = json.decode(response.body);
