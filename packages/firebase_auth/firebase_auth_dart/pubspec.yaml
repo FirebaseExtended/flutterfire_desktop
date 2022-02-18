@@ -19,3 +19,7 @@ dev_dependencies:
   build_runner: ^2.1.5
   mockito: ^5.0.16
   test: ^1.16.0
+
+false_secrets:
+  - /example/bin/firebase_auth_dart_example.dart
+  - /test/firebase_auth_dart_test.dart
