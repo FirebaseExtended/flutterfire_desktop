@@ -1,16 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:desktop_webview_auth/desktop_webview_auth.dart';
+import 'package:desktop_webview_auth/google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'animated_error.dart';
 import 'sms_dialog.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+// ignore: public_member_api_docs
+const redirectUri =
+    'https://react-native-firebase-testing.firebaseapp.com/__/auth/handler';
 
 /// Helper class to show a snackbar using the passed context.
 class ScaffoldSnackbar {
@@ -210,22 +213,25 @@ class _AuthGateState extends State<AuthGate> {
     resetError();
 
     try {
-      // Trigger the authentication flow
-      final googleUser = await GoogleSignIn().signIn();
-
-      // Obtain the auth details from the request
-      final googleAuth = await googleUser?.authentication;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+      final result = await DesktopWebviewAuth.signIn(
+        GoogleSignInArgs(
+          clientId:
+              '448618578101-sg12d2qin42cpr00f8b0gehs5s7inm0v.apps.googleusercontent.com',
+          redirectUri: redirectUri,
+          scope: 'https://www.googleapis.com/auth/userinfo.email',
+        ),
       );
 
-      await windowManager.show();
+      if (result != null) {
+        // Create a new credential
+        final credential = GoogleAuthProvider.credential(
+          idToken: result.idToken,
+          accessToken: result.accessToken,
+        );
 
-      // Once signed in, return the UserCredential
-      await _auth.signInWithCredential(credential);
+        // Once signed in, return the UserCredential
+        await _auth.signInWithCredential(credential);
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';

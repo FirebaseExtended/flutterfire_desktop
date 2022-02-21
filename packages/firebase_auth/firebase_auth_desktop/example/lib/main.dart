@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:yaru/yaru.dart';
 
 import 'auth.dart';
@@ -26,7 +25,6 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
 // e.g via `melos run firebase:emulator`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
 
   await Firebase.initializeApp(options: firebaseOptions);
   //await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);

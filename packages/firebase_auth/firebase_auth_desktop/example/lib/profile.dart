@@ -1,8 +1,9 @@
 import 'dart:developer';
 
+import 'package:desktop_webview_auth/desktop_webview_auth.dart';
+import 'package:desktop_webview_auth/google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'auth.dart';
 import 'sms_dialog.dart';
@@ -166,6 +167,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         onPressed: _linkWithPhone,
                         child: const Text('Link with phone number'),
                       ),
+                    if (!userProviders.contains('google.com'))
+                      TextButton(
+                        onPressed: _linkWithOAuth,
+                        child: const Text('Link with Google'),
+                      ),
                     const SizedBox(height: 40),
                     if (userProviders.contains('phone'))
                       TextButton(
@@ -199,6 +205,35 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _linkWithOAuth() async {
+    try {
+      final result = await DesktopWebviewAuth.signIn(
+        GoogleSignInArgs(
+          clientId:
+              '448618578101-sg12d2qin42cpr00f8b0gehs5s7inm0v.apps.googleusercontent.com',
+          redirectUri: redirectUri,
+          scope: 'https://www.googleapis.com/auth/userinfo.email',
+        ),
+      );
+
+      if (result != null) {
+        // Create a new credential
+        final credential = GoogleAuthProvider.credential(
+          accessToken: result.accessToken,
+          idToken: result.idToken,
+        );
+
+        // Once signed in, return the UserCredential
+        await user.linkWithCredential(credential);
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldSnackbar.of(context).show('${e.message}');
+      log('$e');
+    } finally {
+      setIsLoading();
+    }
   }
 
   Future<void> _linkWithPhone() async {
@@ -262,6 +297,5 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Example code for sign out.
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
-    await GoogleSignIn().signOut();
   }
 }
