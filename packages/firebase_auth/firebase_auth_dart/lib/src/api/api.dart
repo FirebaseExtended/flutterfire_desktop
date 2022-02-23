@@ -140,27 +140,30 @@ class API {
     String? requestUri,
     String? providerIdToken,
     String? providerAccessToken,
+    String? providerSecret,
   }) async {
     var uri = Uri.parse(requestUri ?? '');
     if (!uri.isScheme('https')) {
       uri = uri.replace(scheme: 'https');
     }
 
-    var postBody = '';
+    final postBody = <String>['providerId=$providerId'];
 
     if (providerIdToken != null) {
-      postBody += 'id_token=$providerIdToken';
-    } else if (providerAccessToken != null) {
-      postBody += 'access_token=$providerAccessToken';
+      postBody.add('id_token=$providerIdToken');
     }
-
-    postBody += '&providerId=$providerId';
+    if (providerAccessToken != null) {
+      postBody.add('access_token=$providerAccessToken');
+    }
+    if (providerSecret != null) {
+      postBody.add('oauth_token_secret=$providerSecret');
+    }
 
     final response = await identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: uri.toString(),
-        postBody: postBody,
+        postBody: postBody.join('&'),
         returnIdpCredential: true,
         returnSecureToken: true,
       ),

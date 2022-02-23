@@ -22,6 +22,7 @@ import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
+import 'src/providers/twitter_auth.dart';
 import 'src/utils/jwt.dart';
 
 export 'src/api/authentication/recaptcha/recaptcha_args.dart';

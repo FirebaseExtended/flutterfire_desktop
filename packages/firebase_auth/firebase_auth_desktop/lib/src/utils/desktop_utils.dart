@@ -21,6 +21,11 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
       idToken: credential.idToken,
       accessToken: credential.accessToken,
     );
+  } else if (credential is TwitterAuthCredential) {
+    return auth_dart.TwitterAuthProvider.credential(
+      secret: credential.secret!,
+      accessToken: credential.accessToken!,
+    );
   } else {
     return auth_dart.AuthCredential(
       providerId: credential.providerId,
@@ -49,6 +54,11 @@ AuthCredential mapAuthCredentialFromDart(auth_dart.AuthCredential credential) {
     return GoogleAuthProvider.credential(
       idToken: credential.idToken,
       accessToken: credential.accessToken,
+    );
+  } else if (credential is auth_dart.TwitterAuthCredential) {
+    return TwitterAuthProvider.credential(
+      secret: credential.idToken!,
+      accessToken: credential.accessToken!,
     );
   } else {
     return AuthCredential(

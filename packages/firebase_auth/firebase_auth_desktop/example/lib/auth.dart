@@ -2,6 +2,7 @@
 
 import 'package:desktop_webview_auth/desktop_webview_auth.dart';
 import 'package:desktop_webview_auth/google.dart';
+import 'package:desktop_webview_auth/twitter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,12 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 // ignore: public_member_api_docs
 const redirectUri =
     'https://react-native-firebase-testing.firebaseapp.com/__/auth/handler';
+const REDIRECT_URI =
+    'https://react-native-firebase-testing.firebaseapp.com/__/auth/handler';
+const TWITTER_API_KEY = 'YEXSiWv5UeCHyy0c61O2LBC3B';
+const TWITTER_API_SECRET_KEY =
+    'DOd9dCCRFgtnqMDQT7A68YuGZtvcO4WP1mEFS4mEJAUooM4yaE';
+const FACEBOOK_CLIENT_ID = '128693022464535';
 
 /// Helper class to show a snackbar using the passed context.
 class ScaffoldSnackbar {
@@ -239,6 +246,35 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
+  Future _onTwitterSignIn() async {
+    resetError();
+
+    try {
+      final result = await DesktopWebviewAuth.signIn(
+        TwitterSignInArgs(
+          apiKey: TWITTER_API_KEY,
+          apiSecretKey: TWITTER_API_SECRET_KEY,
+          redirectUri: REDIRECT_URI,
+        ),
+      );
+
+      if (result != null) {
+        // Create a new credential
+        final credential = TwitterAuthProvider.credential(
+          secret: result.tokenSecret!,
+          accessToken: result.accessToken!,
+        );
+
+        // Once signed in, return the UserCredential
+        await _auth.signInWithCredential(credential);
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = '${e.message}';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -315,6 +351,15 @@ class _AuthGateState extends State<AuthGate> {
                           ? Buttons.Google
                           : Buttons.GoogleDark,
                       onPressed: _onGoogleSignIn,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: SignInButton(
+                      Buttons.Twitter,
+                      onPressed: _onTwitterSignIn,
                     ),
                   ),
                   const SizedBox(height: 20),
