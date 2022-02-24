@@ -439,6 +439,13 @@ class FirebaseAuth {
           providerSecret: credential.secret,
         ))
             .toJson();
+      } else if (credential is FacebookAuthCredential) {
+        response = (await _api.signInWithOAuthCredential(
+          requestUri: app.options.authDomain,
+          providerId: credential.providerId,
+          providerAccessToken: credential.accessToken,
+        ))
+            .toJson();
       } else {
         throw UnsupportedError('This credential is not supported yet.');
       }

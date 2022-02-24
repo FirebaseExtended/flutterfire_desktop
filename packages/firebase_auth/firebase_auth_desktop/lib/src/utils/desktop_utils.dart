@@ -26,6 +26,8 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
       secret: credential.secret!,
       accessToken: credential.accessToken!,
     );
+  } else if (credential is FacebookAuthCredential) {
+    return auth_dart.FacebookAuthProvider.credential(credential.accessToken!);
   } else {
     return auth_dart.AuthCredential(
       providerId: credential.providerId,
@@ -60,6 +62,8 @@ AuthCredential mapAuthCredentialFromDart(auth_dart.AuthCredential credential) {
       secret: credential.idToken!,
       accessToken: credential.accessToken!,
     );
+  } else if (credential is auth_dart.FacebookAuthCredential) {
+    return FacebookAuthProvider.credential(credential.accessToken!);
   } else {
     return AuthCredential(
       providerId: credential.providerId,
