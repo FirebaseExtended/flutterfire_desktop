@@ -287,22 +287,6 @@ class API {
     );
   }
 
-  // /// TODO: write endpoint details
-  // Future<idp.VerifyAssertionResponse> linkWithOAuthCredential(String idToken,
-  //     {required String providerId,
-  //     String? providerIdToken,
-  //     String? requestUri}) async {
-  //   final response = await identityToolkit.verifyAssertion(
-  //     idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-  //       idToken: idToken,
-  //       requestUri: requestUri,
-  //       postBody: 'id_token=$providerIdToken&providerId=$providerId',
-  //     ),
-  //   );
-
-  //   return response;
-  // }
-
   /// TODO: write endpoint details
   Future<idp.UserInfo> getCurrentUser(String? idToken) async {
     final _response = await identityToolkit.getAccountInfo(
