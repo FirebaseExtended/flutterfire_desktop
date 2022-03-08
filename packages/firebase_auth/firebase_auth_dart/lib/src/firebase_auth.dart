@@ -425,9 +425,25 @@ class FirebaseAuth {
             'You should provide authDomain when trying to add Google as auth provider.');
 
         response = (await _api.signInWithOAuthCredential(
-          requestUri: app.options.authDomain!,
-          providerIdToken: credential.idToken!,
+          requestUri: app.options.authDomain,
           providerId: credential.providerId,
+          providerIdToken: credential.idToken,
+          providerAccessToken: credential.accessToken,
+        ))
+            .toJson();
+      } else if (credential is TwitterAuthCredential) {
+        response = (await _api.signInWithOAuthCredential(
+          requestUri: app.options.authDomain,
+          providerId: credential.providerId,
+          providerAccessToken: credential.accessToken,
+          providerSecret: credential.secret,
+        ))
+            .toJson();
+      } else if (credential is FacebookAuthCredential) {
+        response = (await _api.signInWithOAuthCredential(
+          requestUri: app.options.authDomain,
+          providerId: credential.providerId,
+          providerAccessToken: credential.accessToken,
         ))
             .toJson();
       } else {
@@ -555,13 +571,23 @@ class FirebaseAuth {
   Exception _getException(Object e) {
     if (e is idp.DetailedApiRequestError) {
       var errorCode = e.message ?? '';
+      String? errorMessage;
+
+      if (e.jsonResponse?['error'] != null &&
+          // ignore: avoid_dynamic_calls
+          e.jsonResponse?['error']['status'] != null) {
+        // ignore: avoid_dynamic_calls
+        errorCode = e.jsonResponse!['error']['status'];
+        errorMessage = e.message;
+      }
 
       // Solves a problem with incosistent error codes coming from the server.
       if (errorCode.contains(' ')) {
         errorCode = errorCode.split(' ').first;
       }
 
-      final authException = FirebaseAuthException(code: errorCode);
+      final authException =
+          FirebaseAuthException(code: errorCode, message: errorMessage);
       log('${authException.message}',
           name: 'firebase_auth_dart/${authException.code}');
 

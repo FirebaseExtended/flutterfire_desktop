@@ -192,10 +192,11 @@ class User {
           credential: credential,
         );
       } else if (credential is GoogleAuthCredential) {
-        final response = await _auth._api.linkWithOAuthCredential(
-          _idToken,
+        final response = await _auth._api.signInWithOAuthCredential(
+          idToken: _idToken,
           providerId: credential.providerId,
-          providerIdToken: credential.idToken!,
+          providerIdToken: credential.idToken,
+          providerAccessToken: credential.accessToken,
           requestUri: _auth.app.options.authDomain,
         );
 
@@ -258,10 +259,10 @@ class User {
             'You should provide authDomain when trying to add Google as auth provider.');
 
         final response = await _auth._api.signInWithOAuthCredential(
-          idToken: _idToken,
           providerId: credential.providerId,
-          providerIdToken: credential.idToken!,
-          requestUri: _auth.app.options.authDomain!,
+          providerIdToken: credential.idToken,
+          providerAccessToken: credential.accessToken,
+          requestUri: _auth.app.options.authDomain,
         );
 
         _setIdToken(response.idToken);

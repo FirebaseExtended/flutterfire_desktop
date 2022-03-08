@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
+
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
 import 'package:http/http.dart' as http;
@@ -134,22 +135,38 @@ class API {
   }
 
   /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> signInWithOAuthCredential(
-      {String? idToken,
-      required String providerId,
-      required String providerIdToken,
-      required String requestUri}) async {
-    var uri = Uri.parse(requestUri);
+  Future<idp.VerifyAssertionResponse> signInWithOAuthCredential({
+    required String providerId,
+    String? idToken,
+    String? requestUri,
+    String? providerIdToken,
+    String? providerAccessToken,
+    String? providerSecret,
+  }) async {
+    var uri = Uri.parse(requestUri ?? '');
     if (!uri.isScheme('https')) {
       uri = uri.replace(scheme: 'https');
+    }
+
+    final postBody = <String>['providerId=$providerId'];
+
+    if (providerIdToken != null) {
+      postBody.add('id_token=$providerIdToken');
+    }
+    if (providerAccessToken != null) {
+      postBody.add('access_token=$providerAccessToken');
+    }
+    if (providerSecret != null) {
+      postBody.add('oauth_token_secret=$providerSecret');
     }
 
     final response = await identityToolkit.verifyAssertion(
       idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: uri.toString(),
-        postBody: 'id_token=$providerIdToken&'
-            'providerId=$providerId',
+        postBody: postBody.join('&'),
+        returnIdpCredential: true,
+        returnSecureToken: true,
       ),
     );
 
@@ -268,22 +285,6 @@ class API {
         password: credential.password,
       ),
     );
-  }
-
-  /// TODO: write endpoint details
-  Future<idp.VerifyAssertionResponse> linkWithOAuthCredential(String idToken,
-      {required String providerIdToken,
-      required String providerId,
-      String? requestUri}) async {
-    final response = await identityToolkit.verifyAssertion(
-      idp.IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-        idToken: idToken,
-        requestUri: requestUri,
-        postBody: 'id_token=$providerIdToken&providerId=$providerId',
-      ),
-    );
-
-    return response;
   }
 
   /// TODO: write endpoint details
