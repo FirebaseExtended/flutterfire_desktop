@@ -1,3 +1,7 @@
+## 0.1.1-dev.6
+
+ - **FEAT**: support for more OAuth providers with WebViews (#48).
+
 ## 0.1.1-dev.5
 
  - Update a dependency to the latest release.

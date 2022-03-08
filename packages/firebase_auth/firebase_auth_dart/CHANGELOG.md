@@ -1,3 +1,7 @@
+## 0.1.1-dev.5
+
+ - **FEAT**: support for more OAuth providers with WebViews (#48).
+
 ## 0.1.1-dev.4
 
  - **FIX**: providerUserInfo casting type.
