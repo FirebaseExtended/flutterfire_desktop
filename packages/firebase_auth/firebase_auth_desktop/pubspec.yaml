@@ -42,4 +42,4 @@ flutter:
         pluginClass: none
 
 false_secrets:
-  - /example/lib/main.dart
+  - /example/**
