@@ -15,7 +15,7 @@ class FirebaseAuth {
     _changeController = StreamController<User?>.broadcast(sync: true);
 
     if (_localUser() != null) {
-      currentUser = User(_localUser()!, this);
+      _currentUser = User(_localUser()!, this);
     }
   }
 
@@ -67,13 +67,20 @@ class FirebaseAuth {
   // ignore: close_sinks
   late StreamController<User?> _idTokenChangedController;
 
+  User? _currentUser;
+
   /// Returns the current [User] if they are currently signed-in, or `null` if
   /// not.
   ///
   /// You should not use this getter to determine the users current state,
   /// instead use [authStateChanges], or [idTokenChanges] to
   /// subscribe to updates.
-  User? currentUser;
+  User? get currentUser => _currentUser;
+
+  /// The current Auth instance's language code.
+  ///
+  /// See [setLanguageCode] to update the language code.
+  String? get languageCode => _api.languageCode;
 
   /// Sends events when the users sign-in state changes.
   ///
@@ -101,13 +108,25 @@ class FirebaseAuth {
       {'currentUser': user?.toMap()},
     );
 
-    currentUser = user;
+    _currentUser = user;
 
     if (authStateChanged) {
       _changeController.add(user);
     }
 
     _idTokenChangedController.add(user);
+  }
+
+  /// When set to null, the default Firebase Console language setting is
+  /// applied.
+  ///
+  /// The language code will propagate to email action templates (password
+  /// reset, email verification and email change revocation), SMS templates for
+  /// phone authentication, reCAPTCHA verifier and OAuth popup/redirect
+  /// operations provided the specified providers support localization with the
+  /// language code specified.
+  void setLanguageCode(String? languageCode) {
+    return _api.setLanguageCode(languageCode);
   }
 
   /// Attempts to sign in a user with the given email address and password.
