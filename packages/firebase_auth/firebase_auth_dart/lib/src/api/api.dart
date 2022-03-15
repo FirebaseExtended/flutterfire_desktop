@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls, use_setters_to_change_properties, implementation_imports
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
-
+import 'package:firebaseapis/src/user_agent.dart';
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
 import 'package:http/http.dart' as http;
@@ -73,7 +73,6 @@ class API {
   // ignore: public_member_api_docs
   API(this.apiConfig, {http.Client? client}) {
     _client = client ?? clientViaApiKey(apiConfig.apiKey);
-    identityToolkit = idp.IdentityToolkitApi(_client).relyingparty;
   }
 
   /// The API configurations of this instance.
@@ -81,15 +80,36 @@ class API {
 
   late http.Client _client;
 
+  String? _languageCode;
+
+  /// The current languageCode sent in the headers of all API requests.
+  /// If `null`, the default Firebase Console language will be used.
+  String? get languageCode => _languageCode;
+
   /// Change the HTTP client for the purpose of testing.
   void setApiClient(http.Client client) {
     _client = client;
-    identityToolkit = idp.IdentityToolkitApi(client).relyingparty;
+  }
+
+  /// Updates the languageCode for this instance.
+  void setLanguageCode(String? languageCode) {
+    _languageCode = languageCode;
+    requestHeaders.addAll({'X-Firebase-Locale': languageCode ?? ''});
   }
 
   /// Identity platform [idp.RelyingpartyResource] initialized with this instance [APIConfig].
   @internal
-  late idp.RelyingpartyResource identityToolkit;
+  idp.RelyingpartyResource get identityToolkit {
+    if (apiConfig.emulator != null) {
+      return idp.IdentityToolkitApi(
+        _client,
+        rootUrl: apiConfig.emulator!.rootUrl,
+      ).relyingparty;
+    }
+    return idp.IdentityToolkitApi(
+      _client,
+    ).relyingparty;
+  }
 
   PhoneAuthAPI? _phoneAuthApiDelegate;
 
@@ -370,14 +390,6 @@ class API {
 
     final Map emulatorProjectConfig = json.decode(response.body);
 
-    // 3. Update the requester to use emulator
-    final rootUrl = 'http://$host:$port/www.googleapis.com/';
-
-    identityToolkit = idp.IdentityToolkitApi(
-      clientViaApiKey(apiConfig.apiKey),
-      rootUrl: rootUrl,
-    ).relyingparty;
-
     // set the the emulator config for this instance.
     apiConfig.setEmulator(host, port);
 
@@ -390,18 +402,11 @@ class EmulatorConfig {
   EmulatorConfig._({
     required this.port,
     required this.host,
-    this.requester,
   });
 
   /// Initialize the Emulator Config using the host and port printed once running `firebase emulators:start`.
   factory EmulatorConfig.use(String host, int port) {
-    return EmulatorConfig._(
-        port: port,
-        host: host,
-        requester: idp.IdentityToolkitApi(
-          clientViaApiKey('dummyKey'),
-          rootUrl: 'http://$host:$port/www.googleapis.com/',
-        ).relyingparty);
+    return EmulatorConfig._(port: port, host: host);
   }
 
   /// The port on which the emulator suite is running.
@@ -410,6 +415,6 @@ class EmulatorConfig {
   /// The port on which the emulator suite is running.
   final int port;
 
-  /// The IDP requester used to make calls to the emulator suite.
-  final idp.RelyingpartyResource? requester;
+  /// The root URL used to make requests to the locally running emulator.
+  String get rootUrl => 'http://$host:$port/www.googleapis.com/';
 }

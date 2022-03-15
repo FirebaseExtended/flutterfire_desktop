@@ -215,8 +215,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  // TODO: implement languageCode
-  String? get languageCode => throw UnimplementedError();
+  String? get languageCode => _authDart?.languageCode;
 
   @override
   Future<void> sendSignInLinkToEmail(
@@ -229,9 +228,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<void> setLanguageCode(String? languageCode) {
-    // TODO: implement setLanguageCode
-    throw UnimplementedError();
+  Future<void> setLanguageCode(String? languageCode) async {
+    return _authDart?.setLanguageCode(languageCode);
   }
 
   @override

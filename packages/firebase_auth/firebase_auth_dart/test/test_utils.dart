@@ -14,9 +14,10 @@ const _testFirebaseProjectId = 'react-native-firebase-testing';
 const testEmulatorHost = 'localhost';
 const testEmulatorPort = 9099;
 
+const bool useEmulator = true;
+
 /// Deletes all users from the Auth emulator.
 Future<void> emulatorClearAllUsers() async {
-  //await realAuth.signOut();
   await http.delete(
     Uri.parse(
       'http://$testEmulatorHost:$testEmulatorPort/emulator/v1/projects/$_testFirebaseProjectId/accounts',

@@ -40,14 +40,18 @@ void main() {
 
       auth = FirebaseAuth.instance;
 
-      await auth.useAuthEmulator();
+      if (useEmulator) {
+        await auth.useAuthEmulator();
+      }
 
       authStateChanges = StreamQueue(auth.authStateChanges());
       idTokenChanges = StreamQueue(auth.idTokenChanges());
     });
 
     setUp(() async {
-      await emulatorClearAllUsers();
+      if (useEmulator) {
+        await emulatorClearAllUsers();
+      }
       await ensureSignedOut();
 
       fakeAuth = MockFirebaseAuth();
@@ -278,6 +282,17 @@ void main() {
     group('Use emulator ', () {
       test('returns project config.', () async {
         expect(auth.useAuthEmulator(), completes);
+      });
+    });
+
+    group('Set languageCode ', () {
+      test('updates the instance laguage code.', () async {
+        auth.setLanguageCode('ar');
+
+        expect(
+          auth.languageCode,
+          equals('ar'),
+        );
       });
     });
 
