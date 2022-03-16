@@ -506,7 +506,7 @@ class FirebaseAuth {
   /// have an account already, one will be created automatically.
   ///
   /// Read how to use Custom Token authentication and the cases where it is
-  /// useful in [the guides](https://firebase.google.com/docs/auth/android/custom-auth).
+  /// useful in [the guides](https://firebase.google.com/docs/auth/web/custom-auth).
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
   /// - **custom-token-mismatch**:
@@ -514,6 +514,8 @@ class FirebaseAuth {
   /// - **invalid-custom-token**:
   ///  - Thrown if the custom token format is incorrect.
   Future<UserCredential> signInWithCustomToken(String token) async {
+    const providerId = 'firebase';
+
     final response = await _api.signInWithCustomToken(token);
     final userData = await _api.getCurrentUser(response.idToken);
 
@@ -525,8 +527,8 @@ class FirebaseAuth {
     return UserCredential._(
       auth: this,
       credential: const AuthCredential(
-        providerId: 'firebase',
-        signInMethod: 'firebase',
+        providerId: providerId,
+        signInMethod: providerId,
       ),
     );
   }
