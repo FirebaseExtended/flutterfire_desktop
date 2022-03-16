@@ -53,3 +53,53 @@ Future<void> ensureSignedOut() async {
     await FirebaseAuth.instance.signOut();
   }
 }
+
+/// Create a custom authentication token with optional claims and tenant id.
+/// Useful for testing signInWithCustomToken, custom claims and tenant id data.
+// Reverse engineered from;
+//  - https://github.com/firebase/firebase-admin-node/blob/d961c3f705a8259762a796ac4f4d6a6dd0992eb1/src/auth/token-generator.ts#L236-L254
+//  - https://github.com/firebase/firebase-admin-node/blob/d961c3f705a8259762a796ac4f4d6a6dd0992eb1/src/auth/token-generator.ts#L309-L365
+String emulatorCreateCustomToken(
+  String uid, {
+  Map<String, Object> claims = const {},
+  String tenantId = '',
+}) {
+  final iat = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+
+  final jwtHeaderEncoded = base64
+      .encode(
+        utf8.encode(
+          jsonEncode({
+            'alg': 'none',
+            'typ': 'JWT',
+          }),
+        ),
+      )
+      // Note that base64 padding ("=") must be omitted as per JWT spec.
+      .replaceAll(RegExp(r'=+$'), '');
+
+  final jwtBody = {
+    'aud':
+        'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    'iat': iat,
+    'exp': iat + const Duration(hours: 1).inSeconds,
+    'iss': 'firebase-auth-emulator@example.com',
+    'sub': 'firebase-auth-emulator@example.com',
+    'uid': uid,
+  };
+  if (claims.isNotEmpty) {
+    jwtBody['claims'] = claims;
+  }
+  if (tenantId.isNotEmpty) {
+    jwtBody['tenant_id'] = tenantId;
+  }
+
+  final jwtBodyEncoded = base64
+      .encode(utf8.encode(jsonEncode(jwtBody)))
+      // Note that base64 padding ("=") must be omitted as per JWT spec.
+      .replaceAll(RegExp(r'=+$'), '');
+
+  // Alg is set to none so signature should be empty.
+  const jwtSignature = '';
+  return '$jwtHeaderEncoded.$jwtBodyEncoded.$jwtSignature';
+}

@@ -35,9 +35,7 @@ class IdTokenResult {
 
   /// The entire payload claims of the ID token including the standard reserved
   /// claims as well as the custom claims.
-  Map<String, dynamic>? get claims => _data['claims'] == null
-      ? null
-      : Map<String, dynamic>.from(_data['claims']);
+  Map<String, dynamic>? get claims => Map<String, dynamic>.from(_data);
 
   /// The sign-in provider through which the ID token was obtained (anonymous,
   /// custom, phone, password, etc). Note, this does not map to provider IDs.
@@ -51,7 +49,7 @@ class IdTokenResult {
   Map<String, dynamic> get toMap {
     return {
       'authTimestamp': _data['auth_time'],
-      'claims': _data['claims'],
+      'claims': _data,
       'expirationTimestamp': _data['exp'],
       'issuedAtTimestamp': _data['iat'],
       'signInProvider': _data['firebase']['sign_in_provider'],

@@ -520,7 +520,7 @@ class FirebaseAuth {
     final userData = await _api.getCurrentUser(response.idToken);
 
     // Map the json response to an actual user.
-    final user = User(userData.toJson(), this);
+    final user = User(userData.toJson()..addAll(response.toJson()), this);
 
     _updateCurrentUserAndEvents(user, true);
 
@@ -530,6 +530,8 @@ class FirebaseAuth {
         providerId: providerId,
         signInMethod: providerId,
       ),
+      additionalUserInfo:
+          AdditionalUserInfo(isNewUser: response.isNewUser ?? false),
     );
   }
 

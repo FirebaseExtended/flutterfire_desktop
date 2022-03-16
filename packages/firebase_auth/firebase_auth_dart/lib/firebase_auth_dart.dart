@@ -20,6 +20,7 @@ import 'src/api/api.dart' show API, APIConfig;
 import 'src/api/authentication/recaptcha/recaptcha_verifier.dart' as verifier;
 import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
+import 'src/providers/enums.dart';
 import 'src/providers/facebook_auth.dart';
 import 'src/providers/google_auth.dart';
 import 'src/providers/phone_auth.dart';
