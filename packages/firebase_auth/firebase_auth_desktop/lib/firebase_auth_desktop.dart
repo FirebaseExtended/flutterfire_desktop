@@ -33,7 +33,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     _idTokenChangesListeners[app.name] =
         StreamController<UserPlatform?>.broadcast();
 
-    _authDart!.authStateChanges().map((auth_dart.User? dartUser) {
+    _delegate!.authStateChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -42,7 +42,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       _authStateChangesListeners[app.name]!.add(user);
     });
 
-    _authDart!.idTokenChanges().map((auth_dart.User? dartUser) {
+    _delegate!.idTokenChanges().map((auth_dart.User? dartUser) {
       if (dartUser == null) {
         return null;
       }
@@ -73,20 +73,20 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   /// Instance of auth from Identity Provider API service.
-  auth_dart.FirebaseAuth? get _authDart =>
+  auth_dart.FirebaseAuth? get _delegate =>
       _app == null ? null : auth_dart.FirebaseAuth.instanceFor(app: _app!);
 
   final core_dart.FirebaseApp? _app;
 
   @override
   UserPlatform? get currentUser {
-    final dartCurrentUser = _authDart!.currentUser;
+    final dartCurrentUser = _delegate!.currentUser;
 
     if (dartCurrentUser == null) {
       return null;
     }
 
-    return User(this, _authDart!.currentUser!);
+    return User(this, _delegate!.currentUser!);
   }
 
   static final Map<String, StreamController<UserPlatform?>>
@@ -117,7 +117,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _authDart!.signInWithEmailAndPassword(email, password),
+        await _delegate!.signInWithEmailAndPassword(email, password),
       );
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -127,7 +127,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      return await _authDart!.fetchSignInMethodsForEmail(email);
+      return await _delegate!.fetchSignInMethodsForEmail(email);
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
@@ -149,7 +149,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   Future<void> sendPasswordResetEmail(String email,
       [ActionCodeSettings? actionCodeSettings]) async {
     try {
-      await _authDart!.sendPasswordResetEmail(
+      await _delegate!.sendPasswordResetEmail(
           email: email, continueUrl: actionCodeSettings?.url);
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -159,7 +159,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> confirmPasswordReset(String code, String newPassword) async {
     try {
-      await _authDart!.confirmPasswordReset(code, newPassword);
+      await _delegate!.confirmPasswordReset(code, newPassword);
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
@@ -171,7 +171,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _authDart!.createUserWithEmailAndPassword(email, password),
+        await _delegate!.createUserWithEmailAndPassword(email, password),
       );
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -215,13 +215,13 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  String? get languageCode => _authDart?.languageCode;
+  String? get languageCode => _delegate?.languageCode;
 
   @override
   Future<void> sendSignInLinkToEmail(
       String email, ActionCodeSettings actionCodeSettings) async {
     try {
-      await _authDart!.sendSignInLinkToEmail(email);
+      await _delegate!.sendSignInLinkToEmail(email);
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
@@ -229,7 +229,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
   @override
   Future<void> setLanguageCode(String? languageCode) async {
-    return _authDart?.setLanguageCode(languageCode);
+    return _delegate?.setLanguageCode(languageCode);
   }
 
   @override
@@ -254,7 +254,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _authDart!.signInAnonymously(),
+        await _delegate!.signInAnonymously(),
       );
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -267,7 +267,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _authDart!
+        await _delegate!
             .signInWithCredential(mapAuthCredentialFromPlatform(credential)),
       );
     } catch (e) {
@@ -287,7 +287,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     try {
       return UserCredential(
         this,
-        await _authDart!.signInWithEmailLink(email, emailLink),
+        await _delegate!.signInWithEmailLink(email, emailLink),
       );
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -302,7 +302,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
 
       return ConfirmationResultDesktop(
         this,
-        await _authDart!.signInWithPhoneNumber(phoneNumber, recaptchaVerifier),
+        await _delegate!.signInWithPhoneNumber(phoneNumber, recaptchaVerifier),
       );
     } catch (e) {
       throw getFirebaseAuthException(e);
@@ -324,7 +324,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> signOut() async {
     try {
-      await _authDart!.signOut();
+      await _delegate!.signOut();
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
@@ -333,7 +333,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> useAuthEmulator(String host, int port) async {
     try {
-      await _authDart!.useAuthEmulator(host: host, port: port);
+      await _delegate!.useAuthEmulator(host: host, port: port);
 
       return;
     } catch (e) {
@@ -344,7 +344,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<String> verifyPasswordResetCode(String code) async {
     try {
-      return await _authDart!.verifyPasswordResetCode(code);
+      return await _delegate!.verifyPasswordResetCode(code);
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
