@@ -194,6 +194,19 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<idp.VerifyCustomTokenResponse> signInWithCustomToken(
+      String token) async {
+    final response = await identityToolkit.verifyCustomToken(
+      idp.IdentitytoolkitRelyingpartyVerifyCustomTokenRequest(
+        token: token,
+        returnSecureToken: true,
+      ),
+    );
+
+    return response;
+  }
+
+  /// TODO: write endpoint details
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     final _response = await identityToolkit.createAuthUri(
       idp.IdentitytoolkitRelyingpartyCreateAuthUriRequest(
