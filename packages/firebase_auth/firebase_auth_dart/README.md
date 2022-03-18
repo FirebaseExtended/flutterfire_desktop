@@ -39,8 +39,8 @@ FirebaseAuth auth = FirebaseAuth.instanceFor(app: secondaryApp);
 You can listen to changes in authentication states through the following streams:
 
 1. `authStateChanges()`: fires event upon changes in `User` state, on sign in and sign out.
-   ```dart
-   FirebaseAuth.instance
+```dart
+ FirebaseAuth.instance
   .authStateChanges()
   .listen((User? user) {
     if (user == null) {
@@ -49,9 +49,9 @@ You can listen to changes in authentication states through the following streams
       print('User is signed in!');
     }
   });
-   ```
+```
 2. `idTokenChanges()`: in addition to listening to the changes in `User` state, it also fires events when the current user's token changes.
-   ```dart
+```dart
    FirebaseAuth.instance
   .idTokenChanges()
   .listen((User? user) {
@@ -61,7 +61,7 @@ You can listen to changes in authentication states through the following streams
       print('User is signed in!');
     }
   });
-   ```
+```
 
 ### Sign-in methods
 
