@@ -1,12 +1,28 @@
 /// Types of providers in Firebase.
+/// Each provider has a special raw string id that is mapped to one of these types.
 enum ProviderId {
+  /// `password` sign-in provider.
   password,
+
+  /// `phone` sign-in provider.
   phone,
+
+  /// `facebook.com` sign-in provider.
   facebook,
+
+  /// `github.com` sign-in provider.
   github,
+
+  /// `twitter.com` sign-in provider.
   twitter,
+
+  /// `custom` sign-in provider.
   custom,
+
+  /// `anonymous` sign-in provider.
   anonymous,
+
+  /// Return when the provider id isn't expected.
   unknown
 }
 
