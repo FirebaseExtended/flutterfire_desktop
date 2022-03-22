@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 /// Types of providers in Firebase.
 /// Each provider has a special raw string id that is mapped to one of these types.
 enum ProviderId {

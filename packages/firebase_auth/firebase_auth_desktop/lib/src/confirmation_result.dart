@@ -1,3 +1,7 @@
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 
