@@ -17,6 +17,8 @@ class User {
   /// Internally used to read the current idToken.
   String get _idToken => _user['idToken'];
 
+  DecodedToken get _decodedIdToken => DecodedToken.fromJWTString(_idToken);
+
   void _setIdToken(String? idToken) {
     _user['idToken'] = idToken;
   }
@@ -48,7 +50,7 @@ class User {
   /// Returns whether the user is a anonymous.
   bool get isAnonymous {
     // ignore: avoid_dynamic_calls
-    return _castProviderFromIdToken(IdTokenResult(_idToken.decodeJWT)) ==
+    return _castProviderFromIdToken(IdTokenResult(_decodedIdToken)) ==
         ProviderId.anonymous;
   }
 
@@ -166,11 +168,11 @@ class User {
   Future<IdTokenResult> getIdTokenResult([bool forceRefresh = false]) async {
     await _refreshIdToken(forceRefresh);
 
-    return IdTokenResult(_idToken.decodeJWT);
+    return IdTokenResult(_decodedIdToken);
   }
 
   Future _refreshIdToken(bool forceRefresh) async {
-    if (forceRefresh || _idToken.expirationTime.isBefore(DateTime.now())) {
+    if (forceRefresh || _decodedIdToken.isValidTimestamp) {
       _user['idToken'] = await _auth._api.refreshIdToken(refreshToken);
       _auth._idTokenChangedController.add(this);
     }

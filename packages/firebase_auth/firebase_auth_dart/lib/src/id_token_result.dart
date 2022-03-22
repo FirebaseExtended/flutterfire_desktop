@@ -10,50 +10,52 @@ part of firebase_auth_dart;
 class IdTokenResult {
   // ignore: public_member_api_docs
   @protected
-  IdTokenResult(this._data);
+  IdTokenResult(this._decodedToken);
 
-  final Map<String, dynamic> _data;
+  final DecodedToken _decodedToken;
 
   /// The authentication time formatted as UTC string. This is the time the user
   /// authenticated (signed in) and not the time the token was refreshed.
-  DateTime? get authTime => _data['auth_time'] == null
+  DateTime? get authTime => _decodedToken.claims['auth_time'] == null
       ? null
       : DateTime.fromMillisecondsSinceEpoch(
-          _data['auth_time'] * secondToMilliesecondsFactor);
+          _decodedToken.claims['auth_time'] * secondToMilliesecondsFactor);
 
   /// The time when the ID token expires.
-  DateTime? get expirationTime => _data['exp'] == null
+  DateTime? get expirationTime => _decodedToken.claims['exp'] == null
       ? null
       : DateTime.fromMillisecondsSinceEpoch(
-          _data['exp'] * secondToMilliesecondsFactor);
+          _decodedToken.claims['exp'] * secondToMilliesecondsFactor);
 
   /// The time when ID token was issued.
-  DateTime? get issuedAtTime => _data['iat'] == null
+  DateTime? get issuedAtTime => _decodedToken.claims['iat'] == null
       ? null
       : DateTime.fromMillisecondsSinceEpoch(
-          _data['iat'] * secondToMilliesecondsFactor);
+          _decodedToken.claims['iat'] * secondToMilliesecondsFactor);
 
   /// The entire payload claims of the ID token including the standard reserved
   /// claims as well as the custom claims.
-  Map<String, dynamic>? get claims => Map<String, dynamic>.from(_data);
+  Map<String, dynamic>? get claims =>
+      Map<String, dynamic>.from(_decodedToken.claims);
 
   /// The sign-in provider through which the ID token was obtained (anonymous,
   /// custom, phone, password, etc). Note, this does not map to provider IDs.
-  String? get signInProvider =>
-      _data['firebase'] == null ? null : _data['firebase']['sign_in_provider'];
+  String? get signInProvider => _decodedToken.claims['firebase'] == null
+      ? null
+      : _decodedToken.claims['firebase']['sign_in_provider'];
 
   /// The Firebase Auth ID token JWT string.
-  String get token => _data['token'];
+  String get token => _decodedToken.token;
 
   /// Map representation of [IdTokenResult]
   Map<String, dynamic> get toMap {
     return {
-      'authTimestamp': _data['auth_time'],
-      'claims': _data,
-      'expirationTimestamp': _data['exp'],
-      'issuedAtTimestamp': _data['iat'],
-      'signInProvider': _data['firebase']['sign_in_provider'],
-      'token': _data['token'],
+      'authTimestamp': authTime,
+      'claims': claims,
+      'expirationTimestamp': expirationTime,
+      'issuedAtTime': issuedAtTime,
+      'signInProvider': signInProvider,
+      'token': token,
     };
   }
 
