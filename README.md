@@ -24,7 +24,7 @@ dependencies:
 
 ## Firebase App Initialization
 
-Unlike FlutterFire for mobile and web platfroms, the initlization in Desktop is done from Dart, which means there are no additional config files required.
+Unlike FlutterFire for mobile and web platforms, the initialization in Desktop is done from Dart, which means there are no additional config files required.
 ### DEFAULT app
 To initialize the default app, provide only options without a name.
  ```dart
