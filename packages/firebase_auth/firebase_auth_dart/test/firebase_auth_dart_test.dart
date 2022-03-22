@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 import 'dart:async';
 
 import 'package:async/async.dart';
@@ -169,6 +169,39 @@ void main() {
         );
       });
     });
+    group('signInWithCustomToken()', () {
+      test('signs in with custom token', () async {
+        final userCredential = await FirebaseAuth.instance.signInAnonymously();
+        final uid = userCredential.user!.uid;
+        final claims = {
+          'roles': [
+            {'role': 'member'},
+            {'role': 'admin'}
+          ]
+        };
+
+        await ensureSignedOut();
+
+        expect(FirebaseAuth.instance.currentUser, null);
+
+        final token = emulatorCreateCustomToken(uid, claims: claims);
+
+        final cred = await auth.signInWithCustomToken(token);
+
+        expect(auth.currentUser, equals(cred.user));
+        final user = cred.user!;
+        expect(user.isAnonymous, isFalse);
+        expect(user.uid, equals(uid));
+
+        final idTokenResult =
+            await FirebaseAuth.instance.currentUser!.getIdTokenResult();
+
+        expect(idTokenResult.claims!['roles'], isA<List>());
+        expect(idTokenResult.claims!['roles'][0], isA<Map>());
+        expect(idTokenResult.claims!['roles'][0]['role'], 'member');
+      });
+    });
+
     group('signInWithPhoneNumber() ', () {
       test('should fail with invalid phone number', () async {
         Future<Exception> getError() async {

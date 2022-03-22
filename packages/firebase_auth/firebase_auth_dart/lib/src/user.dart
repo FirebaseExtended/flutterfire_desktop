@@ -48,7 +48,8 @@ class User {
   /// Returns whether the user is a anonymous.
   bool get isAnonymous {
     // ignore: avoid_dynamic_calls
-    return providerData.isEmpty;
+    return _castProviderFromIdToken(IdTokenResult(_idToken.decodeJWT)) ==
+        ProviderId.anonymous;
   }
 
   /// Returns additional metadata about the user, such as their creation time.
@@ -479,4 +480,9 @@ void _assertSignedOut(FirebaseAuth instance) {
   } else {
     throw FirebaseAuthException(code: 'NOT_SIGNED_IN');
   }
+}
+
+ProviderId _castProviderFromIdToken(IdTokenResult idTokenResult) {
+  final signInProvider = idTokenResult.signInProvider;
+  return signInProvider?.providerId ?? ProviderId.unknown;
 }
