@@ -22,6 +22,29 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
       messagingSenderId: '448618578101',
     );
 
+const _testFirebaseProjectId = 'react-native-firebase-testing';
+
+const testEmulatorHost = 'localhost';
+const testEmulatorPort = 9099;
+
+/// Deletes all users from the Auth emulator.
+Future<void> emulatorClearAllUsers() async {
+  await http.delete(
+    Uri.parse(
+      'http://$testEmulatorHost:$testEmulatorPort/emulator/v1/projects/$_testFirebaseProjectId/accounts',
+    ),
+    headers: {
+      'Authorization': 'Bearer owner',
+    },
+  );
+}
+
+Future<void> ensureSignedOut() async {
+  if (FirebaseAuth.instance.currentUser != null) {
+    await FirebaseAuth.instance.signOut();
+  }
+}
+
 Future<void> main() async {
   setUpAll(() async {
     await Firebase.initializeApp(
@@ -32,6 +55,14 @@ Future<void> main() async {
         projectId: '',
       ),
     );
+
+    await FirebaseAuth.instance.useAuthEmulator();
+
+    await emulatorClearAllUsers();
+  });
+
+  setUp(() async {
+    await ensureSignedOut();
   });
 
   group('FirebaseFunctions', () {
@@ -343,30 +374,11 @@ Future<void> main() async {
       }
     }
 
-    Future<http.Response> _authorize(http.Request request) async {
-      if (request.url.path.contains('signupNewUser')) {
-        return http.Response(
-            jsonEncode({
-              'idToken':
-                  // A jwt that should expire in the year 9000
-                  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIiLCJpYXQiOjE2MzgzMzM5NjUsImV4cCI6MjIxODc0MjY2NzkxLCJhdWQiOiIiLCJzdWIiOiIifQ.au4g9rl9k6C-OLTipN_E8AIOaN81HB5Qh1L3BpR3fNU'
-            }),
-            200,
-            headers: {'content-type': 'application/json'});
-      } else {
-        return http.Response(
-            jsonEncode({
-              'kind': 'identitytoolkit#GetAccountInfoResponse',
-              'users': [{}],
-            }),
-            200,
-            headers: {'content-type': 'application/json'});
-      }
-    }
-
     setUpAll(() async {
       app = await Firebase.initializeApp(
-          options: firebaseOptions, name: 'auth_functions');
+        options: firebaseOptions,
+        name: 'auth_functions',
+      );
       // Clear auth storage
       StorageBox.instanceOf(app.options.projectId)
           .putValue('${app.options.apiKey}:${app.name}', null);
@@ -380,6 +392,7 @@ Future<void> main() async {
       StorageBox.instanceOf(app.options.projectId)
           .putValue('${app.options.apiKey}:${app.name}', null);
     });
+
     test('unauthorized access throws', () async {
       expect(
         () => httpsCallable.call('unauthorized'),
@@ -390,8 +403,8 @@ Future<void> main() async {
 
     test('authorized access succeeds', () async {
       final auth = FirebaseAuth.instanceFor(app: app);
-      auth.setApiClient(MockClient(_authorize));
       await auth.signInAnonymously();
+
       final result = await httpsCallable.call('auth');
       expect(result.data, equals('authorized'));
     });
