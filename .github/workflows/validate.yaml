@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v2
         name: Install Node.js 12
         with:
-          node-version: "12"
+          node-version: '12'
       - name: 'Install Flutter'
         run: ./.github/workflows/scripts/install-flutter.sh stable
       - name: 'Install Tools'
@@ -55,7 +55,8 @@ jobs:
       - name: Start Firebase Emulator
         run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
       - name: 'Run Tests'
-        run: melos run test --no-select
+        working-directory: tests
+        run: flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart
 
   test_windows:
     runs-on: windows-latest
@@ -67,7 +68,7 @@ jobs:
       - uses: actions/setup-node@v2
         name: Install Node.js 12
         with:
-          node-version: "12"
+          node-version: '12'
       - name: 'Install Flutter'
         run: .\.github\workflows\scripts\install-flutter.bat stable
       - name: 'Install Tools'
@@ -77,4 +78,5 @@ jobs:
       - name: Start Firebase Emulator
         run: cd .\.github\workflows\scripts && .\start-firebase-emulator.bat
       - name: 'Run Tests'
-        run: cmd /c melos run test --no-select
+        working-directory: tests
+        run: cmd /c flutter drive -d windows --no-pub --target=./test_driver/driver_e2e.dart

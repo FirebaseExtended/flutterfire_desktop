@@ -2,6 +2,7 @@ name: flutterfire_dart
 
 packages:
   - packages/**
+  - tests/*
 
 scripts:
   lint:all:
@@ -23,12 +24,23 @@ scripts:
     run: melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
     select-package:
       dir-exists:
-        - "test/"
+        - 'test/'
+
+  test:e2e:
+    run: |
+      melos exec -c 1 --fail-fast -- \
+        "flutter drive --no-pub --target=./test_driver/driver_e2e.dart"
+    description: |
+      Run all e2e tests.
+    select-package:
+      dir-exists:
+        - test_driver
+      scope: '*tests*'
 
   firebase:emulator:
-      run: |
-        cd .github/workflows/scripts && ./start-firebase-emulator.sh
-      description: |
-        Start the Firebase emulator suite. Used by Functions, Firestore, Auth and Storage
-        integration testing.
-        - Requires Node.js and NPM installed.
+    run: |
+      cd .github/workflows/scripts && ./start-firebase-emulator.sh
+    description: |
+      Start the Firebase emulator suite. Used by Functions, Firestore, Auth and Storage
+      integration testing.
+      - Requires Node.js and NPM installed.
