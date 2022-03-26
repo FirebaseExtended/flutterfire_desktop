@@ -54,9 +54,16 @@ jobs:
           sudo npm i -g firebase-tools
       - name: Start Firebase Emulator
         run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
+      - name: 'Install Linux Dependencies'
+        run: |
+          sudo apt update
+          sudo apt install -y cmake dbus libblkid-dev libgtk-3-dev liblzma-dev ninja-build pkg-config xvfb clang-format
+          sudo apt install -y libwebkit2gtk-4.0-dev
       - name: 'Run Tests'
         working-directory: tests
-        run: flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart
+        run: |
+          flutter config --enable-linux-desktop
+          flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
 
   test_windows:
     runs-on: windows-latest
