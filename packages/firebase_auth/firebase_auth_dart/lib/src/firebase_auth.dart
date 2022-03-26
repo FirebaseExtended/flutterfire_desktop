@@ -514,8 +514,6 @@ class FirebaseAuth {
   /// - **invalid-custom-token**:
   ///  - Thrown if the custom token format is incorrect.
   Future<UserCredential> signInWithCustomToken(String token) async {
-    const providerId = 'firebase';
-
     final response = await _api.signInWithCustomToken(token);
     final userData = await _api.getCurrentUser(response.idToken);
 
@@ -526,9 +524,9 @@ class FirebaseAuth {
 
     return UserCredential._(
       auth: this,
-      credential: const AuthCredential(
-        providerId: providerId,
-        signInMethod: providerId,
+      credential: AuthCredential(
+        providerId: ProviderId.custom.signInProvider,
+        signInMethod: ProviderId.custom.signInProvider,
       ),
       additionalUserInfo:
           AdditionalUserInfo(isNewUser: response.isNewUser ?? false),

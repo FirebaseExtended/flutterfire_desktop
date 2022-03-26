@@ -29,20 +29,35 @@ environment:
 dependencies:
   cloud_functions: ^3.2.10
   firebase_auth: ^3.3.11
-  firebase_auth_desktop: ^0.1.1-dev.6
   firebase_core: ^1.13.1
-  firebase_core_desktop: ^0.1.1-dev.3
-  firebase_functions_desktop: ^0.1.0-dev.5
+  firebase_auth_desktop:
+    path: ../packages/firebase_auth/firebase_auth_desktop
+  firebase_auth_dart:
+    path: ../packages/firebase_auth/firebase_auth_dart
+  firebase_core_desktop:
+    path: ../packages/firebase_core/firebase_core_desktop
+  firebase_core_dart:
+    path: ../packages/firebase_core/firebase_core_dart
+  firebase_functions_desktop:
+    path: ../packages/firebase_functions/firebase_functions_desktop
+  firebase_functions_dart:
+    path: ../packages/firebase_functions/firebase_functions_dart
   flutter:
     sdk: flutter
 
-dependencies_override:
-  firebase_functions_desktop:
-    path: ../packages/firebase_functions/firebase_functions_desktop
-  firebase_core_desktop:
-    path: ../packages/firebase_core/firebase_core_desktop
+dependency_overrides:
   firebase_auth_desktop:
     path: ../packages/firebase_auth/firebase_auth_desktop
+  firebase_auth_dart:
+    path: ../packages/firebase_auth/firebase_auth_dart
+  firebase_core_desktop:
+    path: ../packages/firebase_core/firebase_core_desktop
+  firebase_core_dart:
+    path: ../packages/firebase_core/firebase_core_dart
+  firebase_functions_desktop:
+    path: ../packages/firebase_functions/firebase_functions_desktop
+  firebase_functions_dart:
+    path: ../packages/firebase_functions/firebase_functions_dart
 
 dev_dependencies:
   drive: ^1.0.0-1.0.nullsafety.5
