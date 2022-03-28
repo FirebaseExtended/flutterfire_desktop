@@ -51,6 +51,7 @@ jobs:
       - name: 'Install Tools'
         run: |
           ./.github/workflows/scripts/install-tools.sh
+          flutter config --enable-linux-desktop
           sudo npm i -g firebase-tools
       - name: Start Firebase Emulator
         run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
@@ -62,7 +63,6 @@ jobs:
       - name: 'Run Tests'
         working-directory: tests
         run: |
-          flutter config --enable-linux-desktop
           flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
 
   test_windows:
@@ -90,7 +90,7 @@ jobs:
 
   test_macos:
     runs-on: macos-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
         with:
