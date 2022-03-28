@@ -87,3 +87,27 @@ jobs:
       - name: 'Run Tests'
         working-directory: tests
         run: cmd /c flutter drive -d windows --no-pub --target=./test_driver/driver_e2e.dart
+
+  test_macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        name: Install Node.js 12
+        with:
+          node-version: '12'
+      - name: 'Install Flutter'
+        run: ./.github/workflows/scripts/install-flutter.sh stable
+      - name: 'Install Tools'
+        run: |
+          ./.github/workflows/scripts/install-tools.sh
+          flutter config --enable-macos-desktop
+          sudo npm i -g firebase-tools
+      - name: Start Firebase Emulator
+        run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
+      - name: 'Run Tests'
+        working-directory: tests
+        run: flutter drive -d macos --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
