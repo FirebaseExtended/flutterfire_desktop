@@ -155,6 +155,8 @@ class User {
   /// If [forceRefresh] is `true`, the token returned will be refresh regardless
   /// of token expiration.
   Future<String> getIdToken([bool forceRefresh = false]) async {
+    _assertSignedOut(_auth);
+
     await _refreshIdToken(forceRefresh);
 
     return _idToken;
@@ -166,15 +168,17 @@ class User {
   /// If [forceRefresh] is `true`, the token returned will be refresh regardless
   /// of token expiration.
   Future<IdTokenResult> getIdTokenResult([bool forceRefresh = false]) async {
+    _assertSignedOut(_auth);
+
     await _refreshIdToken(forceRefresh);
 
     return IdTokenResult(_decodedIdToken);
   }
 
-  Future _refreshIdToken(bool forceRefresh) async {
-    if (forceRefresh || _decodedIdToken.isValidTimestamp) {
-      _user['idToken'] = await _auth._api.refreshIdToken(refreshToken);
-      _auth._idTokenChangedController.add(this);
+  Future<void> _refreshIdToken(bool forceRefresh) async {
+    if (forceRefresh || !_decodedIdToken.isValidTimestamp) {
+      _setIdToken(await _auth._api.refreshIdToken(refreshToken));
+      _auth._updateCurrentUserAndEvents(this);
     }
   }
 

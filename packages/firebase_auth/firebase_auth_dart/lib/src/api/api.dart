@@ -346,7 +346,7 @@ class API {
       return await _exchangeRefreshWithIdToken(refreshToken);
     } on HttpException catch (_) {
       rethrow;
-    } catch (exception) {
+    } catch (_) {
       rethrow;
     }
   }
