@@ -1,10 +1,14 @@
+// Copyright 2019, the Chromium project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import 'dart:convert';
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:http/http.dart' as http;
 
-const mockEmail = 'test@test.com';
-const mockPassword = 'password';
+const testEmail = 'test@test.com';
+const testPassword = 'password';
 const photoURL =
     'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
 const displayName = 'Invertase';
@@ -46,12 +50,6 @@ Future<String?> emulatorPhoneVerificationCode(String phoneNumber) async {
     (verificationCode) => verificationCode['phoneNumber'] == phoneNumber,
     orElse: () => {'code': 'NOT_FOUND'},
   )['code'];
-}
-
-Future<void> ensureSignedOut() async {
-  if (FirebaseAuth.instance.currentUser != null) {
-    await FirebaseAuth.instance.signOut();
-  }
 }
 
 /// Create a custom authentication token with optional claims and tenant id.
@@ -102,4 +100,31 @@ String emulatorCreateCustomToken(
   // Alg is set to none so signature should be empty.
   const jwtSignature = '';
   return '$jwtHeaderEncoded.$jwtBodyEncoded.$jwtSignature';
+}
+
+Future<void> ensureSignedIn(String testEmail) async {
+  if (FirebaseAuth.instance.currentUser == null) {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        testEmail,
+        testPassword,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          testEmail,
+          testPassword,
+        );
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('ensureSignedIn Error $e');
+    }
+  }
+}
+
+Future<void> ensureSignedOut() async {
+  if (FirebaseAuth.instance.currentUser != null) {
+    await FirebaseAuth.instance.signOut();
+  }
 }
