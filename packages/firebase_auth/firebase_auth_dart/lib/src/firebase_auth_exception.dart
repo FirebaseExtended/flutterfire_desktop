@@ -6,9 +6,11 @@ import 'package:firebase_core_dart/firebase_core_dart.dart';
 
 /// All possible error codes returned from Identity Platform REST API.
 const Map error = {
-  'EMAIL_NOT_FOUND': 'There is no registered user corresponding to this email.',
-  'INVALID_PASSWORD': 'The password of this user is invalid.',
-  'USER_DISABLED': 'The user exists but is disabled.',
+  'EMAIL_NOT_FOUND':
+      'There is no user record corresponding to this identifier. The user may have been deleted.',
+  'INVALID_PASSWORD':
+      'The password is invalid or the user does not have a password.',
+  'USER_DISABLED': 'The user account has been disabled by an administrator.',
   'EMAIL_EXISTS': 'The user is trying to sign up with an existed email.',
   'OPERATION_NOT_ALLOWED':
       'Password sign-in feature is disabled for this project.',
@@ -63,6 +65,27 @@ class FirebaseAuthException extends FirebaseException implements Exception {
 
   /// Map to error code that matches the rest of FlutterFire plugins.
   static String _getCode(String code) {
-    return code.toLowerCase().replaceAll('error_', '').replaceAll('_', '-');
+    var _code = code;
+
+    // To be consistent with FlutterFire.
+    switch (_code) {
+      case 'INVALID_OOB_CODE':
+        _code = 'INVALID_ACTION_CODE';
+        break;
+      case 'EMAIL_EXISTS':
+        _code = 'EMAIL_ALREADY_IN_USE';
+        break;
+      case 'INVALID_IDENTIFIER':
+        _code = 'INVALID_EMAIL';
+        break;
+      case 'EMAIL_NOT_FOUND':
+        _code = 'USER_NOT_FOUND';
+        break;
+      case 'INVALID_PASSWORD':
+        _code = 'WRONG_PASSWORD';
+        break;
+    }
+
+    return _code.toLowerCase().replaceAll('error_', '').replaceAll('_', '-');
   }
 }
