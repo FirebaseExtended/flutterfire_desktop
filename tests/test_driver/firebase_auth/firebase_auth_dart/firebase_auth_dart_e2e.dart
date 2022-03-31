@@ -40,14 +40,16 @@ void setupTests() {
         testEmail,
         testPassword,
       );
+
       // Create a disabled user account.
-      // final disabledUserCredential =
-      //     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      // testDisabledEmail,
-      //  testPassword,
-      // );
-      // await emulatorDisableUser(disabledUserCredential.user!.uid);
-      // await ensureSignedOut();
+      final disabledUserCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        testDisabledEmail,
+        testPassword,
+      );
+
+      await emulatorDisableUser(disabledUserCredential.user!.uid);
+      await ensureSignedOut();
     });
 
     instance_tests.setupTests();
