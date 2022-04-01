@@ -137,6 +137,8 @@ class User {
   ///
   Future<void> delete() async {
     try {
+      _assertSignedOut(_auth);
+
       await _auth._api.delete(_idToken, uid);
       await _auth.signOut();
     } catch (e) {
@@ -516,7 +518,7 @@ void _assertSignedOut(FirebaseAuth instance) {
   if (instance.currentUser != null) {
     return;
   } else {
-    throw FirebaseAuthException(code: 'NOT_SIGNED_IN');
+    throw FirebaseAuthException(code: 'NO_CURRENT_USER');
   }
 }
 
