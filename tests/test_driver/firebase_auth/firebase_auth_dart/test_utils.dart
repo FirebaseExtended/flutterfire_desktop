@@ -11,6 +11,8 @@ import 'package:http/http.dart' as http;
 const testEmail = 'test@test.com';
 const testDisabledEmail = 'disabled@example.com';
 const testPassword = 'password';
+const testPhoneNumber = '+447111555666';
+
 const photoURL =
     'https://images.pexels.com/photos/320014/pexels-photo-320014.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260';
 const displayName = 'Invertase';
