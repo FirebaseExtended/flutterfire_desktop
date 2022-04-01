@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas
+// ignore_for_file: require_trailing_commas, avoid_dynamic_calls
 
 part of firebase_auth_dart;
 
@@ -49,7 +49,6 @@ class User {
 
   /// Returns whether the user is a anonymous.
   bool get isAnonymous {
-    // ignore: avoid_dynamic_calls
     return _castProviderFromIdToken(IdTokenResult(_decodedIdToken)) ==
         ProviderId.anonymous;
   }
@@ -75,14 +74,12 @@ class User {
 
   /// Returns a list of user information for each linked provider.
   List<UserInfo> get providerData {
-    // ignore: avoid_dynamic_calls
     return _user['providerUserInfo']
             ?.map((userInfo) {
               if (userInfo is idp.UserInfoProviderUserInfo) {
                 userInfo = userInfo.toJson();
               }
               return UserInfo(
-                // ignore: avoid_dynamic_calls
                 userInfo.cast<String, String?>()
                   ..addAll(<String, String?>{'uid': _user['uid']}),
               );
@@ -121,6 +118,7 @@ class User {
   /// ID given does not exist.
   Future<User> unlink(String providerId) async {
     try {
+      //TODO(pr-mais): implement
       // await _auth._api.unlink();
       // await reload();
       throw UnimplementedError();
@@ -187,17 +185,24 @@ class User {
   Future<UserCredential> linkWithCredential(AuthCredential credential) async {
     try {
       if (credential is EmailAuthCredential) {
-        await _auth._api.linkWithEmail(
+        final response = await _auth._api.linkWithEmail(
           _idToken,
           credential: credential,
         );
 
+        _setIdToken(response.idToken);
         await reload();
 
         return UserCredential._(
           auth: _auth,
           credential: credential,
         );
+      } else if (credential is PhoneAuthCredential) {
+        final confirmationResult = ConfirmationResult(
+          _auth,
+          credential.verificationId!,
+        );
+        return await confirmationResult.confirm(credential.smsCode!);
       } else if (credential is GoogleAuthCredential) {
         final response = await _auth._api.signInWithOAuthCredential(
           idToken: _idToken,
@@ -207,6 +212,7 @@ class User {
           requestUri: _auth.app.options.authDomain,
         );
 
+        _setIdToken(response.idToken);
         await reload();
 
         return UserCredential._(
@@ -243,6 +249,10 @@ class User {
 
     try {
       if (credential is EmailAuthCredential) {
+        if (credential.email != email) {
+          throw FirebaseAuthException(code: 'USER_MISMATCH');
+        }
+
         final response = await _auth._api
             .signInWithEmailAndPassword(credential.email, credential.password!);
 
@@ -335,8 +345,17 @@ class User {
   Future<void> reload() async {
     _assertSignedOut(_auth);
 
-    _user.addAll(await _auth._reloadCurrentUser(_idToken));
-    _auth._updateCurrentUserAndEvents(_auth.currentUser);
+    final user = await _auth._reloadCurrentUser(_idToken);
+
+    if (!user.containsKey('displayName')) {
+      user['displayName'] = null;
+    }
+    if (!user.containsKey('photoUrl')) {
+      user['photoUrl'] = null;
+    }
+
+    _user.addAll(user);
+    _auth._updateCurrentUserAndEvents(this);
   }
 
   /// Updates the user's email address.
@@ -434,25 +453,30 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api
-          .updateProfile({'displayName': displayName}, _idToken, uid);
-      await reload();
+      await _auth._api.updateProfile(
+        _idToken,
+        uid,
+        displayName: displayName,
+      );
     } catch (e) {
       throw _auth._getException(e);
     }
   }
 
-  /// Update user's photoURL.
+  /// Update user's photoUrl.
   ///
   /// Throws [FirebaseAuthException] with following possible codes:
   /// - `email-not-found`: user doesn't exist
   /// TODO
-  Future<void> updatePhotoURL(String? photoURL) async {
+  Future<void> updatePhotoURL(String? photoUrl) async {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updateProfile({'photoURL': photoURL}, _idToken, uid);
-      await reload();
+      await _auth._api.updateProfile(
+        _idToken,
+        uid,
+        photoUrl: photoUrl,
+      );
     } catch (e) {
       throw _auth._getException(e);
     }
@@ -463,11 +487,19 @@ class User {
   /// Throws [FirebaseAuthException] with following possible codes:
   /// - `email-not-found`: user doesn't exist
   /// TODO
-  Future<void> updateProfile(Map<String, dynamic> newProfile) async {
+  Future<void> updateProfile({
+    String? photoUrl = '',
+    String? displayName = '',
+  }) async {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updateProfile(newProfile, _idToken, uid);
+      await _auth._api.updateProfile(
+        _idToken,
+        uid,
+        displayName: displayName,
+        photoUrl: photoUrl,
+      );
       await reload();
     } catch (e) {
       throw _auth._getException(e);
