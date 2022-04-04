@@ -7,6 +7,7 @@ import 'package:firebase_core_dart/firebase_core_dart.dart';
 
 import 'package:drive/drive.dart';
 
+import '../../firebase_options_dart.dart';
 import 'test_utils.dart';
 import 'firebase_auth_instance_e2e.dart' as instance_tests;
 import 'firebase_auth_user_e2e.dart' as user_tests;
@@ -14,18 +15,7 @@ import 'firebase_auth_user_e2e.dart' as user_tests;
 void setupTests() {
   group('firebase_auth', () {
     setUpAll(() async {
-      const options = FirebaseOptions(
-        apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-        authDomain: 'react-native-firebase-testing.firebaseapp.com',
-        databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
-        projectId: 'react-native-firebase-testing',
-        storageBucket: 'react-native-firebase-testing.appspot.com',
-        messagingSenderId: '448618578101',
-        appId: '1:448618578101:web:0b650370bb29e29cac3efc',
-        measurementId: 'G-F79DJ0VFGS',
-      );
-
-      await Firebase.initializeApp(options: options);
+      await Firebase.initializeApp(options: optionsDart);
 
       if (useEmulator) {
         await FirebaseAuth.instance.useAuthEmulator();
