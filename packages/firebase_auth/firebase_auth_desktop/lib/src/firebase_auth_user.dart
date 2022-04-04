@@ -191,7 +191,10 @@ class User extends UserPlatform {
   /// Update the user's profile.
   @override
   Future<void> updateProfile(Map<String, dynamic> newProfile) {
-    return _user.updateProfile(newProfile);
+    return _user.updateProfile(
+      displayName: newProfile['displayName'],
+      photoUrl: newProfile['photoURL'],
+    );
   }
 
   @override

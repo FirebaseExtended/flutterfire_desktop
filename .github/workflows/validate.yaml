@@ -45,17 +45,26 @@ jobs:
       - uses: actions/setup-node@v2
         name: Install Node.js 12
         with:
-          node-version: "12"
+          node-version: '12'
       - name: 'Install Flutter'
         run: ./.github/workflows/scripts/install-flutter.sh stable
       - name: 'Install Tools'
         run: |
           ./.github/workflows/scripts/install-tools.sh
+          flutter config --enable-linux-desktop
           sudo npm i -g firebase-tools
       - name: Start Firebase Emulator
         run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
+      - name: 'Install Linux Dependencies'
+        run: |
+          sudo apt update
+          sudo apt install -y cmake dbus libblkid-dev libgtk-3-dev liblzma-dev ninja-build pkg-config xvfb clang-format
+          sudo apt install -y libwebkit2gtk-4.0-dev
+          sudo apt install -y xvfb
       - name: 'Run Tests'
-        run: melos run test --no-select
+        working-directory: tests
+        run: |
+          xvfb-run -a flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
 
   test_windows:
     runs-on: windows-latest
@@ -67,7 +76,7 @@ jobs:
       - uses: actions/setup-node@v2
         name: Install Node.js 12
         with:
-          node-version: "12"
+          node-version: '12'
       - name: 'Install Flutter'
         run: .\.github\workflows\scripts\install-flutter.bat stable
       - name: 'Install Tools'
@@ -77,4 +86,58 @@ jobs:
       - name: Start Firebase Emulator
         run: cd .\.github\workflows\scripts && .\start-firebase-emulator.bat
       - name: 'Run Tests'
-        run: cmd /c melos run test --no-select
+        working-directory: tests
+        run: cmd /c flutter drive -d windows --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
+
+  test_macos:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        name: Install Node.js 12
+        with:
+          node-version: '12'
+      - uses: hendrikmuhs/ccache-action@v1
+        name: Xcode Compile Cache
+        with:
+          key: ${{ runner.os }}-macos-v2
+          max-size: 700M
+      - uses: actions/cache@v2
+        name: Pods Cache
+        id: pods-cache
+        with:
+          path: tests/macos/Pods
+          key: ${{ runner.os }}-pods-v2-${{ hashFiles('tests/macos/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-macos-pods-v1
+      - name: Cache Firebase Emulator
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-v1-${{ github.run_id }}
+          restore-keys: firebase-emulators-v1
+      - name: 'Install Flutter'
+        run: ./.github/workflows/scripts/install-flutter.sh stable
+      - name: 'Install Tools'
+        run: |
+          ./.github/workflows/scripts/install-tools.sh
+          flutter config --enable-macos-desktop
+          sudo npm i -g firebase-tools
+      - name: 'Build Application'
+        working-directory: tests
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          export CCACHE_SLOPPINESS=clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros
+          export CCACHE_FILECLONE=true
+          export CCACHE_DEPEND=true
+          export CCACHE_INODECACHE=true
+          ccache -s
+          flutter build macos --debug --target=./test_driver/driver_e2e.dart --device-id=macos --dart-define=CI=true
+          ccache -s
+      - name: Start Firebase Emulator
+        run: cd ./.github/workflows/scripts && ./start-firebase-emulator.sh
+      - name: 'Run Tests'
+        working-directory: tests
+        run: flutter drive -d macos --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true

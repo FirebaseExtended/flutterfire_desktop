@@ -9,7 +9,6 @@ import 'package:yaru/yaru.dart';
 import 'auth.dart';
 import 'profile.dart';
 
-/// Initialize with a secondary app until dart-only initialization is merged.
 FirebaseOptions get firebaseOptions => const FirebaseOptions(
       apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
       authDomain: 'react-native-firebase-testing.firebaseapp.com',

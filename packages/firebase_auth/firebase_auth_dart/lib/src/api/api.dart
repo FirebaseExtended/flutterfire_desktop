@@ -284,13 +284,22 @@ class API {
 
   /// TODO: write endpoint details
   Future<idp.SetAccountInfoResponse> updateProfile(
-      Map<String, dynamic> newProfile, String idToken, String uid) async {
+    String idToken,
+    String uid, {
+    String? photoUrl = '',
+    String? displayName = '',
+  }) async {
     final _response = await identityToolkit.setAccountInfo(
       idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        displayName: newProfile['displayName'],
-        photoUrl: newProfile['photoURL'],
+        displayName: displayName == '' ? null : displayName,
+        photoUrl: photoUrl == '' ? null : photoUrl,
         idToken: idToken,
         localId: uid,
+        returnSecureToken: true,
+        deleteAttribute: [
+          if (photoUrl == null) 'PHOTO_URL',
+          if (displayName == null) 'DISPLAY_NAME'
+        ],
       ),
     );
     return _response;
@@ -346,7 +355,7 @@ class API {
       return await _exchangeRefreshWithIdToken(refreshToken);
     } on HttpException catch (_) {
       rethrow;
-    } catch (exception) {
+    } catch (_) {
       rethrow;
     }
   }

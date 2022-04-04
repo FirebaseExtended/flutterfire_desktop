@@ -6,10 +6,13 @@ import 'package:firebase_core_dart/firebase_core_dart.dart';
 
 /// All possible error codes returned from Identity Platform REST API.
 const Map error = {
-  'EMAIL_NOT_FOUND': 'There is no registered user corresponding to this email.',
-  'INVALID_PASSWORD': 'The password of this user is invalid.',
-  'USER_DISABLED': 'The user exists but is disabled.',
-  'EMAIL_EXISTS': 'The user is trying to sign up with an existed email.',
+  'EMAIL_NOT_FOUND':
+      'There is no user record corresponding to this identifier. The user may have been deleted.',
+  'WRONG_PASSWORD':
+      'The password is invalid or the user does not have a password.',
+  'USER_DISABLED': 'The user account has been disabled by an administrator.',
+  'EMAIL_ALREADY_IN_USE':
+      'The email address is already in use by another account.',
   'OPERATION_NOT_ALLOWED':
       'Password sign-in feature is disabled for this project.',
   'TOO_MANY_ATTEMPTS_TRY_LATER':
@@ -17,11 +20,11 @@ const Map error = {
   'INVALID_EMAIL': 'The email address is badly formatted.',
   'INVALID_IDENTIFIER':
       'The identifier provided to `createAuthUri` is invalid.',
-  'NOT_SIGNED_IN': 'The operation requires a user to be signed in.',
+  'NO_CURRENT_USER': 'No user currently signed in.',
   'INVALID_ID_TOKEN':
       "The user's credential is no longer valid. The user must sign in or reauthenticate.",
   'USER_NOT_FOUND':
-      "The user's credential is no longer valid. The user must sign in or reauthenticate.",
+      'There is no user record corresponding to this identifier. The user may have been deleted.',
   'TOKEN_EXPIRED':
       "The user's credential is no longer valid. The user must sign in again.",
   'INVALID_REFRESH_TOKEN':
@@ -35,7 +38,7 @@ const Map error = {
   'EXPIRED_OOB_CODE': 'The action code has expired.',
   'INVALID_OOB_CODE':
       'The action code is invalid. This can happen if the code is malformed, expired, or has already been used.',
-  'WEAK_PASSWORD': 'The password must be 6 characters long or more.',
+  'WEAK_PASSWORD': 'Password should be at least 6 characters.',
   'CREDENTIAL_TOO_OLD_LOGIN_AGAIN':
       "The user's credential is no longer valid. The user must sign in again.",
   'FEDERATED_USER_ID_ALREADY_LINKED':
@@ -47,7 +50,11 @@ const Map error = {
       'The reCAPTCHA response token was invalid, expired, or is called from a non-whitelisted domain.',
   'NEED_CONFIRMATION': 'Account exists with different credential.',
   'VERIFICATION_CANCELED':
-      'Recaptcha verification process was canceled by user.'
+      'Recaptcha verification process was canceled by user.',
+  'INVALID_VERIFICATION_ID':
+      'The verification ID used to create the phone auth credential is invalid.',
+  'USER_MISMATCH':
+      'The supplied credentials do not correspond to the previously signed in user.',
 };
 
 /// Wrap the errors from the Identity Platform REST API, usually of type `DetailedApiRequestError`
@@ -58,11 +65,42 @@ class FirebaseAuthException extends FirebaseException implements Exception {
       : super(
           plugin: 'firebase_auth',
           code: _getCode(code),
-          message: error[code] ?? message,
+          message: error[_castCode(code)] ?? message,
         );
+
+  static String _castCode(String code) {
+    var _code = code;
+
+    // To be consistent with FlutterFire.
+    switch (_code) {
+      case 'INVALID_OOB_CODE':
+        _code = 'INVALID_ACTION_CODE';
+        break;
+      case 'EMAIL_EXISTS':
+        _code = 'EMAIL_ALREADY_IN_USE';
+        break;
+      case 'INVALID_IDENTIFIER':
+        _code = 'INVALID_EMAIL';
+        break;
+      case 'EMAIL_NOT_FOUND':
+        _code = 'USER_NOT_FOUND';
+        break;
+      case 'INVALID_PASSWORD':
+        _code = 'WRONG_PASSWORD';
+        break;
+      case 'INVALID_SESSION_INFO':
+        _code = 'INVALID_VERIFICATION_ID';
+        break;
+    }
+
+    return _code;
+  }
 
   /// Map to error code that matches the rest of FlutterFire plugins.
   static String _getCode(String code) {
-    return code.toLowerCase().replaceAll('error_', '').replaceAll('_', '-');
+    return _castCode(code)
+        .toLowerCase()
+        .replaceAll('error_', '')
+        .replaceAll('_', '-');
   }
 }
