@@ -330,6 +330,17 @@ class API {
   }
 
   /// TODO: write endpoint details
+  Future<idp.SetAccountInfoResponse> unlink(
+      String idToken, String providerId) async {
+    return identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        deleteProvider: [providerId],
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
   Future<idp.UserInfo> getCurrentUser(String? idToken) async {
     final _response = await identityToolkit.getAccountInfo(
       idp.IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
