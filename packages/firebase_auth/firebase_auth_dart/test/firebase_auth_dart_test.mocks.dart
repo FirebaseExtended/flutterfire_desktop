@@ -136,13 +136,16 @@ class MockUser extends _i1.Mock implements _i2.User {
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
-  _i4.Future<void> updatePhotoURL(String? photoURL) =>
-      (super.noSuchMethod(Invocation.method(#updatePhotoURL, [photoURL]),
+  _i4.Future<void> updatePhotoURL(String? photoUrl) =>
+      (super.noSuchMethod(Invocation.method(#updatePhotoURL, [photoUrl]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
-  _i4.Future<void> updateProfile(Map<String, dynamic>? newProfile) =>
-      (super.noSuchMethod(Invocation.method(#updateProfile, [newProfile]),
+  _i4.Future<void> updateProfile(
+          {String? photoUrl = r'', String? displayName = r''}) =>
+      (super.noSuchMethod(
+          Invocation.method(#updateProfile, [],
+              {#photoUrl: photoUrl, #displayName: displayName}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i4.Future<void>);
   @override
@@ -167,10 +170,6 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
       super.noSuchMethod(Invocation.setter(#app, _app),
           returnValueForMissingStub: null);
   @override
-  set currentUser(_i2.User? _currentUser) =>
-      super.noSuchMethod(Invocation.setter(#currentUser, _currentUser),
-          returnValueForMissingStub: null);
-  @override
   void setApiClient(_i7.Client? client) =>
       super.noSuchMethod(Invocation.method(#setApiClient, [client]),
           returnValueForMissingStub: null);
@@ -182,6 +181,10 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
   _i4.Stream<_i2.User?> idTokenChanges() =>
       (super.noSuchMethod(Invocation.method(#idTokenChanges, []),
           returnValue: Stream<_i2.User?>.empty()) as _i4.Stream<_i2.User?>);
+  @override
+  void setLanguageCode(String? languageCode) =>
+      super.noSuchMethod(Invocation.method(#setLanguageCode, [languageCode]),
+          returnValueForMissingStub: null);
   @override
   _i4.Future<_i2.UserCredential> signInWithEmailAndPassword(
           String? email, String? password) =>
@@ -242,6 +245,12 @@ class MockFirebaseAuth extends _i1.Mock implements _i2.FirebaseAuth {
           _i2.AuthCredential? credential) =>
       (super.noSuchMethod(
               Invocation.method(#signInWithCredential, [credential]),
+              returnValue:
+                  Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
+          as _i4.Future<_i2.UserCredential>);
+  @override
+  _i4.Future<_i2.UserCredential> signInWithCustomToken(String? token) =>
+      (super.noSuchMethod(Invocation.method(#signInWithCustomToken, [token]),
               returnValue:
                   Future<_i2.UserCredential>.value(_FakeUserCredential_2()))
           as _i4.Future<_i2.UserCredential>);
