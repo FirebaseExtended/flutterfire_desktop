@@ -60,14 +60,11 @@ jobs:
           sudo apt update
           sudo apt install -y cmake dbus libblkid-dev libgtk-3-dev liblzma-dev ninja-build pkg-config xvfb clang-format
           sudo apt install -y libwebkit2gtk-4.0-dev
-      - name: 'Build Application'
-        working-directory: tests
-        run: |
-          flutter build linux --debug --target=./test_driver/driver_e2e.dart --device-id=linux --dart-define=CI=true
+          sudo apt install -y xvfb
       - name: 'Run Tests'
         working-directory: tests
         run: |
-          flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
+          xvfb-run -a flutter drive -d linux --no-pub --target=./test_driver/driver_e2e.dart --dart-define=CI=true
 
   test_windows:
     runs-on: windows-latest
