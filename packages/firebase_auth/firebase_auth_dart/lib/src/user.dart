@@ -118,10 +118,19 @@ class User {
   /// ID given does not exist.
   Future<User> unlink(String providerId) async {
     try {
-      //TODO(pr-mais): implement
-      // await _auth._api.unlink();
-      // await reload();
-      throw UnimplementedError();
+      _assertSignedOut(_auth);
+
+      final currentProviders = providerData.map((p) => p.providerId).toList();
+
+      if (providerId.providerId == ProviderId.unknown ||
+          !currentProviders.contains(providerId)) {
+        throw FirebaseAuthException(code: 'NO_SUCH_PROVIDER');
+      }
+
+      await _auth._api.unlink(_idToken, providerId);
+      await reload();
+
+      return this;
     } catch (e) {
       throw _auth._getException(e);
     }

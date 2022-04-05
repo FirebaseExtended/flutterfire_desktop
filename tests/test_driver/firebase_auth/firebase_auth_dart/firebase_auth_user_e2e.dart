@@ -210,11 +210,9 @@ void setupTests() {
           );
           expect(FirebaseAuth.instance.currentUser!.isAnonymous, isFalse);
 
-          //TODO(pr-mais): uncomment once unlink is implemented
-
-          // await FirebaseAuth.instance.currentUser
-          //     ?.unlink(PhoneAuthProvider.PROVIDER_ID);
-          // await FirebaseAuth.instance.currentUser?.delete();
+          await FirebaseAuth.instance.currentUser
+              ?.unlink(PhoneAuthProvider.PROVIDER_ID);
+          await FirebaseAuth.instance.currentUser?.delete();
         },
       );
 
@@ -445,7 +443,6 @@ void setupTests() {
       );
     });
 
-    //TODO(pr-mais): skip until implemented
     group('unlink()', () {
       test('should unlink the email address', () async {
         // Setup
@@ -483,20 +480,16 @@ void setupTests() {
         User linkedUser = FirebaseAuth.instance.currentUser!;
         expect(linkedUser.email, email);
 
-        // Test
-        try {
-          await FirebaseAuth.instance.currentUser!.unlink('invalid');
-        } on FirebaseAuthException catch (e) {
-          expect(e.code, 'no-such-provider');
-          expect(
-            e.message,
-            'User was not linked to an account with the given provider.',
-          );
-          return;
-        } catch (e) {
-          fail('should have thrown an FirebaseAuthException error');
-        }
-        fail('should have thrown an error');
+        await expectLater(
+          FirebaseAuth.instance.currentUser!.unlink('invalid'),
+          throwsA(
+            isA<FirebaseAuthException>().having(
+              (p0) => p0.code,
+              'Throws no-such-provider exception',
+              'no-such-provider',
+            ),
+          ),
+        );
       });
 
       test('should throw error if user does not have this provider linked',
@@ -504,22 +497,19 @@ void setupTests() {
         // Setup
         await FirebaseAuth.instance.signInAnonymously();
         // Test
-        try {
-          await FirebaseAuth.instance.currentUser!
-              .unlink(EmailAuthProvider.PROVIDER_ID);
-        } on FirebaseAuthException catch (e) {
-          expect(e.code, 'no-such-provider');
-          expect(
-            e.message,
-            'User was not linked to an account with the given provider.',
-          );
-          return;
-        } catch (e) {
-          fail('should have thrown an FirebaseAuthException error');
-        }
-        fail('should have thrown an error');
+        await expectLater(
+          FirebaseAuth.instance.currentUser!
+              .unlink(EmailAuthProvider.PROVIDER_ID),
+          throwsA(
+            isA<FirebaseAuthException>().having(
+              (p0) => p0.code,
+              'Throws no-such-provider exception',
+              'no-such-provider',
+            ),
+          ),
+        );
       });
-    }, skip: true);
+    });
 
     group('updateEmail()', () {
       test('should update the email address', () async {

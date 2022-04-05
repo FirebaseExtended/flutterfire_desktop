@@ -55,6 +55,8 @@ const Map error = {
       'The verification ID used to create the phone auth credential is invalid.',
   'USER_MISMATCH':
       'The supplied credentials do not correspond to the previously signed in user.',
+  'NO_SUCH_PROVIDER':
+      'User was not linked to an account with the given provider.',
 };
 
 /// Wrap the errors from the Identity Platform REST API, usually of type `DetailedApiRequestError`

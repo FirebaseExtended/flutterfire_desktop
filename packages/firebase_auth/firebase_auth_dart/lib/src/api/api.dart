@@ -190,6 +190,10 @@ class API {
       ),
     );
 
+    if (response.errorMessage != null) {
+      throw idp.DetailedApiRequestError(null, response.errorMessage);
+    }
+
     return response;
   }
 
@@ -325,6 +329,17 @@ class API {
         idToken: idToken,
         email: credential.email,
         password: credential.password,
+      ),
+    );
+  }
+
+  /// TODO: write endpoint details
+  Future<idp.SetAccountInfoResponse> unlink(
+      String idToken, String providerId) async {
+    return identityToolkit.setAccountInfo(
+      idp.IdentitytoolkitRelyingpartySetAccountInfoRequest(
+        idToken: idToken,
+        deleteProvider: [providerId],
       ),
     );
   }
