@@ -11,6 +11,9 @@ enum ProviderId {
   /// `phone` sign-in provider.
   phone,
 
+  /// `google.com` sign-in provider.
+  google,
+
   /// `facebook.com` sign-in provider.
   facebook,
 
@@ -64,6 +67,8 @@ extension ProviderIdFromString on String {
         return ProviderId.password;
       case 'phone':
         return ProviderId.phone;
+      case 'google.com':
+        return ProviderId.google;
       case 'facebook.com':
         return ProviderId.facebook;
       case 'github.com':
