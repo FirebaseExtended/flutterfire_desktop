@@ -23,9 +23,9 @@ environment:
 dependencies:
   desktop_webview_auth: ^0.0.6
   firebase_auth: ^3.3.7
-  firebase_auth_desktop: ^0.1.1-dev.6
+  firebase_auth_desktop: ^0.1.1
   firebase_core: ^1.12.0
-  firebase_core_desktop: ^0.1.1-dev.3
+  firebase_core_desktop: ^0.1.1
   flutter:
     sdk: flutter
   flutter_lints: ^1.0.4

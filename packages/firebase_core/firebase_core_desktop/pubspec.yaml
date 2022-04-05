@@ -2,14 +2,14 @@ name: firebase_core_desktop
 description: Desktop implementation of firebase_core
 homepage: https://firebase.flutter.dev
 repository: https://github.com/invertase/flutterfire_dart
-version: 0.1.1-dev.3
+version: 0.1.1
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.20.0"
 
 dependencies:
-  firebase_core_dart: ^0.1.1-dev.2
+  firebase_core_dart: ^0.1.1
   firebase_core_platform_interface: ^4.1.0
   flutter:
     sdk: flutter
