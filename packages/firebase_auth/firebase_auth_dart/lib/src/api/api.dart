@@ -190,6 +190,10 @@ class API {
       ),
     );
 
+    if (response.errorMessage != null) {
+      throw idp.DetailedApiRequestError(null, response.errorMessage);
+    }
+
     return response;
   }
 

@@ -127,8 +127,8 @@ class User {
         throw FirebaseAuthException(code: 'NO_SUCH_PROVIDER');
       }
 
-      final response = await _auth._api.unlink(_idToken, providerId);
-      _user.addAll(response.toJson());
+      await _auth._api.unlink(_idToken, providerId);
+      await reload();
 
       return this;
     } catch (e) {
