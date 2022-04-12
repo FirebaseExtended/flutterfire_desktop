@@ -31,7 +31,7 @@ class AuthEmulator {
   final APIConfig _config;
 
   /// TODO: write endpoint details
-  Future<Map> useEmulator(String host, int port) async {
+  Future<Map<String, dynamic>> useEmulator(String host, int port) async {
     // 1. Get the emulator project configs, it must be initialized first.
     // http://localhost:9099/emulator/v1/projects/{project-id}/config
     final localEmulator = Uri(
@@ -49,7 +49,8 @@ class AuthEmulator {
       return {};
     }
 
-    final Map emulatorProjectConfig = json.decode(response.body);
+    final Map<String, dynamic> emulatorProjectConfig =
+        json.decode(response.body);
 
     // set the the emulator config for this instance.
     _config.setEmulator(host, port);
