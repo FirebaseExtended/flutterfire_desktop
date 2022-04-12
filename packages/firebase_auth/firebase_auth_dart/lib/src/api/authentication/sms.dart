@@ -1,13 +1,6 @@
 // ignore_for_file: require_trailing_commas
-import 'dart:async';
 
-import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
-import 'package:meta/meta.dart';
-
-import '../../firebase_auth_exception.dart';
-import '../api.dart';
-import 'recaptcha/recaptcha_args.dart';
-import 'recaptcha/recaptcha_verifier.dart';
+part of api;
 
 /// A return type from Idp phone authentication requests.
 @internal
@@ -48,11 +41,13 @@ class SignInWithPhoneNumberResponse {
   }
 }
 
-/// The instance used for phone authentication with idp.
+/// Class wrapping methods that calls to the following endpoints:
+/// - `verifyPhoneNumber`: verify a phone number using a verification id and sms code.
+/// - `sendVerificationCode`: send an sms login code.
 @internal
-class PhoneAuthAPI {
-  /// Construct a new [PhoneAuthAPI].
-  PhoneAuthAPI(this._api);
+class SmsAuth {
+  /// Construct a new [SmsAuth].
+  SmsAuth(this._api);
 
   /// The [API] instance containing required configurations to make the requests.
   final API _api;
@@ -116,7 +111,7 @@ class PhoneAuthAPI {
   }) async {
     try {
       final response = await _api.identityToolkit.verifyPhoneNumber(
-        idp.IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
+        IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
           code: smsCode,
           sessionInfo: verificationId,
           idToken: idToken,
@@ -188,7 +183,7 @@ class PhoneAuthAPI {
     try {
       // Send SMS code.
       final response = await _api.identityToolkit.sendVerificationCode(
-        idp.IdentitytoolkitRelyingpartySendVerificationCodeRequest(
+        IdentitytoolkitRelyingpartySendVerificationCodeRequest(
           phoneNumber: phoneNumber,
           recaptchaToken: recaptchaToken,
         ),

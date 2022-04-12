@@ -9,7 +9,12 @@ part of firebase_auth_dart;
 /// Pure Dart FirebaseAuth implementation.
 class FirebaseAuth {
   FirebaseAuth._({required this.app}) {
-    _api = API(APIConfig(app.options.apiKey, app.options.projectId));
+    _api = API.instanceOf(
+      APIConfig(
+        app.options.apiKey,
+        app.options.projectId,
+      ),
+    );
 
     _idTokenChangedController = StreamController<User?>.broadcast(sync: true);
     _changeController = StreamController<User?>.broadcast(sync: true);
@@ -150,8 +155,9 @@ class FirebaseAuth {
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
     try {
-      final response = await _api.signInWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response.idToken);
+      final response = await _api.emailAndPasswordAuth
+          .signInWithEmailAndPassword(email, password);
+      final userData = await _api.userAccount.getAccountInfo(response.idToken);
 
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response.toJson()), this);
@@ -193,9 +199,9 @@ class FirebaseAuth {
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     try {
-      final response =
-          await _api.createUserWithEmailAndPassword(email, password);
-      final userData = await _api.getCurrentUser(response.idToken);
+      final response = await _api.emailAndPasswordAuth
+          .createUserWithEmailAndPassword(email, password);
+      final userData = await _api.userAccount.getAccountInfo(response.idToken);
 
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response.toJson()), this);
@@ -235,7 +241,8 @@ class FirebaseAuth {
   ///   - Thrown if the identifier isn't a valid email
   Future<List<String>> fetchSignInMethodsForEmail(String email) async {
     try {
-      final providers = await _api.fetchSignInMethodsForEmail(email);
+      final providers =
+          await _api.createAuthUri.fetchSignInMethodsForEmail(email);
 
       return providers;
     } catch (e) {
@@ -256,7 +263,7 @@ class FirebaseAuth {
   Future<String> sendPasswordResetEmail(
       {required String email, String? continueUrl}) async {
     try {
-      return await _api.sendPasswordResetEmail(email);
+      return await _api.emailAndPasswordAuth.sendPasswordResetEmail(email);
     } catch (e) {
       throw _getException(e);
     }
@@ -282,7 +289,8 @@ class FirebaseAuth {
   ///   - Thrown if the new password is not strong enough.
   Future<String> confirmPasswordReset(String? code, String? newPassword) async {
     try {
-      return await _api.confirmPasswordReset(code, newPassword);
+      return await _api.emailAndPasswordAccount
+          .resetPassword(code, newPassword);
     } catch (e) {
       throw _getException(e);
     }
@@ -307,7 +315,7 @@ class FirebaseAuth {
   ///    was issued and when this method was called.
   Future<String> verifyPasswordResetCode(String? code) async {
     try {
-      return await _api.confirmPasswordReset(code, null);
+      return await _api.emailAndPasswordAccount.resetPassword(code, null);
     } catch (e) {
       throw _getException(e);
     }
@@ -320,7 +328,7 @@ class FirebaseAuth {
   ///   - user doesn't exist
   Future sendSignInLinkToEmail(String email, [String? continueUrl]) async {
     try {
-      await _api.sendSignInLinkToEmail(email, continueUrl);
+      await _api.emailAndPasswordAuth.sendSignInLinkToEmail(email, continueUrl);
     } catch (e) {
       throw _getException(e);
     }
@@ -354,8 +362,9 @@ class FirebaseAuth {
         );
       }
 
-      final response = await _api.signInAnonymously();
-      final userData = (await _api.getCurrentUser(response.idToken)).toJson();
+      final response = await _api.signUp.signInAnonymously();
+      final userData =
+          (await _api.userAccount.getAccountInfo(response.idToken)).toJson();
 
       // Map the json response to an actual user.
       final user = User(userData..addAll(response.toJson()), this);
@@ -453,7 +462,7 @@ class FirebaseAuth {
         assert(app.options.authDomain != null,
             'You should provide authDomain when trying to add Google as auth provider.');
 
-        response = (await _api.signInWithOAuthCredential(
+        response = (await _api.idpAuth.signInWithOAuthCredential(
           requestUri: app.options.authDomain,
           providerId: credential.providerId,
           providerIdToken: credential.idToken,
@@ -461,7 +470,7 @@ class FirebaseAuth {
         ))
             .toJson();
       } else if (credential is TwitterAuthCredential) {
-        response = (await _api.signInWithOAuthCredential(
+        response = (await _api.idpAuth.signInWithOAuthCredential(
           requestUri: app.options.authDomain,
           providerId: credential.providerId,
           providerAccessToken: credential.accessToken,
@@ -469,7 +478,7 @@ class FirebaseAuth {
         ))
             .toJson();
       } else if (credential is FacebookAuthCredential) {
-        response = (await _api.signInWithOAuthCredential(
+        response = (await _api.idpAuth.signInWithOAuthCredential(
           requestUri: app.options.authDomain,
           providerId: credential.providerId,
           providerAccessToken: credential.accessToken,
@@ -479,7 +488,8 @@ class FirebaseAuth {
         throw UnsupportedError('This credential is not supported yet.');
       }
 
-      final userData = await _api.getCurrentUser(response['idToken']);
+      final userData =
+          await _api.userAccount.getAccountInfo(response['idToken']);
 
       // Map the json response to an actual user.
       final user = User(userData.toJson()..addAll(response), this);
@@ -524,8 +534,8 @@ class FirebaseAuth {
   /// - **invalid-custom-token**:
   ///  - Thrown if the custom token format is incorrect.
   Future<UserCredential> signInWithCustomToken(String token) async {
-    final response = await _api.signInWithCustomToken(token);
-    final userData = await _api.getCurrentUser(response.idToken);
+    final response = await _api.customTokenAuth.signInWithCustomToken(token);
+    final userData = await _api.userAccount.getAccountInfo(response.idToken);
 
     // Map the json response to an actual user.
     final user = User(userData.toJson()..addAll(response.toJson()), this);
@@ -574,10 +584,9 @@ class FirebaseAuth {
   /// which you can then use to sign the user in, or link with their account (
   /// see [signInWithCredential] or [User.linkWithCredential]).
   Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
-      [verifier.RecaptchaVerifier? verifier]) async {
+      [RecaptchaVerifier? verifier]) async {
     try {
-      final signInResponse =
-          await _api.phoneAuthApiDelegate.signInWithPhoneNumber(
+      final signInResponse = await _api.smsAuth.signInWithPhoneNumber(
         phoneNumber,
         verifier: verifier,
         idToken: await currentUser?.getIdToken(),
@@ -593,7 +602,7 @@ class FirebaseAuth {
   @protected
   Future<Map<String, dynamic>> _reloadCurrentUser(String idToken) async {
     try {
-      final response = await _api.getCurrentUser(idToken);
+      final response = await _api.userAccount.getAccountInfo(idToken);
       return response.toJson();
     } catch (e) {
       throw _getException(e);
@@ -629,7 +638,7 @@ class FirebaseAuth {
   Future<Map> useAuthEmulator(
       {String host = 'localhost', int port = 9099}) async {
     try {
-      return await _api.useEmulator(host, port);
+      return await _api.emulator.useEmulator(host, port);
     } catch (e) {
       throw _getException(e);
     }

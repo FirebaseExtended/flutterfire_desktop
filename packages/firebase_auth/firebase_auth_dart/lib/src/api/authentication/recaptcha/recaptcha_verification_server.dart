@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'recaptcha_args.dart';
-import 'recaptcha_html.dart';
+part of api;
 
 /// Request recaptcha verification on the local server.
 class RecaptchaVerificationServer {

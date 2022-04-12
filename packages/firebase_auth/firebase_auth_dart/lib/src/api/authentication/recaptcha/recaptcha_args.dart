@@ -1,3 +1,5 @@
+part of api;
+
 /// Recaptcha verification arguments needed to render recaptcha widget.
 class RecaptchaArgs {
   /// Construct new RecaptchaArgs.
