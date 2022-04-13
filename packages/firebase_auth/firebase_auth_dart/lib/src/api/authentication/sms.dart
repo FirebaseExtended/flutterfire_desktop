@@ -1,24 +1,36 @@
-// ignore_for_file: require_trailing_commas
-
 part of api;
 
 /// A return type from Idp phone authentication requests.
 @internal
-class SignInWithPhoneNumberResponse {
+class SignInWithPhoneNumberResponse extends SignInResponse {
   /// Construct a new [IdTokenResponse].
-  SignInWithPhoneNumberResponse({
+  SignInWithPhoneNumberResponse._({
+    required String idToken,
+    required String refreshToken,
     required this.phoneNumber,
     this.verificationId,
-    this.idToken,
     this.temporaryProof,
-    this.isNewUser,
-  });
+    bool isNewUser = false,
+  }) : super(
+          idToken,
+          refreshToken,
+          isNewUser,
+        );
+
+  /// Construct new [SignInWithPhoneNumberResponse] from a sign-in json result.
+  factory SignInWithPhoneNumberResponse.fromJson(Map<String, dynamic> json) {
+    return SignInWithPhoneNumberResponse._(
+      idToken: json['idToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+      phoneNumber: json['phoneNumber'] as String,
+      verificationId: json['verificationId'],
+      temporaryProof: json['temporaryProof'],
+      isNewUser: (json['isNewUser'] as bool?) ?? false,
+    );
+  }
 
   /// The phone number used to sign in.
   final String phoneNumber;
-
-  /// Fresh idToken after sign in with phone number is verified.
-  final String? idToken;
 
   /// The Id returned after SMS code is sent to the phone number.
   final String? verificationId;
@@ -26,15 +38,13 @@ class SignInWithPhoneNumberResponse {
   /// If not null, it indicates that the phone number is assigned to another account under different credentials.
   final String? temporaryProof;
 
-  /// Wether this user is newly registered or not.
-  final bool? isNewUser;
-
-  /// Json representation of this object.
+  @override
   Map<String, dynamic> toJson() {
     return {
+      'idToken': idToken,
+      'refreshToken': refreshToken,
       'phoneNumber': phoneNumber,
       'verificationId': verificationId,
-      'idToken': idToken,
       'temporaryProof': temporaryProof,
       'isNewUser': isNewUser,
     };
@@ -52,21 +62,18 @@ class SmsAuth {
   /// The [API] instance containing required configurations to make the requests.
   final API _api;
 
+  /// Default Recaptcha theme. Could be overridden if user passed a `verifier` to [signInWithPhoneNumber].
   final _recaptchaVerifier =
       RecaptchaVerifier({'theme': RecaptchaTheme.light.name});
 
-  /// Sign in using Phone Number with a recaptcha verifier.
+  /// Sign in using Phone Number with a [RecaptchaVerifier].
   ///
-  /// If the emulator is running, the verification will be skipped.
+  /// If the emulator is running, the recaptcha verification will be skipped.
   ///
   /// A [FirebaseAuthException] maybe thrown with the following error code:
-  /// - `verification-canceled`
-  ///   - The user canceled the verification process
-  /// - ``
-  ///   -
-  Future<SignInWithPhoneNumberResponse> signInWithPhoneNumber(
+  /// - `verification-canceled`: The user canceled the verification process
+  Future<String> signInWithPhoneNumber(
     String phoneNumber, {
-    String? idToken,
     RecaptchaVerifier? verifier,
   }) async {
     Future<String> _verifyAction;
@@ -78,31 +85,16 @@ class SmsAuth {
       _verifyAction = _verify(phoneNumber, verifier);
     }
 
-    return SignInWithPhoneNumberResponse(
-      phoneNumber: phoneNumber,
-      verificationId: await _verifyAction,
-      idToken: idToken,
-    );
+    return _verifyAction;
   }
 
-  /// TODO: write endpoint details
-  Future<SignInWithPhoneNumberResponse> linkWithPhoneNumber(
-    String idToken,
-    String phoneNumber, {
-    RecaptchaVerifier? verifier,
-    Duration timeout = const Duration(seconds: 30),
-  }) async {
-    final signInResponse = await signInWithPhoneNumber(
-      phoneNumber,
-      idToken: idToken,
-      verifier: verifier,
-    );
-
-    return signInResponse;
-  }
-
-  /// TODO: write endpoint details
-  Future<SignInWithPhoneNumberResponse> verifyPhoneNumber({
+  /// Confirm a phone number belongs to a user via SMS code.
+  /// The response will contain a fresh `idToken` and a `refreshToken`.
+  ///
+  /// Common error codes:
+  /// - `NEED_CONFIRMATION`: The phone number is already used by another account.
+  /// - `INVALID_CODE`: The provided code is not valid.
+  Future<SignInWithPhoneNumberResponse> confirmPhoneNumber({
     String? phoneNumber,
     String? smsCode,
     String? verificationId,
@@ -121,15 +113,11 @@ class SmsAuth {
       );
 
       if (response.temporaryProof != null) {
-        throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
+        // We throw the exception manually since it's not considered as an exception by the IDP package.
+        throw DetailedApiRequestError(null, 'NEED_CONFIRMATION');
       }
 
-      return SignInWithPhoneNumberResponse(
-        phoneNumber: response.phoneNumber!,
-        idToken: response.idToken,
-        temporaryProof: response.temporaryProof,
-        isNewUser: response.isNewUser,
-      );
+      return SignInWithPhoneNumberResponse.fromJson(response.toJson());
     } catch (e) {
       rethrow;
     }
@@ -148,7 +136,9 @@ class SmsAuth {
     final recaptchaToken = await verifier.verify(recaptchaArgs);
 
     if (recaptchaToken == null) {
-      throw FirebaseAuthException(code: 'VERIFICATION_CANCELED');
+      // This's not an exception coming from the IDP package,
+      // but for consistency we throw it as if it's coming from the package.
+      throw DetailedApiRequestError(null, 'VERIFICATION_CANCELED');
     }
 
     try {
@@ -178,8 +168,10 @@ class SmsAuth {
     return completer.future;
   }
 
-  Future<String?> _sendSMSCode(
-      {required String phoneNumber, String? recaptchaToken}) async {
+  Future<String?> _sendSMSCode({
+    required String phoneNumber,
+    String? recaptchaToken,
+  }) async {
     try {
       // Send SMS code.
       final response = await _api.identityToolkit.sendVerificationCode(

@@ -310,7 +310,7 @@ class User {
           ),
         );
       } else if (credential is PhoneAuthCredential) {
-        final response = await _auth._api.smsAuth.verifyPhoneNumber(
+        final response = await _auth._api.smsAuth.confirmPhoneNumber(
           phoneNumber: phoneNumber,
           smsCode: credential.smsCode,
           idToken: _idToken,
@@ -324,7 +324,7 @@ class User {
           auth: _auth,
           credential: credential,
           additionalUserInfo: AdditionalUserInfo(
-            isNewUser: response.isNewUser ?? false,
+            isNewUser: response.isNewUser,
             providerId: credential.providerId,
           ),
         );
@@ -341,10 +341,12 @@ class User {
       [RecaptchaVerifier? applicationVerifier]) async {
     try {
       return ConfirmationResult(
-          _auth,
-          (await _auth._api.smsAuth.linkWithPhoneNumber(_idToken, phoneNumber,
-                  verifier: applicationVerifier))
-              .verificationId!);
+        _auth,
+        await _auth._api.smsAuth.signInWithPhoneNumber(
+          phoneNumber,
+          verifier: applicationVerifier,
+        ),
+      );
     } catch (e) {
       throw _auth._getException(e);
     }
@@ -446,7 +448,7 @@ class User {
     _assertSignedOut(_auth);
 
     try {
-      await _auth._api.smsAuth.verifyPhoneNumber(
+      await _auth._api.smsAuth.confirmPhoneNumber(
         idToken: _idToken,
         smsCode: phoneCredential.smsCode,
         verificationId: phoneCredential.verificationId,

@@ -50,8 +50,9 @@ class FirebaseAuth {
 
   /// Change the HTTP client for the purpose of testing.
   @visibleForTesting
-  void setApiClient(http.Client client) {
-    _api.setApiClient(client);
+  // ignore: avoid_setters_without_getters
+  set client(http.Client client) {
+    _api.client = client;
   }
 
   StorageBox<Object> get _userStorage =>
@@ -535,10 +536,8 @@ class FirebaseAuth {
   ///  - Thrown if the custom token format is incorrect.
   Future<UserCredential> signInWithCustomToken(String token) async {
     final response = await _api.customTokenAuth.signInWithCustomToken(token);
-    final userData = await _api.userAccount.getAccountInfo(response.idToken);
 
-    // Map the json response to an actual user.
-    final user = User(userData.toJson()..addAll(response.toJson()), this);
+    final user = await _getUserFromIdToken(response.idToken, response);
 
     _updateCurrentUserAndEvents(user, true);
 
@@ -548,9 +547,18 @@ class FirebaseAuth {
         providerId: ProviderId.custom.signInProvider,
         signInMethod: ProviderId.custom.signInProvider,
       ),
-      additionalUserInfo:
-          AdditionalUserInfo(isNewUser: response.isNewUser ?? false),
+      additionalUserInfo: AdditionalUserInfo(isNewUser: response.isNewUser),
     );
+  }
+
+  Future<User> _getUserFromIdToken(
+    String idToken,
+    SignInResponse signInResponse,
+  ) async {
+    final userData = await _api.userAccount.getAccountInfo(idToken);
+
+    // Map the json response to an actual user.
+    return User(userData.toJson()..addAll(signInResponse.toJson()), this);
   }
 
   /// TODO
@@ -586,13 +594,11 @@ class FirebaseAuth {
   Future<ConfirmationResult> signInWithPhoneNumber(String phoneNumber,
       [RecaptchaVerifier? verifier]) async {
     try {
-      final signInResponse = await _api.smsAuth.signInWithPhoneNumber(
+      final verificationId = await _api.smsAuth.signInWithPhoneNumber(
         phoneNumber,
         verifier: verifier,
-        idToken: await currentUser?.getIdToken(),
       );
-      final verificationId = signInResponse.verificationId;
-      return ConfirmationResult(this, verificationId!);
+      return ConfirmationResult(this, verificationId);
     } catch (e) {
       throw _getException(e);
     }

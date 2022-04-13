@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// ignore_for_file: require_trailing_commas, avoid_dynamic_calls, use_setters_to_change_properties, implementation_imports
+// ignore_for_file: implementation_imports
 
 library api;
 
@@ -36,6 +36,28 @@ part 'authentication/sign_up.dart';
 part 'authentication/sms.dart';
 part 'authentication/token.dart';
 part 'emulator.dart';
+
+/// Response template to be returned from all sign in methods.
+abstract class SignInResponse {
+  /// Construct a new [SignInResponse].
+  SignInResponse(
+    this.idToken,
+    this.refreshToken, [
+    this.isNewUser = false,
+  ]);
+
+  /// User's Firebase Id Token.
+  final String idToken;
+
+  /// User's refresh token.
+  final String refreshToken;
+
+  /// Whether this user is new or not.
+  final bool isNewUser;
+
+  /// Map representation of this object.
+  Map<String, dynamic> toJson();
+}
 
 /// Configurations necessary for making all idp requests.
 @protected
@@ -83,7 +105,7 @@ class API {
   /// The API configurations of this instance.
   final APIConfig apiConfig;
 
-  late http.Client _client;
+  http.Client? _client;
 
   String? _languageCode;
 
@@ -92,7 +114,9 @@ class API {
   String? get languageCode => _languageCode;
 
   /// Change the HTTP client for the purpose of testing.
-  void setApiClient(http.Client client) {
+  @internal
+  // ignore: avoid_setters_without_getters
+  set client(http.Client client) {
     _client = client;
   }
 
@@ -107,12 +131,12 @@ class API {
   RelyingpartyResource get identityToolkit {
     if (apiConfig.emulator != null) {
       return IdentityToolkitApi(
-        _client,
+        _client!,
         rootUrl: apiConfig.emulator!.rootUrl,
       ).relyingparty;
     }
     return IdentityToolkitApi(
-      _client,
+      _client!,
     ).relyingparty;
   }
 
