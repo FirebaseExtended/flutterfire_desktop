@@ -9,7 +9,7 @@ class CreateAuthUri {
 
   final API _api;
 
-  /// Look all providers associated with a specified email.
+  /// Look up all providers associated with an email.
   /// Returns a list of provider Ids.
   ///
   /// Example response:
@@ -19,15 +19,17 @@ class CreateAuthUri {
   ///
   /// Common error codes:
   /// - `INVALID_EMAIL`: The email address is badly formatted.
-  Future<List<String>> fetchSignInMethodsForEmail(String email) async {
+  Future<List<String>> fetchSignInMethodsForEmail(
+    String email, {
+    String? continueUri = 'http://localhost',
+  }) async {
     final _response = await _api.identityToolkit.createAuthUri(
       IdentitytoolkitRelyingpartyCreateAuthUriRequest(
         identifier: email,
-        // TODO hmm?
-        continueUri: 'http://localhost:8080/app',
+        continueUri: continueUri,
       ),
     );
 
-    return _response.allProviders ?? [];
+    return _response.signinMethods ?? [];
   }
 }
