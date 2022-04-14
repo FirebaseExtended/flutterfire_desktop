@@ -3,11 +3,9 @@ part of api;
 /// Class wrapping methods that calls to the following endpoints:
 /// - `verifyAssertion`: sign in or link a user with an OAuth credential.
 @internal
-class IdpAuth {
+class IdpAuth extends APIDelegate {
   // ignore: public_member_api_docs
-  const IdpAuth(this._api);
-
-  final API _api;
+  const IdpAuth(API api) : super(api);
 
   /// TODO: write endpoint details
   Future<VerifyAssertionResponse> signInWithOAuthCredential({
@@ -35,7 +33,7 @@ class IdpAuth {
       postBody.add('oauth_token_secret=$providerSecret');
     }
 
-    final response = await _api.identityToolkit.verifyAssertion(
+    final response = await api.identityToolkit.verifyAssertion(
       IdentitytoolkitRelyingpartyVerifyAssertionRequest(
         idToken: idToken,
         requestUri: uri.toString(),

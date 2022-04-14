@@ -55,12 +55,9 @@ class SignInWithPhoneNumberResponse extends SignInResponse {
 /// - `verifyPhoneNumber`: verify a phone number using a verification id and sms code.
 /// - `sendVerificationCode`: send an sms login code.
 @internal
-class SmsAuth {
-  /// Construct a new [SmsAuth].
-  SmsAuth(this._api);
-
-  /// The [API] instance containing required configurations to make the requests.
-  final API _api;
+class SmsAuth extends APIDelegate {
+  // ignore: public_member_api_docs
+  SmsAuth(API api) : super(api);
 
   /// Default Recaptcha theme. Could be overridden if user passed a `verifier` to [signInWithPhoneNumber].
   final _recaptchaVerifier =
@@ -78,7 +75,7 @@ class SmsAuth {
   }) async {
     Future<String> _verifyAction;
 
-    if (_api.apiConfig.emulator != null) {
+    if (api.apiConfig.emulator != null) {
       _verifyAction = _verifyEmulator(phoneNumber);
     } else {
       verifier ??= _recaptchaVerifier;
@@ -102,7 +99,7 @@ class SmsAuth {
     String? temporaryProof,
   }) async {
     try {
-      final response = await _api.identityToolkit.verifyPhoneNumber(
+      final response = await api.identityToolkit.verifyPhoneNumber(
         IdentitytoolkitRelyingpartyVerifyPhoneNumberRequest(
           code: smsCode,
           sessionInfo: verificationId,
@@ -126,7 +123,7 @@ class SmsAuth {
   Future<String> _verify(String phoneNumber, RecaptchaVerifier verifier) async {
     final completer = Completer<String>();
 
-    final recaptchaResponse = await _api.identityToolkit.getRecaptchaParam();
+    final recaptchaResponse = await api.identityToolkit.getRecaptchaParam();
 
     final recaptchaArgs = RecaptchaArgs(
       siteKey: recaptchaResponse.recaptchaSiteKey!,
@@ -174,7 +171,7 @@ class SmsAuth {
   }) async {
     try {
       // Send SMS code.
-      final response = await _api.identityToolkit.sendVerificationCode(
+      final response = await api.identityToolkit.sendVerificationCode(
         IdentitytoolkitRelyingpartySendVerificationCodeRequest(
           phoneNumber: phoneNumber,
           recaptchaToken: recaptchaToken,

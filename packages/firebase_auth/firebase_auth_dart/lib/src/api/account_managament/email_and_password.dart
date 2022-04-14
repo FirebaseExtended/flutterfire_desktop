@@ -4,11 +4,9 @@ part of api;
 /// - `setAccountInfo`: change a user's email or password.
 /// - `resetPassword`: apply a password reset change.
 @internal
-class EmailAndPasswordAccount {
+class EmailAndPasswordAccount extends APIDelegate {
   // ignore: public_member_api_docs
-  const EmailAndPasswordAccount(this._api);
-
-  final API _api;
+  const EmailAndPasswordAccount(API api) : super(api);
 
   /// TODO: write endpoint details
   Future<SetAccountInfoResponse> updateEmail(
@@ -16,7 +14,7 @@ class EmailAndPasswordAccount {
     String idToken,
     String uid,
   ) async {
-    final _response = await _api.identityToolkit.setAccountInfo(
+    final _response = await api.identityToolkit.setAccountInfo(
       IdentitytoolkitRelyingpartySetAccountInfoRequest(
         email: newEmail,
         idToken: idToken,
@@ -31,7 +29,7 @@ class EmailAndPasswordAccount {
     String idToken, {
     String? newPassword,
   }) async {
-    return _api.identityToolkit.setAccountInfo(
+    return api.identityToolkit.setAccountInfo(
       IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         password: newPassword,
@@ -41,7 +39,7 @@ class EmailAndPasswordAccount {
 
   /// TODO: write endpoint details
   Future<String> resetPassword(String? code, String? newPassword) async {
-    final _response = await _api.identityToolkit.resetPassword(
+    final _response = await api.identityToolkit.resetPassword(
       IdentitytoolkitRelyingpartyResetPasswordRequest(
         newPassword: newPassword,
         oobCode: code,

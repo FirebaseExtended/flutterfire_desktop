@@ -3,11 +3,9 @@ part of api;
 /// Class wrapping methods that calls to the following endpoints:
 /// - `setAccountInfo`: change a user's displayName or photoUrl.
 @protected
-class UserProfile {
+class UserProfile extends APIDelegate {
   // ignore: public_member_api_docs
-  UserProfile(this._api);
-
-  final API _api;
+  const UserProfile(API api) : super(api);
 
   /// TODO: write endpoint details
   Future<SetAccountInfoResponse> updateProfile(
@@ -16,7 +14,7 @@ class UserProfile {
     String? photoUrl = '',
     String? displayName = '',
   }) async {
-    final _response = await _api.identityToolkit.setAccountInfo(
+    final _response = await api.identityToolkit.setAccountInfo(
       IdentitytoolkitRelyingpartySetAccountInfoRequest(
         displayName: displayName == '' ? null : displayName,
         photoUrl: photoUrl == '' ? null : photoUrl,

@@ -3,11 +3,9 @@ part of api;
 /// Class wrapping methods that calls to the following endpoints:
 /// - `createAuthUri`:  look all providers associated with a specified email.
 @internal
-class CreateAuthUri {
+class CreateAuthUri extends APIDelegate {
   // ignore: public_member_api_docs
-  CreateAuthUri(this._api);
-
-  final API _api;
+  const CreateAuthUri(API api) : super(api);
 
   /// Look up all providers associated with an email.
   /// Returns a list of provider Ids.
@@ -23,7 +21,7 @@ class CreateAuthUri {
     String email, {
     String? continueUri = 'http://localhost',
   }) async {
-    final _response = await _api.identityToolkit.createAuthUri(
+    final _response = await api.identityToolkit.createAuthUri(
       IdentitytoolkitRelyingpartyCreateAuthUriRequest(
         identifier: email,
         continueUri: continueUri,

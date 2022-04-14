@@ -31,11 +31,9 @@ class CustomTokenResponse extends SignInResponse {
 /// Class wrapping methods that calls to the following endpoints:
 /// - `verifyCustomToken`: exchange a custom Auth token for a `tokenId` and `refreshToken`.
 @internal
-class CustomTokenAuth {
+class CustomTokenAuth extends APIDelegate {
   // ignore: public_member_api_docs
-  CustomTokenAuth(this._api);
-
-  final API _api;
+  const CustomTokenAuth(API api) : super(api);
 
   /// Sign a user using developer's custom JWT token.
   /// The response will contain a fresh `idToken` and a `refreshToken`.
@@ -45,7 +43,7 @@ class CustomTokenAuth {
   /// invalid for some reason (e.g. expired, invalid signature etc.)
   /// - `CREDENTIAL_MISMATCH`: The custom token corresponds to a different Firebase project.
   Future<CustomTokenResponse> signInWithCustomToken(String customToken) async {
-    final response = await _api.identityToolkit.verifyCustomToken(
+    final response = await api.identityToolkit.verifyCustomToken(
       IdentitytoolkitRelyingpartyVerifyCustomTokenRequest(
         token: customToken,
         returnSecureToken: true,

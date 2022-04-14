@@ -59,6 +59,15 @@ abstract class SignInResponse {
   Map<String, dynamic> toJson();
 }
 
+/// All API classes calling to IDP API must extend this template.
+abstract class APIDelegate {
+  /// Construct a new [APIDelegate].
+  const APIDelegate(this.api);
+
+  /// The [API] instance containing required configurations to make the requests.
+  final API api;
+}
+
 /// Configurations necessary for making all idp requests.
 @protected
 class APIConfig {
@@ -152,7 +161,7 @@ class API {
   SignUp get signUp => SignUp(this);
 
   /// A delegate getter used to perform all requests
-  /// for custon token related operations.
+  /// for custom token related operations.
   CustomTokenAuth get customTokenAuth => CustomTokenAuth(this);
 
   /// A delegate getter used to perform all requests

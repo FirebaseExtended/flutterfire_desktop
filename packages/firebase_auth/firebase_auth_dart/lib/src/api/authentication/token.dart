@@ -26,11 +26,9 @@ class IdTokenResponse {
 /// Class wrapping methods that calls to the following endpoints:
 /// - `securetoken.googleapis.com`: refresh a Firebase ID token.
 @internal
-class IdToken {
+class IdToken extends APIDelegate {
   // ignore: public_member_api_docs
-  IdToken(this._api);
-
-  final API _api;
+  IdToken(API api) : super(api);
 
   /// Refresh a user ID token using the refreshToken,
   /// will refresh even if the token hasn't expired.
@@ -46,14 +44,14 @@ class IdToken {
   }
 
   Future<String?> _exchangeRefreshWithIdToken(String? refreshToken) async {
-    final baseUri = _api.apiConfig.emulator != null
-        ? 'http://${_api.apiConfig.emulator!.host}:${_api.apiConfig.emulator!.port}'
+    final baseUri = api.apiConfig.emulator != null
+        ? 'http://${api.apiConfig.emulator!.host}:${api.apiConfig.emulator!.port}'
             '/securetoken.googleapis.com/v1/'
         : 'https://securetoken.googleapis.com/v1/';
 
     final _response = await http.post(
       Uri.parse(
-        '${baseUri}token?key=${_api.apiConfig.apiKey}',
+        '${baseUri}token?key=${api.apiConfig.apiKey}',
       ),
       body: {
         'grant_type': 'refresh_token',

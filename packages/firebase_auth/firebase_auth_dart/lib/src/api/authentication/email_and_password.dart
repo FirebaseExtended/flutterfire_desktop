@@ -7,18 +7,16 @@ part of api;
 /// - `getOobConfirmationCode`: send an email verification for the current user
 /// or send a password reset email.
 @internal
-class EmailAndPasswordAuth {
+class EmailAndPasswordAuth extends APIDelegate {
   // ignore: public_member_api_docs
-  const EmailAndPasswordAuth(this._api);
-
-  final API _api;
+  const EmailAndPasswordAuth(API api) : super(api);
 
   /// TODO: write endpoint details
   Future<VerifyPasswordResponse> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
-    final _response = await _api.identityToolkit.verifyPassword(
+    final _response = await api.identityToolkit.verifyPassword(
       IdentitytoolkitRelyingpartyVerifyPasswordRequest(
         returnSecureToken: true,
         password: password,
@@ -34,7 +32,7 @@ class EmailAndPasswordAuth {
     String email,
     String password,
   ) async {
-    final _response = await _api.identityToolkit.signupNewUser(
+    final _response = await api.identityToolkit.signupNewUser(
       IdentitytoolkitRelyingpartySignupNewUserRequest(
         email: email,
         password: password,
@@ -48,7 +46,7 @@ class EmailAndPasswordAuth {
     String idToken, {
     required EmailAuthCredential credential,
   }) async {
-    return _api.identityToolkit.setAccountInfo(
+    return api.identityToolkit.setAccountInfo(
       IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         email: credential.email,
@@ -59,7 +57,7 @@ class EmailAndPasswordAuth {
 
   /// TODO: write endpoint details
   Future<String?> sendVerificationEmail(String idToken) async {
-    final _response = await _api.identityToolkit.getOobConfirmationCode(
+    final _response = await api.identityToolkit.getOobConfirmationCode(
       Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
     );
 
@@ -71,7 +69,7 @@ class EmailAndPasswordAuth {
     String email, {
     String? continueUrl,
   }) async {
-    final _response = await _api.identityToolkit.getOobConfirmationCode(
+    final _response = await api.identityToolkit.getOobConfirmationCode(
       Relyingparty(
         email: email,
         requestType: 'PASSWORD_RESET',
@@ -87,7 +85,7 @@ class EmailAndPasswordAuth {
     String email,
     String? continueUrl,
   ) async {
-    return _api.identityToolkit.getOobConfirmationCode(
+    return api.identityToolkit.getOobConfirmationCode(
       Relyingparty(
         email: email,
         requestType: 'EMAIL_SIGNIN',
