@@ -9,8 +9,13 @@ class UserAccount extends APIDelegate {
   // ignore: public_member_api_docs
   const UserAccount(API api) : super(api);
 
-  /// TODO: write endpoint details
-  Future<DeleteAccountResponse> delete(String idToken, String uid) async {
+  /// Delete a current user account.
+  ///
+  /// Common error codes:
+  /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
+  /// - `USER_NOT_FOUND`: There is no user record corresponding to this identifier.
+  /// The user may have been deleted.
+  Future<void> delete(String idToken, String uid) {
     return api.identityToolkit.deleteAccount(
       IdentitytoolkitRelyingpartyDeleteAccountRequest(
         idToken: idToken,
@@ -19,25 +24,37 @@ class UserAccount extends APIDelegate {
     );
   }
 
-  /// TODO: write endpoint details
-  Future<SetAccountInfoResponse> deleteLinkedAccount(
+  /// Unlink a provider from a current user.
+  ///
+  /// Common error codes:
+  /// `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
+  Future<Map<String, dynamic>> deleteLinkedAccount(
     String idToken,
     String providerId,
   ) async {
-    return api.identityToolkit.setAccountInfo(
+    final response = await api.identityToolkit.setAccountInfo(
       IdentitytoolkitRelyingpartySetAccountInfoRequest(
         idToken: idToken,
         deleteProvider: [providerId],
       ),
     );
+
+    return response.toJson();
   }
 
-  /// TODO: write endpoint details
-  Future<UserInfo> getAccountInfo(String? idToken) async {
-    final _response = await api.identityToolkit.getAccountInfo(
+  /// Get a user's data.
+  ///
+  /// Common error codes:
+  /// `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
+  /// `USER_NOT_FOUND`: There is no user record corresponding to this identifier.
+  /// The user may have been deleted.
+  Future<Map<String, dynamic>> getAccountInfo(String idToken) async {
+    final response = await api.identityToolkit.getAccountInfo(
       IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
     );
 
-    return _response.users![0];
+    final json = response.users![0].toJson();
+
+    return json;
   }
 }

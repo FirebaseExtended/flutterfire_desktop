@@ -158,10 +158,10 @@ class FirebaseAuth {
     try {
       final response = await _api.emailAndPasswordAuth
           .signInWithEmailAndPassword(email, password);
-      final userData = await _api.userAccount.getAccountInfo(response.idToken);
+      final userData = await _api.userAccount.getAccountInfo(response.idToken!);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response.toJson()), this);
+      final user = User(userData..addAll(response.toJson()), this);
 
       _updateCurrentUserAndEvents(user, true);
 
@@ -171,13 +171,14 @@ class FirebaseAuth {
         credential:
             EmailAuthProvider.credential(email: email, password: password),
         additionalUserInfo: AdditionalUserInfo(
-            isNewUser: false,
-            providerId: EmailAuthProvider.PROVIDER_ID,
-            username: userData.screenName,
-            profile: {
-              'displayName': userData.displayName,
-              'photoUrl': userData.photoUrl
-            }),
+          isNewUser: false,
+          providerId: EmailAuthProvider.PROVIDER_ID,
+          username: userData['screenName'],
+          profile: {
+            'displayName': userData['displayName'],
+            'photoUrl': userData['photoUrl']
+          },
+        ),
       );
     } catch (e) {
       throw _getException(e);
@@ -202,10 +203,10 @@ class FirebaseAuth {
     try {
       final response = await _api.emailAndPasswordAuth
           .createUserWithEmailAndPassword(email, password);
-      final userData = await _api.userAccount.getAccountInfo(response.idToken);
+      final userData = await _api.userAccount.getAccountInfo(response.idToken!);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response.toJson()), this);
+      final user = User(userData..addAll(response.toJson()), this);
 
       _updateCurrentUserAndEvents(user, true);
 
@@ -214,13 +215,14 @@ class FirebaseAuth {
         credential:
             EmailAuthProvider.credential(email: email, password: password),
         additionalUserInfo: AdditionalUserInfo(
-            isNewUser: true,
-            providerId: EmailAuthProvider.PROVIDER_ID,
-            username: userData.screenName,
-            profile: {
-              'displayName': userData.displayName,
-              'photoUrl': userData.photoUrl
-            }),
+          isNewUser: true,
+          providerId: EmailAuthProvider.PROVIDER_ID,
+          username: userData['screenName'],
+          profile: {
+            'displayName': userData['displayName'],
+            'photoUrl': userData['photoUrl']
+          },
+        ),
       );
     } catch (e) {
       throw _getException(e);
@@ -364,8 +366,7 @@ class FirebaseAuth {
       }
 
       final response = await _api.signUp.signInAnonymously();
-      final userData =
-          (await _api.userAccount.getAccountInfo(response.idToken)).toJson();
+      final userData = await _api.userAccount.getAccountInfo(response.idToken!);
 
       // Map the json response to an actual user.
       final user = User(userData..addAll(response.toJson()), this);
@@ -376,7 +377,9 @@ class FirebaseAuth {
           auth: this,
           additionalUserInfo: AdditionalUserInfo(isNewUser: true),
           credential: const AuthCredential(
-              providerId: providerId, signInMethod: providerId));
+            providerId: providerId,
+            signInMethod: providerId,
+          ));
     } catch (e) {
       throw _getException(e);
     }
@@ -493,7 +496,7 @@ class FirebaseAuth {
           await _api.userAccount.getAccountInfo(response['idToken']);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response), this);
+      final user = User(userData..addAll(response), this);
 
       _updateCurrentUserAndEvents(user, true);
 
@@ -503,10 +506,10 @@ class FirebaseAuth {
         additionalUserInfo: AdditionalUserInfo(
           isNewUser: response['isNewUser'] ?? false,
           providerId: credential.providerId,
-          username: userData.screenName,
+          username: userData['screenName'],
           profile: {
-            'displayName': userData.displayName,
-            'photoUrl': userData.photoUrl
+            'displayName': userData['displayName'],
+            'photoUrl': userData['photoUrl']
           },
         ),
       );
@@ -558,7 +561,7 @@ class FirebaseAuth {
     final userData = await _api.userAccount.getAccountInfo(idToken);
 
     // Map the json response to an actual user.
-    return User(userData.toJson()..addAll(signInResponse.toJson()), this);
+    return User(userData..addAll(signInResponse.toJson()), this);
   }
 
   /// TODO
@@ -609,7 +612,7 @@ class FirebaseAuth {
   Future<Map<String, dynamic>> _reloadCurrentUser(String idToken) async {
     try {
       final response = await _api.userAccount.getAccountInfo(idToken);
-      return response.toJson();
+      return response;
     } catch (e) {
       throw _getException(e);
     }

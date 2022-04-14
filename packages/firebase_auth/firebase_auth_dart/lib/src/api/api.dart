@@ -37,28 +37,6 @@ part 'authentication/sms.dart';
 part 'authentication/token.dart';
 part 'emulator.dart';
 
-/// Response template to be returned from all sign in methods.
-abstract class SignInResponse {
-  /// Construct a new [SignInResponse].
-  SignInResponse(
-    this.idToken,
-    this.refreshToken, [
-    this.isNewUser = false,
-  ]);
-
-  /// User's Firebase Id Token.
-  final String idToken;
-
-  /// User's refresh token.
-  final String refreshToken;
-
-  /// Whether this user is new or not.
-  final bool isNewUser;
-
-  /// Map representation of this object.
-  Map<String, dynamic> toJson();
-}
-
 /// All API classes calling to IDP API must extend this template.
 abstract class APIDelegate {
   /// Construct a new [APIDelegate].
@@ -91,6 +69,56 @@ class APIConfig {
   }
 }
 
+/// Response template to be returned from all sign in methods.
+abstract class SignInResponse {
+  /// Construct a new [SignInResponse].
+  SignInResponse(
+    this.idToken,
+    this.refreshToken, [
+    this.isNewUser = false,
+  ]);
+
+  /// User's Firebase Id Token.
+  final String idToken;
+
+  /// User's refresh token.
+  final String refreshToken;
+
+  /// Whether this user is new or not.
+  final bool isNewUser;
+
+  /// Json representation of this object.
+  Map<String, dynamic> toJson() {
+    return {
+      'idToken': idToken,
+      'refreshToken': refreshToken,
+    };
+  }
+}
+
+/// A return type from Idp authentication requests, must be extended by any other response
+/// type for any operation that requires idToken.
+@protected
+abstract class IdTokenResponse {
+  /// Construct a new [IdTokenResponse].
+  const IdTokenResponse({required this.idToken, required this.refreshToken});
+
+  /// The idToken returned from a successful authentication operation, valid only for 1 hour.
+  final String idToken;
+
+  /// Th refreshToken returned from a successful authentication operation, used to request new
+  /// [idToken] if it has expired or force refreshed.
+  final String refreshToken;
+
+  /// Json representation of this object.
+  Map<String, dynamic> toJson() {
+    return {
+      'idToken': idToken,
+      'refreshToken': refreshToken,
+    };
+  }
+}
+
 /// Pure Dart service layer to perform all requests
 /// with the underlying Identity Toolkit API.
 ///
@@ -109,10 +137,10 @@ class API {
     );
   }
 
-  static final Map<APIConfig, API> _instances = {};
-
   /// The API configurations of this instance.
   final APIConfig apiConfig;
+
+  static final Map<APIConfig, API> _instances = {};
 
   http.Client? _client;
 
@@ -129,7 +157,7 @@ class API {
     _client = client;
   }
 
-  /// Updates the languageCode for this instance.
+  /// Updates the [languageCode] for this instance.
   void setLanguageCode(String? languageCode) {
     _languageCode = languageCode;
     requestHeaders.addAll({'X-Firebase-Locale': languageCode ?? ''});

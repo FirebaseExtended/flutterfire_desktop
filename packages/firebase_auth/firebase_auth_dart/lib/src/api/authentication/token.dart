@@ -1,28 +1,5 @@
 part of api;
 
-/// A return type from Idp authentication requests, must be extended by any other response
-/// type for any operation that requires idToken.
-@protected
-class IdTokenResponse {
-  /// Construct a new [IdTokenResponse].
-  IdTokenResponse({required this.idToken, required this.refreshToken});
-
-  /// The idToken returned from a successful authentication operation, valid only for 1 hour.
-  final String idToken;
-
-  /// Th refreshToken returned from a successful authentication operation, used to request new
-  /// [idToken] if it has expired or force refreshed.
-  final String refreshToken;
-
-  /// Json representation of this object.
-  Map<String, dynamic> toJson() {
-    return {
-      'idToken': idToken,
-      'refreshToken': refreshToken,
-    };
-  }
-}
-
 /// Class wrapping methods that calls to the following endpoints:
 /// - `securetoken.googleapis.com`: refresh a Firebase ID token.
 @internal

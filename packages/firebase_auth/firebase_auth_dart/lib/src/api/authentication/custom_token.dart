@@ -21,8 +21,7 @@ class CustomTokenResponse extends SignInResponse {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'idToken': idToken,
-      'refreshToken': refreshToken,
+      ...super.toJson(),
       'isNewUser': isNewUser,
     };
   }
