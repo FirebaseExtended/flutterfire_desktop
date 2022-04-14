@@ -7,7 +7,10 @@ class UserProfile extends APIDelegate {
   // ignore: public_member_api_docs
   const UserProfile(API api) : super(api);
 
-  /// TODO: write endpoint details
+  /// Update a user's profile (display name / photo URL).
+  ///
+  /// Common error codes:
+  /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
   Future<SetAccountInfoResponse> updateProfile(
     String idToken,
     String uid, {

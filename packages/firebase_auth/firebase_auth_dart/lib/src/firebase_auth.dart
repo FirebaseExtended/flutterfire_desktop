@@ -324,19 +324,6 @@ class FirebaseAuth {
     }
   }
 
-  /// Send a sign in link to email.
-  ///
-  /// Throws [FirebaseAuthException] with following possible codes:
-  /// - `email-not-found`
-  ///   - user doesn't exist
-  Future sendSignInLinkToEmail(String email, [String? continueUrl]) async {
-    try {
-      await _api.emailAndPasswordAuth.sendSignInLinkToEmail(email, continueUrl);
-    } catch (e) {
-      throw _getException(e);
-    }
-  }
-
   /// Asynchronously creates and becomes an anonymous user.
   ///
   /// If there is already an anonymous user signed in, that user will be
@@ -562,28 +549,6 @@ class FirebaseAuth {
 
     // Map the json response to an actual user.
     return User(userData..addAll(signInResponse.toJson()), this);
-  }
-
-  /// TODO
-  Future<UserCredential> signInWithEmailLink(
-      String email, String emailLink) async {
-    throw UnimplementedError('signInWithEmailLink() is not yet implemented.');
-
-    // final response = await _api.signInWithEmailLink(
-    //     email, Uri.parse(emailLink).queryParameters['oobCode']!);
-
-    // final userData = await _api.getCurrentUser(response.idToken!);
-
-    // // Map the json response to an actual user.
-    // final user = User(userData.toJson()..addAll(response.toJson()), this);
-
-    // updateCurrentUserAndEvents(user);
-
-    // return UserCredential._(
-    //   auth: this,
-    //   credential: EmailAuthProvider.credentialWithLink(
-    //       email: email, emailLink: emailLink),
-    // );
   }
 
   /// Starts a phone number verification process for the given phone number.

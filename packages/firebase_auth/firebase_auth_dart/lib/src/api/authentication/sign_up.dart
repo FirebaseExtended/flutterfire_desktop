@@ -7,7 +7,10 @@ class SignUp extends APIDelegate {
   // ignore: public_member_api_docs
   SignUp(API api) : super(api);
 
-  /// TODO: write endpoint details
+  /// Sign in a user anonymously.
+  ///
+  /// Common error codes:
+  /// - `OPERATION_NOT_ALLOWED`: Anonymous user sign-in is disabled for this project.
   Future<SignupNewUserResponse> signInAnonymously() async {
     final _response = await api.identityToolkit.signupNewUser(
       IdentitytoolkitRelyingpartySignupNewUserRequest(),

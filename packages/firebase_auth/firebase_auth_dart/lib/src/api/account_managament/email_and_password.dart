@@ -8,7 +8,11 @@ class EmailAndPasswordAccount extends APIDelegate {
   // ignore: public_member_api_docs
   const EmailAndPasswordAccount(API api) : super(api);
 
-  /// TODO: write endpoint details
+  /// Change a user's email.
+  ///
+  /// Common error codes:
+  /// - `EMAIL_EXISTS`: The email address is already in use by another account.
+  /// - `INVALID_ID_TOKEN`:The user's credential is no longer valid. The user must sign in again.
   Future<SetAccountInfoResponse> updateEmail(
     String newEmail,
     String idToken,
@@ -24,7 +28,11 @@ class EmailAndPasswordAccount extends APIDelegate {
     return _response;
   }
 
-  /// TODO: write endpoint details
+  /// Change a user's password.
+  ///
+  /// Common error codes:
+  /// - `INVALID_ID_TOKEN`:The user's credential is no longer valid. The user must sign in again.
+  /// - `WEAK_PASSWORD`: The password must be 6 characters long or more.
   Future<SetAccountInfoResponse> updatePassword(
     String idToken, {
     String? newPassword,
@@ -37,7 +45,14 @@ class EmailAndPasswordAccount extends APIDelegate {
     );
   }
 
-  /// TODO: write endpoint details
+  /// Apply a password reset change.
+  ///
+  /// Common error codes:
+  /// - `OPERATION_NOT_ALLOWED`: Password sign-in is disabled for this project.
+  /// - `EXPIRED_OOB_CODE`: The action code has expired.
+  /// - `INVALID_OOB_CODE`: The action code is invalid. This can happen if the
+  /// code is malformed, expired, or has already been used.
+  /// - `USER_DISABLED`: The user account has been disabled by an administrator.
   Future<String> resetPassword(String? code, String? newPassword) async {
     final _response = await api.identityToolkit.resetPassword(
       IdentitytoolkitRelyingpartyResetPasswordRequest(

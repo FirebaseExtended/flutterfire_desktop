@@ -7,7 +7,11 @@ class IdpAuth extends APIDelegate {
   // ignore: public_member_api_docs
   const IdpAuth(API api) : super(api);
 
-  /// TODO: write endpoint details
+  /// Sign in a user with an OAuth credential.
+  ///
+  /// Common error codes:
+  /// - `OPERATION_NOT_ALLOWED`: The corresponding provider is disabled for this project.
+  /// - `INVALID_IDP_RESPONSE`: The supplied auth credential is malformed or has expired.
   Future<VerifyAssertionResponse> signInWithOAuthCredential({
     required String providerId,
     String? idToken,

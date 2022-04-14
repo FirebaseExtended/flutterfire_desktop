@@ -30,7 +30,9 @@ class AuthEmulator {
 
   final APIConfig _config;
 
-  /// TODO: write endpoint details
+  /// Try to connect to the local runnning emulator by getting emulator-specific
+  /// configuration for the specified project. If the connection was successful,
+  /// set local emulator in API configurations to be used for all future requests.
   Future<Map<String, dynamic>> useEmulator(String host, int port) async {
     // 1. Get the emulator project configs, it must be initialized first.
     // http://localhost:9099/emulator/v1/projects/{project-id}/config
