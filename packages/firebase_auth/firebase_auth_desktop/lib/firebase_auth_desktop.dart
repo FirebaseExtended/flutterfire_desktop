@@ -276,9 +276,15 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   }
 
   @override
-  Future<UserCredentialPlatform> signInWithCustomToken(String token) {
-    // TODO: implement signInWithCustomToken
-    throw UnimplementedError();
+  Future<UserCredentialPlatform> signInWithCustomToken(String token) async {
+    try {
+      return UserCredential(
+        this,
+        await _delegate!.signInWithCustomToken(token),
+      );
+    } catch (e) {
+      throw getFirebaseAuthException(e);
+    }
   }
 
   @override
