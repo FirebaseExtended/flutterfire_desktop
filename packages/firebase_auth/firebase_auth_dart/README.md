@@ -17,7 +17,7 @@ First, please make sure you initialize Firebase for Dart by following the guide 
 
 2. Import it:
     ```dart
-    import 'package:firebase_core_dart/firebase_auth_dart.dart';
+    import 'package:firebase_auth_dart/firebase_auth_dart.dart';
     ```
 ## Usage
 
