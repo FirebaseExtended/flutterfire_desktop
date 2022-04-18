@@ -23,7 +23,7 @@ class ConfirmationResult {
   /// that was sent to the user's mobile device.
   Future<UserCredential> confirm(String verificationCode) async {
     try {
-      final response = await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+      final response = await _auth._api.smsAuth.confirmPhoneNumber(
         smsCode: verificationCode,
         verificationId: verificationId,
         idToken: _auth.currentUser?._idToken,
@@ -33,10 +33,11 @@ class ConfirmationResult {
         throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
       }
 
-      final userData = await _auth._api.getCurrentUser(response.idToken);
+      final userData =
+          await _auth._api.userAccount.getAccountInfo(response.idToken);
 
       // Map the json response to an actual user.
-      final user = User(userData.toJson()..addAll(response.toJson()), _auth);
+      final user = User(userData..addAll(response.toJson()), _auth);
 
       _auth._updateCurrentUserAndEvents(user, true);
 
@@ -49,12 +50,12 @@ class ConfirmationResult {
         auth: _auth,
         credential: credential,
         additionalUserInfo: AdditionalUserInfo(
-          isNewUser: response.isNewUser ?? false,
+          isNewUser: response.isNewUser,
           providerId: credential.providerId,
-          username: userData.screenName,
+          username: userData['screenName'],
           profile: {
-            'displayName': userData.displayName,
-            'photoUrl': userData.photoUrl
+            'displayName': userData['displayName'],
+            'photoUrl': userData['photoUrl']
           },
         ),
       );

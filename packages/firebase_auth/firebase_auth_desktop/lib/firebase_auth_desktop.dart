@@ -220,11 +220,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<void> sendSignInLinkToEmail(
       String email, ActionCodeSettings actionCodeSettings) async {
-    try {
-      await _delegate!.sendSignInLinkToEmail(email);
-    } catch (e) {
-      throw getFirebaseAuthException(e);
-    }
+    // TODO: implement sendSignInLinkToEmail
+    throw UnimplementedError();
   }
 
   @override
@@ -290,14 +287,8 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   @override
   Future<UserCredentialPlatform> signInWithEmailLink(
       String email, String emailLink) async {
-    try {
-      return UserCredential(
-        this,
-        await _delegate!.signInWithEmailLink(email, emailLink),
-      );
-    } catch (e) {
-      throw getFirebaseAuthException(e);
-    }
+    // TODO: implement signInWithEmailLink
+    throw UnimplementedError();
   }
 
   @override

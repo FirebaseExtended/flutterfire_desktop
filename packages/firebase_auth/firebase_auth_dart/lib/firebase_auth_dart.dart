@@ -16,8 +16,7 @@ import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import 'src/api/api.dart' show API, APIConfig;
-import 'src/api/authentication/recaptcha/recaptcha_verifier.dart' as verifier;
+import 'src/api/api.dart';
 import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/enums.dart';
@@ -27,8 +26,7 @@ import 'src/providers/phone_auth.dart';
 import 'src/providers/twitter_auth.dart';
 import 'src/utils/jwt.dart';
 
-export 'src/api/authentication/recaptcha/recaptcha_args.dart';
-export 'src/api/authentication/recaptcha/recaptcha_verifier.dart';
+export 'src/api/api.dart' show RecaptchaVerifier, RecaptchaArgs, API, APIConfig;
 export 'src/auth_provider.dart';
 export 'src/firebase_auth_exception.dart';
 export 'src/providers/email_auth.dart';

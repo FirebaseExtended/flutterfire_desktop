@@ -181,7 +181,7 @@ linter:
     - use_if_null_to_convert_nulls_to_bools
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
-    - use_late_for_private_fields_and_variables
+    # - use_late_for_private_fields_and_variables
     - use_named_constants
     - use_raw_strings
     - use_rethrow_when_possible

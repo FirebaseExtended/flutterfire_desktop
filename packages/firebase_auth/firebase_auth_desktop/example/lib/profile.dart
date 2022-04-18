@@ -242,8 +242,7 @@ class _ProfilePageState extends State<ProfilePage> {
           await ExampleDialog.of(context).show('Phone number:', 'Link');
 
       if (phoneNumber != null) {
-        final confirmationResult =
-            await user.linkWithPhoneNumber('+16505550101');
+        final confirmationResult = await user.linkWithPhoneNumber(phoneNumber);
 
         final smsCode =
             // ignore: use_build_context_synchronously

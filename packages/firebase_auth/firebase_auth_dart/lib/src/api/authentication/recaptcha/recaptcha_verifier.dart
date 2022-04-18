@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io';
-
-import '../../../utils/open_url.dart';
-import 'recaptcha_args.dart';
-import 'recaptcha_verification_server.dart';
+part of api;
 
 /// The theme of the rendered recaptcha widget.
 enum RecaptchaTheme {

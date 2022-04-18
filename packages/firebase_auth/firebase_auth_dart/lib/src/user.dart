@@ -127,7 +127,7 @@ class User {
         throw FirebaseAuthException(code: 'NO_SUCH_PROVIDER');
       }
 
-      await _auth._api.unlink(_idToken, providerId);
+      await _auth._api.userAccount.deleteLinkedAccount(_idToken, providerId);
       await reload();
 
       return this;
@@ -148,7 +148,7 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.delete(_idToken, uid);
+      await _auth._api.userAccount.delete(_idToken, uid);
       await _auth.signOut();
     } catch (e) {
       throw _auth._getException(e);
@@ -186,7 +186,7 @@ class User {
 
   Future<void> _refreshIdToken(bool forceRefresh) async {
     if (forceRefresh || !_decodedIdToken.isValidTimestamp) {
-      _setIdToken(await _auth._api.refreshIdToken(refreshToken));
+      _setIdToken(await _auth._api.idToken.refreshIdToken(refreshToken));
       _auth._updateCurrentUserAndEvents(this);
     }
   }
@@ -196,7 +196,7 @@ class User {
   Future<UserCredential> linkWithCredential(AuthCredential credential) async {
     try {
       if (credential is EmailAuthCredential) {
-        final response = await _auth._api.linkWithEmail(
+        final response = await _auth._api.emailAndPasswordAuth.linkWithEmail(
           _idToken,
           credential: credential,
         );
@@ -215,7 +215,7 @@ class User {
         );
         return await confirmationResult.confirm(credential.smsCode!);
       } else if (credential is GoogleAuthCredential) {
-        final response = await _auth._api.signInWithOAuthCredential(
+        final response = await _auth._api.idpAuth.signInWithOAuthCredential(
           idToken: _idToken,
           providerId: credential.providerId,
           providerIdToken: credential.idToken,
@@ -264,7 +264,7 @@ class User {
           throw FirebaseAuthException(code: 'USER_MISMATCH');
         }
 
-        final response = await _auth._api
+        final response = await _auth._api.emailAndPasswordAuth
             .signInWithEmailAndPassword(credential.email, credential.password!);
 
         _setIdToken(response.idToken);
@@ -286,7 +286,7 @@ class User {
         assert(_auth.app.options.authDomain != null,
             'You should provide authDomain when trying to add Google as auth provider.');
 
-        final response = await _auth._api.signInWithOAuthCredential(
+        final response = await _auth._api.idpAuth.signInWithOAuthCredential(
           providerId: credential.providerId,
           providerIdToken: credential.idToken,
           providerAccessToken: credential.accessToken,
@@ -310,8 +310,7 @@ class User {
           ),
         );
       } else if (credential is PhoneAuthCredential) {
-        final response =
-            await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+        final response = await _auth._api.smsAuth.confirmPhoneNumber(
           phoneNumber: phoneNumber,
           smsCode: credential.smsCode,
           idToken: _idToken,
@@ -325,7 +324,7 @@ class User {
           auth: _auth,
           credential: credential,
           additionalUserInfo: AdditionalUserInfo(
-            isNewUser: response.isNewUser ?? false,
+            isNewUser: response.isNewUser,
             providerId: credential.providerId,
           ),
         );
@@ -339,14 +338,15 @@ class User {
 
   /// Link the current user with the given phone number.
   Future<ConfirmationResult> linkWithPhoneNumber(String phoneNumber,
-      [verifier.RecaptchaVerifier? applicationVerifier]) async {
+      [RecaptchaVerifier? applicationVerifier]) async {
     try {
       return ConfirmationResult(
-          _auth,
-          (await _auth._api.phoneAuthApiDelegate.linkWithPhoneNumber(
-                  _idToken, phoneNumber,
-                  verifier: applicationVerifier))
-              .verificationId!);
+        _auth,
+        await _auth._api.smsAuth.signInWithPhoneNumber(
+          phoneNumber,
+          verifier: applicationVerifier,
+        ),
+      );
     } catch (e) {
       throw _auth._getException(e);
     }
@@ -385,7 +385,8 @@ class User {
     _assertSignedOut(_auth);
 
     try {
-      await _auth._api.updateEmail(newEmail, _idToken, uid);
+      await _auth._api.emailAndPasswordAccount
+          .updateEmail(newEmail, _idToken, uid);
       await reload();
     } catch (e) {
       throw _auth._getException(e);
@@ -403,7 +404,7 @@ class User {
     _assertSignedOut(_auth);
 
     try {
-      await _auth._api.sendEmailVerification(_idToken);
+      await _auth._api.emailAndPasswordAuth.sendVerificationEmail(_idToken);
     } catch (e) {
       throw _auth._getException(e);
     }
@@ -423,7 +424,10 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updatePassword(newPassword, _idToken);
+      await _auth._api.emailAndPasswordAccount.updatePassword(
+        _idToken,
+        newPassword: newPassword,
+      );
       await reload();
     } catch (e) {
       throw _auth._getException(e);
@@ -444,7 +448,7 @@ class User {
     _assertSignedOut(_auth);
 
     try {
-      await _auth._api.phoneAuthApiDelegate.verifyPhoneNumber(
+      await _auth._api.smsAuth.confirmPhoneNumber(
         idToken: _idToken,
         smsCode: phoneCredential.smsCode,
         verificationId: phoneCredential.verificationId,
@@ -464,7 +468,7 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updateProfile(
+      await _auth._api.userProfile.updateProfile(
         _idToken,
         uid,
         displayName: displayName,
@@ -483,7 +487,7 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updateProfile(
+      await _auth._api.userProfile.updateProfile(
         _idToken,
         uid,
         photoUrl: photoUrl,
@@ -505,7 +509,7 @@ class User {
     try {
       _assertSignedOut(_auth);
 
-      await _auth._api.updateProfile(
+      await _auth._api.userProfile.updateProfile(
         _idToken,
         uid,
         displayName: displayName,

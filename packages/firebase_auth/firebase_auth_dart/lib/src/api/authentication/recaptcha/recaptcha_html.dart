@@ -4,6 +4,8 @@
 
 // ignore_for_file: public_member_api_docs, require_trailing_commas
 
+part of api;
+
 String recaptchaHTML(String? siteKey, String? token,
     {String? theme, String? size}) {
   return '''
