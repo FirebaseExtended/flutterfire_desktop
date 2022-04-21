@@ -181,7 +181,7 @@ class FirebaseAuth {
         ),
       );
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -225,7 +225,7 @@ class FirebaseAuth {
         ),
       );
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -249,7 +249,7 @@ class FirebaseAuth {
 
       return providers;
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -268,7 +268,7 @@ class FirebaseAuth {
     try {
       return await _api.emailAndPasswordAuth.sendPasswordResetEmail(email);
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -295,7 +295,7 @@ class FirebaseAuth {
       return await _api.emailAndPasswordAccount
           .resetPassword(code, newPassword);
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -320,7 +320,7 @@ class FirebaseAuth {
     try {
       return await _api.emailAndPasswordAccount.resetPassword(code, null);
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -368,7 +368,7 @@ class FirebaseAuth {
             signInMethod: providerId,
           ));
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -501,7 +501,7 @@ class FirebaseAuth {
         ),
       );
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -568,7 +568,7 @@ class FirebaseAuth {
       );
       return ConfirmationResult(this, verificationId);
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -579,7 +579,7 @@ class FirebaseAuth {
       final response = await _api.userAccount.getAccountInfo(idToken);
       return response;
     } catch (e) {
-      throw _getException(e);
+      rethrow;
     }
   }
 
@@ -614,43 +614,7 @@ class FirebaseAuth {
     try {
       return await _api.emulator.useEmulator(host, port);
     } catch (e) {
-      throw _getException(e);
-    }
-  }
-
-  @protected
-  Exception _getException(Object e) {
-    if (e is idp.DetailedApiRequestError) {
-      var errorCode = e.message ?? '';
-      String? errorMessage;
-
-      if (e.jsonResponse?['error'] != null &&
-          // ignore: avoid_dynamic_calls
-          e.jsonResponse?['error']['status'] != null) {
-        // ignore: avoid_dynamic_calls
-        errorCode = e.jsonResponse!['error']['status'];
-        errorMessage = e.message;
-      }
-
-      // Solves a problem with incosistent error codes coming from the server.
-      if (errorCode.contains(' ')) {
-        errorCode = errorCode.split(' ').first;
-      }
-
-      final authException =
-          FirebaseAuthException(code: errorCode, message: errorMessage);
-      log('${authException.message}',
-          name: 'firebase_auth_dart/${authException.code}');
-
-      return authException;
-    } else if (e is Exception) {
-      log('$e', name: 'firebase_auth_dart');
-
-      return e;
-    } else {
-      log('$e', name: 'firebase_auth_dart');
-
-      return Exception(e);
+      rethrow;
     }
   }
 }

@@ -73,16 +73,20 @@ class SmsAuth extends APIDelegate {
     String phoneNumber, {
     RecaptchaVerifier? verifier,
   }) async {
-    Future<String> _verifyAction;
+    try {
+      Future<String> _verifyAction;
 
-    if (api.apiConfig.emulator != null) {
-      _verifyAction = _verifyEmulator(phoneNumber);
-    } else {
-      verifier ??= _recaptchaVerifier;
-      _verifyAction = _verify(phoneNumber, verifier);
+      if (api.apiConfig.emulator != null) {
+        _verifyAction = _verifyEmulator(phoneNumber);
+      } else {
+        verifier ??= _recaptchaVerifier;
+        _verifyAction = _verify(phoneNumber, verifier);
+      }
+
+      return _verifyAction;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
     }
-
-    return _verifyAction;
   }
 
   /// Confirm a phone number belongs to a user via SMS code.
@@ -115,8 +119,8 @@ class SmsAuth extends APIDelegate {
       }
 
       return SignInWithPhoneNumberResponse.fromJson(response.toJson());
-    } catch (e) {
-      rethrow;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
     }
   }
 
@@ -179,8 +183,8 @@ class SmsAuth extends APIDelegate {
       );
 
       return response.sessionInfo;
-    } catch (e) {
-      rethrow;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
     }
   }
 }

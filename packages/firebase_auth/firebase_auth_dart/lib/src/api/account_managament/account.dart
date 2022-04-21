@@ -15,13 +15,17 @@ class UserAccount extends APIDelegate {
   /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
   /// - `USER_NOT_FOUND`: There is no user record corresponding to this identifier.
   /// The user may have been deleted.
-  Future<void> delete(String idToken, String uid) {
-    return api.identityToolkit.deleteAccount(
-      IdentitytoolkitRelyingpartyDeleteAccountRequest(
-        idToken: idToken,
-        localId: uid,
-      ),
-    );
+  Future<void> delete(String idToken, String uid) async {
+    try {
+      await api.identityToolkit.deleteAccount(
+        IdentitytoolkitRelyingpartyDeleteAccountRequest(
+          idToken: idToken,
+          localId: uid,
+        ),
+      );
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Unlink a provider from a current user.
@@ -32,14 +36,18 @@ class UserAccount extends APIDelegate {
     String idToken,
     String providerId,
   ) async {
-    final response = await api.identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        idToken: idToken,
-        deleteProvider: [providerId],
-      ),
-    );
+    try {
+      final response = await api.identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          idToken: idToken,
+          deleteProvider: [providerId],
+        ),
+      );
 
-    return response.toJson();
+      return response.toJson();
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Get a user's data.
@@ -49,12 +57,24 @@ class UserAccount extends APIDelegate {
   /// `USER_NOT_FOUND`: There is no user record corresponding to this identifier.
   /// The user may have been deleted.
   Future<Map<String, dynamic>> getAccountInfo(String idToken) async {
-    final response = await api.identityToolkit.getAccountInfo(
-      IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
-    );
+    try {
+      final response = await api.identityToolkit.getAccountInfo(
+        IdentitytoolkitRelyingpartyGetAccountInfoRequest(idToken: idToken),
+      );
 
-    final json = response.users![0].toJson();
+      final json = response.users![0].toJson();
 
-    return json;
+      /// Map the list of providers from [UserInfoProviderUserInfo] to a Map.
+      json['providerUserInfo'] = response.users![0].providerUserInfo?.map((e) {
+        final json = e.toJson();
+        json.addAll({'uid': response.users![0].localId});
+
+        return json.cast<String, String?>();
+      }).toList();
+
+      return json;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

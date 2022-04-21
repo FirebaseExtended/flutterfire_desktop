@@ -21,13 +21,17 @@ class CreateAuthUri extends APIDelegate {
     String email, {
     String? continueUri = 'http://localhost',
   }) async {
-    final _response = await api.identityToolkit.createAuthUri(
-      IdentitytoolkitRelyingpartyCreateAuthUriRequest(
-        identifier: email,
-        continueUri: continueUri,
-      ),
-    );
+    try {
+      final _response = await api.identityToolkit.createAuthUri(
+        IdentitytoolkitRelyingpartyCreateAuthUriRequest(
+          identifier: email,
+          continueUri: continueUri,
+        ),
+      );
 
-    return _response.signinMethods ?? [];
+      return _response.signinMethods ?? [];
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

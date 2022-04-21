@@ -12,20 +12,25 @@ class EmailAndPasswordAccount extends APIDelegate {
   ///
   /// Common error codes:
   /// - `EMAIL_EXISTS`: The email address is already in use by another account.
-  /// - `INVALID_ID_TOKEN`:The user's credential is no longer valid. The user must sign in again.
+  /// - `INVALID_ID_TOKEN`: The user's credential is no longer valid. The user must sign in again.
   Future<SetAccountInfoResponse> updateEmail(
     String newEmail,
     String idToken,
     String uid,
   ) async {
-    final _response = await api.identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        email: newEmail,
-        idToken: idToken,
-        localId: uid,
-      ),
-    );
-    return _response;
+    try {
+      final response = await api.identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          email: newEmail,
+          idToken: idToken,
+          localId: uid,
+        ),
+      );
+
+      return response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Change a user's password.
@@ -37,12 +42,18 @@ class EmailAndPasswordAccount extends APIDelegate {
     String idToken, {
     String? newPassword,
   }) async {
-    return api.identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        idToken: idToken,
-        password: newPassword,
-      ),
-    );
+    try {
+      final response = await api.identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          idToken: idToken,
+          password: newPassword,
+        ),
+      );
+
+      return response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Apply a password reset change.
@@ -54,13 +65,17 @@ class EmailAndPasswordAccount extends APIDelegate {
   /// code is malformed, expired, or has already been used.
   /// - `USER_DISABLED`: The user account has been disabled by an administrator.
   Future<String> resetPassword(String? code, String? newPassword) async {
-    final _response = await api.identityToolkit.resetPassword(
-      IdentitytoolkitRelyingpartyResetPasswordRequest(
-        newPassword: newPassword,
-        oobCode: code,
-      ),
-    );
+    try {
+      final response = await api.identityToolkit.resetPassword(
+        IdentitytoolkitRelyingpartyResetPasswordRequest(
+          newPassword: newPassword,
+          oobCode: code,
+        ),
+      );
 
-    return _response.email!;
+      return response.email!;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

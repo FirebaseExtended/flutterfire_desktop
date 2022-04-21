@@ -20,37 +20,41 @@ class IdpAuth extends APIDelegate {
     String? providerAccessToken,
     String? providerSecret,
   }) async {
-    var uri = Uri.parse(requestUri ?? '');
-    if (!uri.isScheme('https')) {
-      uri = uri.replace(scheme: 'https');
-    }
+    try {
+      var uri = Uri.parse(requestUri ?? '');
+      if (!uri.isScheme('https')) {
+        uri = uri.replace(scheme: 'https');
+      }
 
-    final postBody = <String>['providerId=$providerId'];
+      final postBody = <String>['providerId=$providerId'];
 
-    if (providerIdToken != null) {
-      postBody.add('id_token=$providerIdToken');
-    }
-    if (providerAccessToken != null) {
-      postBody.add('access_token=$providerAccessToken');
-    }
-    if (providerSecret != null) {
-      postBody.add('oauth_token_secret=$providerSecret');
-    }
+      if (providerIdToken != null) {
+        postBody.add('id_token=$providerIdToken');
+      }
+      if (providerAccessToken != null) {
+        postBody.add('access_token=$providerAccessToken');
+      }
+      if (providerSecret != null) {
+        postBody.add('oauth_token_secret=$providerSecret');
+      }
 
-    final response = await api.identityToolkit.verifyAssertion(
-      IdentitytoolkitRelyingpartyVerifyAssertionRequest(
-        idToken: idToken,
-        requestUri: uri.toString(),
-        postBody: postBody.join('&'),
-        returnIdpCredential: true,
-        returnSecureToken: true,
-      ),
-    );
+      final response = await api.identityToolkit.verifyAssertion(
+        IdentitytoolkitRelyingpartyVerifyAssertionRequest(
+          idToken: idToken,
+          requestUri: uri.toString(),
+          postBody: postBody.join('&'),
+          returnIdpCredential: true,
+          returnSecureToken: true,
+        ),
+      );
 
-    if (response.errorMessage != null) {
-      throw DetailedApiRequestError(null, response.errorMessage);
+      if (response.errorMessage != null) {
+        throw DetailedApiRequestError(null, response.errorMessage);
+      }
+
+      return response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
     }
-
-    return response;
   }
 }

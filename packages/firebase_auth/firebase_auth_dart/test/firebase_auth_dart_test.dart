@@ -51,7 +51,6 @@ void main() {
       test('Facebook', () {});
     });
     group('unlink()', () {
-      //TODO: implement and test unlink
       test('should unlink phone number', () async {});
     });
     group('Set languageCode ', () {

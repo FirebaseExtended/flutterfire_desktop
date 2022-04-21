@@ -75,15 +75,7 @@ class User {
   /// Returns a list of user information for each linked provider.
   List<UserInfo> get providerData {
     return _user['providerUserInfo']
-            ?.map((userInfo) {
-              if (userInfo is idp.UserInfoProviderUserInfo) {
-                userInfo = userInfo.toJson();
-              }
-              return UserInfo(
-                userInfo.cast<String, String?>()
-                  ..addAll(<String, String?>{'uid': _user['uid']}),
-              );
-            })
+            ?.map((userInfo) => UserInfo(userInfo))
             ?.toList()
             ?.cast<UserInfo>() ??
         [];
@@ -124,7 +116,7 @@ class User {
 
       if (providerId.providerId == ProviderId.unknown ||
           !currentProviders.contains(providerId)) {
-        throw FirebaseAuthException(code: 'NO_SUCH_PROVIDER');
+        throw FirebaseAuthException(AuthErrorCode.NO_SUCH_PROVIDER);
       }
 
       await _auth._api.userAccount.deleteLinkedAccount(_idToken, providerId);
@@ -132,7 +124,7 @@ class User {
 
       return this;
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -151,7 +143,7 @@ class User {
       await _auth._api.userAccount.delete(_idToken, uid);
       await _auth.signOut();
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -243,7 +235,7 @@ class User {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -261,7 +253,7 @@ class User {
     try {
       if (credential is EmailAuthCredential) {
         if (credential.email != email) {
-          throw FirebaseAuthException(code: 'USER_MISMATCH');
+          throw FirebaseAuthException(AuthErrorCode.USER_MISMATCH);
         }
 
         final response = await _auth._api.emailAndPasswordAuth
@@ -332,7 +324,7 @@ class User {
         throw UnsupportedError('${credential.providerId} is not supported.');
       }
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -348,7 +340,7 @@ class User {
         ),
       );
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -389,7 +381,7 @@ class User {
           .updateEmail(newEmail, _idToken, uid);
       await reload();
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -406,7 +398,7 @@ class User {
     try {
       await _auth._api.emailAndPasswordAuth.sendVerificationEmail(_idToken);
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -430,7 +422,7 @@ class User {
       );
       await reload();
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -455,7 +447,7 @@ class User {
       );
       await reload();
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -474,7 +466,7 @@ class User {
         displayName: displayName,
       );
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -493,7 +485,7 @@ class User {
         photoUrl: photoUrl,
       );
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -517,7 +509,7 @@ class User {
       );
       await reload();
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 
@@ -531,7 +523,7 @@ void _assertSignedOut(FirebaseAuth instance) {
   if (instance.currentUser != null) {
     return;
   } else {
-    throw FirebaseAuthException(code: 'NO_CURRENT_USER');
+    throw FirebaseAuthException(AuthErrorCode.NO_CURRENT_USER);
   }
 }
 

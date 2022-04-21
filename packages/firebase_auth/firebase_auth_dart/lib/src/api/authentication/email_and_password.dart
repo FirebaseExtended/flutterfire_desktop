@@ -22,15 +22,19 @@ class EmailAndPasswordAuth extends APIDelegate {
     String email,
     String password,
   ) async {
-    final _response = await api.identityToolkit.verifyPassword(
-      IdentitytoolkitRelyingpartyVerifyPasswordRequest(
-        returnSecureToken: true,
-        password: password,
-        email: email,
-      ),
-    );
+    try {
+      final _response = await api.identityToolkit.verifyPassword(
+        IdentitytoolkitRelyingpartyVerifyPasswordRequest(
+          returnSecureToken: true,
+          password: password,
+          email: email,
+        ),
+      );
 
-    return _response;
+      return _response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Create a new email and password user.
@@ -44,13 +48,17 @@ class EmailAndPasswordAuth extends APIDelegate {
     String email,
     String password,
   ) async {
-    final _response = await api.identityToolkit.signupNewUser(
-      IdentitytoolkitRelyingpartySignupNewUserRequest(
-        email: email,
-        password: password,
-      ),
-    );
-    return _response;
+    try {
+      final _response = await api.identityToolkit.signupNewUser(
+        IdentitytoolkitRelyingpartySignupNewUserRequest(
+          email: email,
+          password: password,
+        ),
+      );
+      return _response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Link an email/password to a current user.
@@ -64,13 +72,19 @@ class EmailAndPasswordAuth extends APIDelegate {
     String idToken, {
     required EmailAuthCredential credential,
   }) async {
-    return api.identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        idToken: idToken,
-        email: credential.email,
-        password: credential.password,
-      ),
-    );
+    try {
+      final response = await api.identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          idToken: idToken,
+          email: credential.email,
+          password: credential.password,
+        ),
+      );
+
+      return response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Send an email verification for the current user.
@@ -80,11 +94,15 @@ class EmailAndPasswordAuth extends APIDelegate {
   /// - `USER_NOT_FOUND`: There is no user record corresponding to this identifier.
   /// The user may have been deleted.
   Future<String?> sendVerificationEmail(String idToken) async {
-    final _response = await api.identityToolkit.getOobConfirmationCode(
-      Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
-    );
+    try {
+      final _response = await api.identityToolkit.getOobConfirmationCode(
+        Relyingparty(requestType: 'VERIFY_EMAIL', idToken: idToken),
+      );
 
-    return _response.email;
+      return _response.email;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 
   /// Send a password reset email.
@@ -96,14 +114,18 @@ class EmailAndPasswordAuth extends APIDelegate {
     String email, {
     String? continueUrl,
   }) async {
-    final _response = await api.identityToolkit.getOobConfirmationCode(
-      Relyingparty(
-        email: email,
-        requestType: 'PASSWORD_RESET',
-        continueUrl: continueUrl,
-      ),
-    );
+    try {
+      final _response = await api.identityToolkit.getOobConfirmationCode(
+        Relyingparty(
+          email: email,
+          requestType: 'PASSWORD_RESET',
+          continueUrl: continueUrl,
+        ),
+      );
 
-    return _response.email!;
+      return _response.email!;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }
