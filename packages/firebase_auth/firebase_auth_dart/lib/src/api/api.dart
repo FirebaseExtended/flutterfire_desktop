@@ -46,6 +46,7 @@ abstract class APIDelegate {
   /// The [API] instance containing required configurations to make the requests.
   final API api;
 
+  /// Convert [DetailedApiRequestError] thrown by idp to [FirebaseAuthException].
   FirebaseAuthException makeAuthException(DetailedApiRequestError apiError) {
     try {
       final json = apiError.jsonResponse;
