@@ -75,7 +75,7 @@ class User {
   /// Returns a list of user information for each linked provider.
   List<UserInfo> get providerData {
     return _user['providerUserInfo']
-            ?.map((userInfo) => UserInfo(userInfo))
+            ?.map((userInfo) => UserInfo(userInfo.cast<String, String?>()))
             ?.toList()
             ?.cast<UserInfo>() ??
         [];
@@ -205,14 +205,17 @@ class User {
           _auth,
           credential.verificationId!,
         );
+
         return await confirmationResult.confirm(credential.smsCode!);
-      } else if (credential is GoogleAuthCredential) {
+      } else if (credential is OAuthCredential) {
         final response = await _auth._api.idpAuth.signInWithOAuthCredential(
           idToken: _idToken,
-          providerId: credential.providerId,
-          providerIdToken: credential.idToken,
-          providerAccessToken: credential.accessToken,
           requestUri: _auth.app.options.authDomain,
+          providerId: credential.providerId,
+          providerAccessToken: credential.accessToken,
+          providerIdToken: credential.idToken,
+          nonce: credential.rawNonce,
+          providerSecret: credential.secret,
         );
 
         _setIdToken(response.idToken);
