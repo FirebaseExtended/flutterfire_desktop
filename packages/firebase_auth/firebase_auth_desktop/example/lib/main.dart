@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:yaru/yaru.dart';
@@ -9,37 +10,36 @@ import 'package:yaru/yaru.dart';
 import 'auth.dart';
 import 'profile.dart';
 
-const firebaseOptionsDefault = FirebaseOptions(
-  apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
-  authDomain: 'react-native-firebase-testing.firebaseapp.com',
-  databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
-  projectId: 'react-native-firebase-testing',
-  messagingSenderId: '448618578101',
-  appId: '1:448618578101:web:0b650370bb29e29cac3efc',
-  measurementId: 'G-F79DJ0VFGS',
-);
-
-const firebaseOptionsSecondary = FirebaseOptions(
-  apiKey: 'AIzaSyBzTujHR_zs6CnxcBR-e2PuFcj8U0EfyK0',
-  appId: '1:252234506814:web:a5950ff065e27301a8676f',
-  messagingSenderId: '252234506814',
-  projectId: 'get-started-with-flutter-3bdfb',
-  authDomain: 'get-started-with-flutter-3bdfb.firebaseapp.com',
-  storageBucket: 'get-started-with-flutter-3bdfb.appspot.com',
-);
+FirebaseOptions get firebaseOptionsDefault {
+  if (defaultTargetPlatform == TargetPlatform.macOS) {
+    // Use iOS configurations on macOS.
+    return const FirebaseOptions(
+      apiKey: 'AIzaSyAHAsf51D0A407EklG1bs-5wA7EbyfNFg0',
+      appId: '1:448618578101:ios:3e76955ab6d49ecaac3efc',
+      messagingSenderId: '448618578101',
+      projectId: 'react-native-firebase-testing',
+      authDomain: 'react-native-firebase-testing.firebaseapp.com',
+    );
+  } else {
+    // Use web configurations on Linux, Windows and Web.
+    return const FirebaseOptions(
+      apiKey: 'AIzaSyAgUhHU8wSJgO5MVNy95tMT07NEjzMOfz0',
+      authDomain: 'react-native-firebase-testing.firebaseapp.com',
+      databaseURL: 'https://react-native-firebase-testing.firebaseio.com',
+      projectId: 'react-native-firebase-testing',
+      messagingSenderId: '448618578101',
+      appId: '1:448618578101:web:0b650370bb29e29cac3efc',
+      measurementId: 'G-F79DJ0VFGS',
+    );
+  }
+}
 
 // Requires that the Firebase Auth emulator is running locally
 // e.g via `melos run firebase:emulator`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: firebaseOptionsDefault,
-  );
-  await Firebase.initializeApp(
-    name: 'Secondary',
-    options: firebaseOptionsSecondary,
-  );
+  await Firebase.initializeApp(options: firebaseOptionsDefault);
 
   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
 

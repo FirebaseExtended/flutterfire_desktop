@@ -21,6 +21,7 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
+  crypto: ^3.0.1
   desktop_webview_auth: ^0.0.6
   firebase_auth: ^3.3.7
   firebase_auth_desktop: ^0.1.1
@@ -32,6 +33,7 @@ dependencies:
   flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.0-nullsafety
   google_sign_in_dartio: ^0.2.0
+  sign_in_with_apple: ^3.3.0
   yaru: ^0.2.0
 
 dependency_overrides:
