@@ -17,19 +17,23 @@ class UserProfile extends APIDelegate {
     String? photoUrl = '',
     String? displayName = '',
   }) async {
-    final _response = await api.identityToolkit.setAccountInfo(
-      IdentitytoolkitRelyingpartySetAccountInfoRequest(
-        displayName: displayName == '' ? null : displayName,
-        photoUrl: photoUrl == '' ? null : photoUrl,
-        idToken: idToken,
-        localId: uid,
-        returnSecureToken: true,
-        deleteAttribute: [
-          if (photoUrl == null) 'PHOTO_URL',
-          if (displayName == null) 'DISPLAY_NAME'
-        ],
-      ),
-    );
-    return _response;
+    try {
+      final response = await api.identityToolkit.setAccountInfo(
+        IdentitytoolkitRelyingpartySetAccountInfoRequest(
+          displayName: displayName == '' ? null : displayName,
+          photoUrl: photoUrl == '' ? null : photoUrl,
+          idToken: idToken,
+          localId: uid,
+          returnSecureToken: true,
+          deleteAttribute: [
+            if (photoUrl == null) 'PHOTO_URL',
+            if (displayName == null) 'DISPLAY_NAME'
+          ],
+        ),
+      );
+      return response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

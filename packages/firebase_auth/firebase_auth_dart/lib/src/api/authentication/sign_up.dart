@@ -12,10 +12,14 @@ class SignUp extends APIDelegate {
   /// Common error codes:
   /// - `OPERATION_NOT_ALLOWED`: Anonymous user sign-in is disabled for this project.
   Future<SignupNewUserResponse> signInAnonymously() async {
-    final _response = await api.identityToolkit.signupNewUser(
-      IdentitytoolkitRelyingpartySignupNewUserRequest(),
-    );
+    try {
+      final _response = await api.identityToolkit.signupNewUser(
+        IdentitytoolkitRelyingpartySignupNewUserRequest(),
+      );
 
-    return _response;
+      return _response;
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

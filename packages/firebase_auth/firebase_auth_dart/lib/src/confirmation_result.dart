@@ -30,7 +30,7 @@ class ConfirmationResult {
       );
 
       if (response.temporaryProof != null) {
-        throw FirebaseAuthException(code: 'NEED_CONFIRMATION');
+        throw FirebaseAuthException(AuthErrorCode.NEED_CONFIRMATION);
       }
 
       final userData =
@@ -60,7 +60,7 @@ class ConfirmationResult {
         ),
       );
     } catch (e) {
-      throw _auth._getException(e);
+      rethrow;
     }
   }
 }

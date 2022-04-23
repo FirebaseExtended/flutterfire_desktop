@@ -12,11 +12,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:firebaseapis/identitytoolkit/v3.dart' as idp;
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import 'src/api/api.dart';
+import 'src/api/errors.dart';
 import 'src/firebase_auth_exception.dart';
 import 'src/providers/email_auth.dart';
 import 'src/providers/enums.dart';

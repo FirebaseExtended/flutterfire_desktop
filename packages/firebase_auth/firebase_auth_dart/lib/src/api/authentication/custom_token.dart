@@ -42,13 +42,17 @@ class CustomTokenAuth extends APIDelegate {
   /// invalid for some reason (e.g. expired, invalid signature etc.)
   /// - `CREDENTIAL_MISMATCH`: The custom token corresponds to a different Firebase project.
   Future<CustomTokenResponse> signInWithCustomToken(String customToken) async {
-    final response = await api.identityToolkit.verifyCustomToken(
-      IdentitytoolkitRelyingpartyVerifyCustomTokenRequest(
-        token: customToken,
-        returnSecureToken: true,
-      ),
-    );
+    try {
+      final response = await api.identityToolkit.verifyCustomToken(
+        IdentitytoolkitRelyingpartyVerifyCustomTokenRequest(
+          token: customToken,
+          returnSecureToken: true,
+        ),
+      );
 
-    return CustomTokenResponse.fromJson(response.toJson());
+      return CustomTokenResponse.fromJson(response.toJson());
+    } on DetailedApiRequestError catch (e) {
+      throw makeAuthException(e);
+    }
   }
 }

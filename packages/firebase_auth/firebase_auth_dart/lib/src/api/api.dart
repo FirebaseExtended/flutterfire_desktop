@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 import '../firebase_auth_exception.dart';
 import '../providers/email_auth.dart';
 import '../utils/open_url.dart';
+import 'errors.dart';
 
 part 'account_managament/account.dart';
 part 'account_managament/email_and_password.dart';
@@ -44,6 +45,42 @@ abstract class APIDelegate {
 
   /// The [API] instance containing required configurations to make the requests.
   final API api;
+
+  /// Convert [DetailedApiRequestError] thrown by idp to [FirebaseAuthException].
+  FirebaseAuthException makeAuthException(DetailedApiRequestError apiError) {
+    try {
+      final json = apiError.jsonResponse;
+      var serverErrorCode = apiError.message ?? '';
+
+      String? customMessage;
+
+      if (json != null) {
+        if (json['error'] != null &&
+            // ignore: avoid_dynamic_calls
+            json['error']['status'] != null) {
+          // ignore: avoid_dynamic_calls
+          serverErrorCode = apiError.jsonResponse!['error']['status'];
+          customMessage = apiError.message;
+        }
+
+        // Solves a problem with incosistent error codes coming from the server.
+        if (serverErrorCode.contains(' ')) {
+          serverErrorCode = serverErrorCode.split(' ').first;
+        }
+      }
+
+      final authErrorCode = ServerError.values
+          .firstWhere((code) => code.name == serverErrorCode)
+          .authCode;
+
+      return FirebaseAuthException(
+        authErrorCode,
+        message: customMessage,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 /// Configurations necessary for making all idp requests.
