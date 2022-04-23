@@ -19,6 +19,7 @@ class IdpAuth extends APIDelegate {
     String? providerIdToken,
     String? providerAccessToken,
     String? providerSecret,
+    String? nonce,
   }) async {
     try {
       var uri = Uri.parse(requestUri ?? '');
@@ -36,6 +37,9 @@ class IdpAuth extends APIDelegate {
       }
       if (providerSecret != null) {
         postBody.add('oauth_token_secret=$providerSecret');
+      }
+      if (nonce != null) {
+        postBody.add('nonce=$nonce');
       }
 
       final response = await api.identityToolkit.verifyAssertion(

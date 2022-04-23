@@ -475,6 +475,15 @@ class FirebaseAuth {
           providerAccessToken: credential.accessToken,
         ))
             .toJson();
+      } else if (credential is OAuthCredential) {
+        response = (await _api.idpAuth.signInWithOAuthCredential(
+          requestUri: app.options.authDomain,
+          providerId: credential.providerId,
+          providerAccessToken: credential.accessToken,
+          providerIdToken: credential.idToken,
+          nonce: credential.rawNonce,
+        ))
+            .toJson();
       } else {
         throw UnsupportedError('This credential is not supported yet.');
       }
