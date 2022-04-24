@@ -12,7 +12,7 @@ class _RemoteConfigStorage {
   static const settingsKey = 'settings';
   static const throttleMetadataKey = 'throttle_metadata';
 
-  /// The last fetched config
+  /// The latest cached config loaded from storage or the server
   Map<String, RemoteConfigValue> _lastFetchedConfig = {};
 
   DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
@@ -21,7 +21,7 @@ class _RemoteConfigStorage {
   RemoteConfigFetchStatus _lastFetchStatus = RemoteConfigFetchStatus.noFetchYet;
   RemoteConfigFetchStatus get lastFetchStatus => _lastFetchStatus;
 
-  Future<void> load() async {
+  Future<void> loadFromStorage() async {
     final config = _options.getValue(activeConfigKey) as Map<String, Object?>;
     _lastFetchedConfig = {
       for (final entry in config.entries)

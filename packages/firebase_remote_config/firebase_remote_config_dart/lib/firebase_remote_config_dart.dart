@@ -66,8 +66,6 @@ class RemoteConfig {
       );
   RemoteConfigSettings _settings = RemoteConfigSettings();
 
-  /// The latest cached config loaded from storage or the server
-
   /// Default parameters set via [setDefaults]
   Map<String, dynamic> _defaultParameters = {};
 
@@ -77,7 +75,7 @@ class RemoteConfig {
   /// were activated. Returns a [bool] that is false if the
   /// config parameters were already activated.
   Future<bool> activate() async {
-    // TODO: Load config from storage into local map
+    // TODO: Load config from storage
     // final bool configChanged
     // return configChanged;
     return false;
@@ -85,14 +83,15 @@ class RemoteConfig {
 
   /// Ensures the last activated config are available to getters.
   Future<void> ensureInitialized() async {
-    // TODO: Wait for storage to be ready and loaded
+    // Unnecessary for desktop because we do synchronous file reads for storage
+    // Will be necessary if we ever support pure dart on web
   }
 
   /// Fetches and caches configuration from the Remote Config service.
   Future<void> fetch() async {
     // TODO: Implement & wrap in try / catch etc
     // await _api.fetch();
-    // TODO: Track last fetch time, status, config in storage instead of here
+    // TODO: Update these parameters in storage
     // _lastFetchTime = DateTime.now();
     // _lastFetchStatus = RemoteConfigFetchStatus.success;
     // _lastFetchedConfig = {};
