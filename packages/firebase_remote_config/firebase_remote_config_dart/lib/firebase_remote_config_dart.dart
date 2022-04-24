@@ -44,23 +44,32 @@ class RemoteConfig {
     });
   }
 
-  RemoteConfigApi _api;
+  final _api = RemoteConfigApi();
 
   /// Returns the [DateTime] of the last successful fetch.
   ///
   /// If no successful fetch has been made a [DateTime] representing
   /// the epoch (1970-01-01 UTC) is returned.
-  DateTime get lastFetchTime {}
-  final DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime get lastFetchTime => _lastFetchTime;
+  DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Returns the status of the last fetch attempt.
-  RemoteConfigFetchStatus get lastFetchStatus {}
-  final RemoteConfigFetchStatus _lastFetchStatus =
-      RemoteConfigFetchStatus.noFetchYet;
+  RemoteConfigFetchStatus get lastFetchStatus => _lastFetchStatus;
+  RemoteConfigFetchStatus _lastFetchStatus = RemoteConfigFetchStatus.noFetchYet;
 
-  /// Returns the [RemoteConfigSettings] of the current instance.
-  RemoteConfigSettings get settings {}
+  /// Returns a copy of the [RemoteConfigSettings] of the current instance.
+  RemoteConfigSettings get settings => RemoteConfigSettings(
+        fetchTimeout: _settings.fetchTimeout,
+        minimumFetchInterval: _settings.minimumFetchInterval,
+      );
   RemoteConfigSettings _settings = RemoteConfigSettings();
+
+  /// The latest cached config loaded from storage or the server
+  // TODO: Consider moving to storage provider?
+  Map<String, RemoteConfigValue> _lastFetchedConfig = {};
+
+  /// Default parameters set via [setDefaults]
+  Map<String, dynamic> _defaultParameters = {};
 
   /// Makes the last fetched config available to getters.
   ///
@@ -68,20 +77,24 @@ class RemoteConfig {
   /// were activated. Returns a [bool] that is false if the
   /// config parameters were already activated.
   Future<bool> activate() async {
-    final bool configChanged = await _api.activate();
-    notifyListeners();
-    return configChanged;
+    // TODO: Load config from storage into local map
+    // final bool configChanged
+    // return configChanged;
+    return false;
   }
 
   /// Ensures the last activated config are available to getters.
-  Future<void> ensureInitialized() {
-    return _api.ensureInitialized();
+  Future<void> ensureInitialized() async {
+    // TODO: Wait for storage to be ready and loaded
   }
 
   /// Fetches and caches configuration from the Remote Config service.
   Future<void> fetch() async {
-    // TODO: Implement
-    await _api.fetch();
+    // TODO: Implement & wrap in try / catch etc
+    // await _api.fetch();
+    // TODO: Track last fetch time, status, config in storage instead of here
+    _lastFetchTime = DateTime.now();
+    _lastFetchStatus = RemoteConfigFetchStatus.success;
     _lastFetchedConfig = {};
   }
 
@@ -89,14 +102,9 @@ class RemoteConfig {
   ///
   /// Returns [bool] in the same way that is done for [activate].
   Future<bool> fetchAndActivate() async {
-    final bool configChanged = await _api.fetchAndActivate();
-    notifyListeners();
-    _lastFetchedConfig = {};
-    return configChanged;
+    await fetch();
+    return activate();
   }
-
-  Map<String, RemoteConfigValue> _lastFetchedConfig = {};
-  Map<String, dynamic> _defaultParameters;
 
   /// Returns a Map of all Remote Config parameters.
   Map<String, RemoteConfigValue> getAll() {
@@ -104,36 +112,24 @@ class RemoteConfig {
   }
 
   /// Gets the value for a given key as a bool.
-  bool getBool(String key) {
-    return _lastFetchedConfig[key]?.asBool() ??
-        _defaultParameters[key]! as bool;
-  }
+  bool getBool(String key) => getValue(key).asBool();
 
   /// Gets the value for a given key as an int.
-  int getInt(String key) {
-    return _lastFetchedConfig[key]?.asInt() ?? _defaultParameters[key]! as int;
-  }
+  int getInt(String key) => getValue(key).asInt();
 
   /// Gets the value for a given key as a double.
-  double getDouble(String key) {
-    return _lastFetchedConfig[key]?.asDouble() ??
-        _defaultParameters[key]! as double;
-  }
+  double getDouble(String key) => getValue(key).asDouble();
 
   /// Gets the value for a given key as a String.
-  String getString(String key) {
-    return _lastFetchedConfig[key]?.asString() ??
-        _defaultParameters[key]! as String;
-  }
+  String getString(String key) => getValue(key).asString();
 
   /// Gets the [RemoteConfigValue] for a given key.
-  RemoteConfigValue getValue(String key) {
-    return _lastFetchedConfig[key] ??
-        RemoteConfigValue(
-          const Utf8Codec().encode('${_defaultParameters[key]}'),
-          ValueSource.valueDefault,
-        );
-  }
+  RemoteConfigValue getValue(String key) =>
+      _lastFetchedConfig[key] ??
+      RemoteConfigValue(
+        const Utf8Codec().encode('${_defaultParameters[key]}'),
+        ValueSource.valueDefault,
+      );
 
   /// Sets the [RemoteConfigSettings] for the current instance.
   Future<void> setConfigSettings(
@@ -151,6 +147,7 @@ class RemoteConfig {
 
   /// Sets the default parameter values for the current instance.
   Future<void> setDefaults(Map<String, dynamic> defaultParameters) async {
+    // TODO: Copy rather than trusting user to not mutate?
     _defaultParameters = defaultParameters;
   }
 }
