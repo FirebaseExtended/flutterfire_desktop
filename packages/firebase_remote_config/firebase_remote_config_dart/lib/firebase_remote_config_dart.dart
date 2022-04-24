@@ -93,9 +93,9 @@ class RemoteConfig {
     // TODO: Implement & wrap in try / catch etc
     // await _api.fetch();
     // TODO: Track last fetch time, status, config in storage instead of here
-    _lastFetchTime = DateTime.now();
-    _lastFetchStatus = RemoteConfigFetchStatus.success;
-    _lastFetchedConfig = {};
+    // _lastFetchTime = DateTime.now();
+    // _lastFetchStatus = RemoteConfigFetchStatus.success;
+    // _lastFetchedConfig = {};
   }
 
   /// Performs a fetch and activate operation, as a convenience.
@@ -108,7 +108,7 @@ class RemoteConfig {
 
   /// Returns a Map of all Remote Config parameters.
   Map<String, RemoteConfigValue> getAll() {
-    return _lastFetchedConfig;
+    return _storage._lastFetchedConfig;
   }
 
   /// Gets the value for a given key as a bool.
@@ -125,7 +125,7 @@ class RemoteConfig {
 
   /// Gets the [RemoteConfigValue] for a given key.
   RemoteConfigValue getValue(String key) =>
-      _lastFetchedConfig[key] ??
+      _storage._lastFetchedConfig[key] ??
       RemoteConfigValue(
         const Utf8Codec().encode('${_defaultParameters[key]}'),
         ValueSource.valueDefault,
