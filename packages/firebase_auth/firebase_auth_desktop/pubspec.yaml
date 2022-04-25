@@ -9,7 +9,7 @@ environment:
   flutter: '>=1.20.0'
 
 dependencies:
-  desktop_webview_auth: ^0.0.6
+  desktop_webview_auth: ^0.0.7
   firebase_auth: ^3.3.7
   firebase_auth_dart: ^0.1.1
   firebase_auth_platform_interface: ^6.1.4

@@ -22,7 +22,7 @@ environment:
 
 dependencies:
   crypto: ^3.0.1
-  desktop_webview_auth: ^0.0.6
+  desktop_webview_auth: ^0.0.7
   firebase_auth: ^3.3.7
   firebase_auth_desktop: ^0.1.1
   firebase_core: ^1.12.0
