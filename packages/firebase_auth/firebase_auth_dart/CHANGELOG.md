@@ -1,3 +1,10 @@
+## 0.1.2
+
+ - **REFACTOR**: errors (#64).
+ - **REFACTOR**: 🔨 identity toolkit api layer (#61).
+ - **FEAT**: OAuth providers support (#65).
+ - **DOCS**: fix typo in import.
+
 ## 0.1.1
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.

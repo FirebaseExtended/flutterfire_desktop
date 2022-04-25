@@ -1,3 +1,9 @@
+## 0.1.2
+
+ - **REFACTOR**: 🔨 identity toolkit api layer (#61).
+ - **FEAT**: OAuth providers support (#65).
+ - **FEAT**: support for signInWithCustomToken (#62).
+
 ## 0.1.1
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
