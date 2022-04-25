@@ -13,7 +13,7 @@ dependencies:
   ansicolor: ^2.0.1
   args: ^2.3.0
   cli_util: ^0.3.5
-  firebase_auth_dart: ^0.1.1
+  firebase_auth_dart: ^0.1.2
   firebase_core_dart: ^0.1.1
 dependency_overrides:
   firebase_auth_dart:
