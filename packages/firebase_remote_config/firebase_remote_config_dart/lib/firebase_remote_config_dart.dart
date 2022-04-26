@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:http/http.dart';
 
 import 'src/remote_config_settings.dart';
 import 'src/remote_config_status.dart';
@@ -26,7 +27,10 @@ part 'src/internal/storage.dart';
 /// [RemoteConfig.instance] is async.
 // TODO(TimWhiting): Figure out how to introduce ChangeNotifier like class
 class RemoteConfig {
-  RemoteConfig._({required this.app});
+  RemoteConfig._({required this.app})
+      : _storage = _RemoveConfigStorageCache(
+          _RemoteConfigStorage(app.options.appId, app.name, ''),
+        );
 
   // Cached instances of [FirebaseRemoteConfig].
   static final Map<String, RemoteConfig> _firebaseRemoteConfigInstances = {};
@@ -47,17 +51,19 @@ class RemoteConfig {
     });
   }
 
-  final _api = RemoteConfigApi();
-  final _storage = _RemoteConfigStorage();
+  // final _api = _RemoteConfigApiClient();
+  final _RemoveConfigStorageCache _storage;
 
   /// Returns the [DateTime] of the last successful fetch.
   ///
   /// If no successful fetch has been made a [DateTime] representing
   /// the epoch (1970-01-01 UTC) is returned.
-  DateTime get lastFetchTime => _storage.lastFetchTime;
+  DateTime get lastFetchTime =>
+      _storage.lastFetchTime ?? DateTime.fromMicrosecondsSinceEpoch(0);
 
   /// Returns the status of the last fetch attempt.
-  RemoteConfigFetchStatus get lastFetchStatus => _storage.lastFetchStatus;
+  RemoteConfigFetchStatus get lastFetchStatus =>
+      _storage.lastFetchStatus ?? RemoteConfigFetchStatus.noFetchYet;
 
   /// Returns a copy of the [RemoteConfigSettings] of the current instance.
   RemoteConfigSettings get settings => RemoteConfigSettings(
@@ -78,6 +84,7 @@ class RemoteConfig {
     // TODO: Load config from storage
     // final bool configChanged
     // return configChanged;
+
     return false;
   }
 
@@ -106,8 +113,8 @@ class RemoteConfig {
   }
 
   /// Returns a Map of all Remote Config parameters.
-  Map<String, RemoteConfigValue> getAll() {
-    return _storage._lastFetchedConfig;
+  Map<String, RemoteConfigValue>? getAll() {
+    return _storage.activeConfig;
   }
 
   /// Gets the value for a given key as a bool.
@@ -124,7 +131,7 @@ class RemoteConfig {
 
   /// Gets the [RemoteConfigValue] for a given key.
   RemoteConfigValue getValue(String key) =>
-      _storage._lastFetchedConfig[key] ??
+      _storage.activeConfig?[key] ??
       RemoteConfigValue(
         const Utf8Codec().encode('${_defaultParameters[key]}'),
         ValueSource.valueDefault,

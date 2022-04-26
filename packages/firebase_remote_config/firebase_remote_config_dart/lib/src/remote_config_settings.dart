@@ -5,7 +5,7 @@ class RemoteConfigSettings {
   /// and [minimumFetchInterval].
   RemoteConfigSettings({
     this.fetchTimeout = const Duration(minutes: 10),
-    this.minimumFetchInterval = const Duration(minutes: 12),
+    this.minimumFetchInterval = const Duration(hours: 12),
   });
 
   /// Maximum Duration to wait for a response when fetching configuration from
