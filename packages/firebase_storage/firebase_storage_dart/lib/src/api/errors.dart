@@ -34,6 +34,36 @@ extension ToString on StorageErrorCode {
   }
 }
 
+extension GetMessage on StorageErrorCode {
+  String get message {
+    switch (this) {
+      case StorageErrorCode.OBJECT_NOT_FOUND:
+        return "No object exists at the desired reference.";
+      case StorageErrorCode.BUCKET_NOT_FOUND:
+        return "No bucket is configured for Firebase Storage.";
+      case StorageErrorCode.PROJECT_NOT_FOUND:
+        return "No project is configured for Firebase Storage.";
+      case StorageErrorCode.QUOTA_EXCEEDED:
+        return "Quota on your Firebase Storage bucket has been exceeded.";
+      case StorageErrorCode.UNAUTHENTICATED:
+        return "User is unauthenticated. Authenticate and try again.";
+      case StorageErrorCode.UNAUTHORIZED:
+        return "User is not authorized to perform the desired action.";
+      case StorageErrorCode.RETRY_LIMIT_EXCEEDED:
+        return "The maximum time limit on an operation (upload, download, delete, etc.) has been exceeded.";
+      case StorageErrorCode.INVALID_CHECKSUM:
+        return "File on the client does not match the checksum of the file received by the server.";
+      case StorageErrorCode.CANCELED:
+        return "User cancelled the operation.";
+      case StorageErrorCode.UNKNOWN:
+      default:
+        {
+          return "An unknown error occurred";
+        }
+    }
+  }
+}
+
 class StorageError {
   late String _baseMessage;
   String message;

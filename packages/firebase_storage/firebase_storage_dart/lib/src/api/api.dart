@@ -6,11 +6,59 @@
 
 library api;
 
+import 'package:firebase_storage_dart/src/api/errors.dart';
+import 'package:firebase_storage_dart/src/firebase_storage_exception.dart';
+import 'package:firebaseapis/firebasestorage/v1beta.dart';
+import 'package:firebaseapis/src/user_agent.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
 part 'emulator.dart';
+
+/// All API classes calling to IDP API must extend this template.
+abstract class APIDelegate {
+  /// Construct a new [APIDelegate].
+  const APIDelegate(this.api);
+
+  /// The [API] instance containing required configurations to make the requests.
+  final API api;
+
+  /// Convert [DetailedApiRequestError] thrown by idp to [FirebaseStorageException].
+  FirebaseStorageException makeAuthException(DetailedApiRequestError apiError) {
+    try {
+      final json = apiError.jsonResponse;
+      var serverErrorCode = apiError.message ?? '';
+
+      String? customMessage;
+
+      if (json != null) {
+        if (json['error'] != null &&
+            // ignore: avoid_dynamic_calls
+            json['error']['status'] != null) {
+          // ignore: avoid_dynamic_calls
+          serverErrorCode = apiError.jsonResponse!['error']['status'];
+          customMessage = apiError.message;
+        }
+
+        // Solves a problem with incosistent error codes coming from the server.
+        if (serverErrorCode.contains(' ')) {
+          serverErrorCode = serverErrorCode.split(' ').first;
+        }
+      }
+
+      final storageErrorCode = StorageErrorCode.values
+          .firstWhere((code) => code.name == serverErrorCode);
+
+      return FirebaseStorageException(
+        storageErrorCode,
+        message: customMessage,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+}
 
 /// Configurations necessary for making all idp requests.
 @protected
@@ -71,5 +119,25 @@ class API {
   // ignore: avoid_setters_without_getters
   set client(http.Client client) {
     _client = client;
+  }
+
+  /// Updates the [languageCode] for this instance.
+  void setLanguageCode(String? languageCode) {
+    _languageCode = languageCode;
+    requestHeaders.addAll({'X-Firebase-Locale': languageCode ?? ''});
+  }
+
+  /// Identity platform [ProjectsResource] initialized with this instance [APIConfig].
+  @internal
+  ProjectsResource get firebaseStorage {
+    if (apiConfig.emulator != null) {
+      return FirebasestorageApi(
+        _client!,
+        rootUrl: apiConfig.emulator!.rootUrl,
+      ).projects;
+    }
+    return FirebasestorageApi(
+      _client!,
+    ).projects;
   }
 }
