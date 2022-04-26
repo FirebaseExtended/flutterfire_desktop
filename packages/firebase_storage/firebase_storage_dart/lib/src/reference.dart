@@ -1,54 +1,102 @@
 part of firebase_storage_dart;
 
 class Reference {
-  Reference._(this.storage, this._delegate) {
-    ReferencePlatform.verifyExtends(_delegate);
-  }
-
-  ReferencePlatform _delegate;
+  Reference.fromPath({required this.storage,required String path}):location=Location(path,storage.bucket);
+  Reference._(this.storage, this.location);
 
   /// The storage service associated with this reference.
   final FirebaseStorage storage;
 
+  ///An fbs.location, or the URL at
+  ///     which to base this object, in one of the following forms:
+  ///         gs://<bucket>/<object-path>
+  ///         http[s]://firebasestorage.googleapis.com/
+  ///                     <api-version>/b/<bucket>/o/<object-path>
+  ///     Any query or fragment strings will be ignored in the http[s]
+  ///     format. If no value is passed, the storage object will use a URL based on
+  ///     the project ID of the base firebase.App instance.
+  ///
+  final Location location;
+
   /// The name of the bucket containing this reference's object.
-  String get bucket => _delegate.bucket;
+  String get bucket => location.bucket;
 
   /// The full path of this object.
-  String get fullPath => _delegate.fullPath;
+  String get fullPath => location.path;
 
   /// The short name of this object, which is the last component of the full path.
   ///
   /// For example, if fullPath is 'full/path/image.png', name is 'image.png'.
-  String get name => _delegate.name;
+  String get name => paths.lastComponent(location.path);
 
   /// A reference pointing to the parent location of this reference, or `null`
   /// if this reference is the root.
   Reference? get parent {
-    ReferencePlatform? referenceParentPlatform = _delegate.parent;
-
-    if (referenceParentPlatform == null) {
+    final newPath = paths.parent(this.location.path);
+    if (newPath == null) {
       return null;
     }
-
-    return Reference._(storage, referenceParentPlatform);
+    final newLocation = Location(
+      newPath,
+      location.bucket,
+    );
+    return Reference._(storage, newLocation);
   }
 
   /// A reference to the root of this reference's bucket.
-  Reference get root => Reference._(storage, _delegate.root);
+  Reference get root {
+    final newLocation = Location(
+      '',
+      location.bucket,
+    );
+    return Reference._(storage, newLocation);
+  }
 
   /// Returns a reference to a relative path from this reference.
   ///
   /// [path] The relative path from this reference. Leading, trailing, and
   ///   consecutive slashes are removed.
   Reference child(String path) {
-    return Reference._(storage, _delegate.child(path));
+    final newPath = paths.child(location.path, path);
+    final newLocation = Location(
+      newPath,
+      location.bucket,
+    );
+    return Reference._(storage, newLocation);
   }
 
   /// Deletes the object at this reference's location.
-  Future<void> delete() => _delegate.delete();
+  Future<void> delete() {
+    throw UnimplementedError();
+    //   final urlPart = location.fullServerUrl();
+    // final url = makeUrl(urlPart, service.host, service._protocol);
+    // const method = 'DELETE';
+    // final timeout = storage.maxOperationRetryTime;
+
+    // void handler(Connection<String> _xhr,String _text) {}
+    // final requestInfo =  RequestInfo(url, method, handler, timeout);
+    // requestInfo.successCodes = [200, 204];
+    // requestInfo.errorHandler = objectErrorHandler(location);
+    // return requestInfo;
+  }
 
   /// Fetches a long lived download URL for this object.
-  Future<String> getDownloadURL() => _delegate.getDownloadURL();
+  Future<String> getDownloadURL() {
+    // ref._throwIfRoot('getDownloadURL');
+  const requestInfo = requestsGetDownloadUrl(
+    storage,
+    location,
+    getMappings()
+  );
+  return ref.storage
+    .makeRequestWithTokens(requestInfo, newTextConnection)
+    .then(url => {
+      if (url === null) {
+        throw noDownloadURL();
+      }
+      return url;
+    });
+  }
 
   /// Fetches metadata for the object at this location, if one exists.
   Future<FullMetadata> getMetadata() => _delegate.getMetadata();

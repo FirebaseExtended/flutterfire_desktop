@@ -1,6 +1,6 @@
 name: firebase_storage_desktop
 description: A new Flutter package project.
-version: 0.0.1
+version: 0.1.0-dev.0
 homepage:
 
 environment:
@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   firebase_storage_platform_interface: ^4.1.4
   firebase_core_dart: ^0.1.1
+  firebase_storage_dart:
+    path: ../firebase_storage_dart
 
 dev_dependencies:
   flutter_test:

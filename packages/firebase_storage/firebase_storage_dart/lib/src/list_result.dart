@@ -3,7 +3,7 @@ part of firebase_storage_dart;
 /// Class returned as a result of calling a list method ([list] or [listAll])
 /// on a [Reference].
 class ListResult {
-  ListResult(this.storage, this._delegate) {
+  ListResult._(this.storage, this._delegate) {
     ListResultPlatform.verifyExtends(_delegate);
   }
 

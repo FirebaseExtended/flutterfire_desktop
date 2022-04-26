@@ -2,11 +2,9 @@ part of firebase_storage_dart;
 
 /// A class representing an on-going storage task that additionally delegates to a [Future].
 abstract class Task implements Future<TaskSnapshot> {
-  Task._(this.storage, this._delegate) {
-    TaskPlatform.verifyExtends(_delegate);
-  }
-
-  TaskPlatform _delegate;
+  Task._(
+    this.storage,
+  );
 
   /// The [FirebaseStorage] instance associated with this task.
   final FirebaseStorage storage;
@@ -32,7 +30,18 @@ abstract class Task implements Future<TaskSnapshot> {
   ///
   /// Calling this method will trigger a snapshot event with a [TaskState.paused]
   /// state.
-  Future<bool> pause() => _delegate.pause();
+  Future<bool> pause() async {
+    if (snapshot.state == TaskState.paused) {
+      return true;
+    }
+
+    final paused = _task.pause();
+    // Wait until the snapshot is paused, then return the value of paused...
+    return snapshotEvents
+        .takeWhile((snapshot) => snapshot.state != TaskState.paused)
+        .last
+        .then<bool>((_) => paused);
+  }
 
   /// Resumes the current task.
   ///
@@ -80,12 +89,17 @@ abstract class Task implements Future<TaskSnapshot> {
 
 /// A class which indicates an on-going upload task.
 class UploadTask extends Task {
-  UploadTask._(FirebaseStorage storage, TaskPlatform delegate)
-      : super._(storage, delegate);
+  UploadTask._(
+    FirebaseStorage storage,
+  ) : super._(
+          storage,
+        );
 }
 
 /// A class which indicates an on-going download task.
 class DownloadTask extends Task {
-  DownloadTask._(FirebaseStorage storage, TaskPlatform delegate)
-      : super._(storage, delegate);
+  DownloadTask._(FirebaseStorage storage)
+      : super._(
+          storage,
+        );
 }

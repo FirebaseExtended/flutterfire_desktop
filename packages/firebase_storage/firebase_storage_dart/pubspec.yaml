@@ -1,6 +1,6 @@
 name: firebase_storage_dart
 description: A starting point for Dart libraries or applications.
-version: 1.0.0
+version: 0.1.0-dev.0
 # homepage: https://www.example.com
 
 environment:
@@ -10,9 +10,7 @@ environment:
 dependencies:
   firebase_auth_dart: ^0.1.1
   firebase_core_dart: ^0.1.1
-  firebase_storage_dart:
-    path: ../firebase_storage_dart
-
+  firebaseapis: ^0.1.1
 dev_dependencies:
   lints: ^1.0.0
   test: ^1.16.0

@@ -1,15 +1,37 @@
-import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:firebase_storage_dart/firebase_storage_dart.dart';
-import 'package:firebase_storage_dart/src/utils.dart';
+// Copyright 2021 Invertase Limited. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
 
+// ignore_for_file: require_trailing_commas
+
+part of firebase_storage_dart;
+
+/// Pure Dart FirebaseAuth implementation.
 /// The entrypoint for [FirebaseStorage].
 class FirebaseStorage {
   /// Creates Firebase Functions
   // @visibleForTesting
-  FirebaseStorage({required this.app, required this.bucket});
+  FirebaseStorage({required this.app, required this.bucket}) {
+    _api = API.instanceOf(
+      APIConfig(
+        app.options.apiKey,
+        app.options.projectId,
+      ),
+    );
+  }
 
   /// The [FirebaseApp] for this current [FirebaseStorage] instance.
   FirebaseApp app;
+
+  /// Initialized [API] instance linked to this instance.
+  late final API _api;
+
+  /// Change the HTTP client for the purpose of testing.
+  @visibleForTesting
+  // ignore: avoid_setters_without_getters
+  set client(http.Client client) {
+    _api.client = client;
+  }
 
   /// The storage bucket of this instance.
   String bucket;
@@ -85,7 +107,7 @@ class FirebaseStorage {
   /// storage bucket.
   Reference ref([String? path]) {
     path ??= '/';
-    throw UnimplementedError();
+    return Reference.fromPath(storage: this, path: path);
   }
 
   /// Returns a new [Reference] from a given URL.
