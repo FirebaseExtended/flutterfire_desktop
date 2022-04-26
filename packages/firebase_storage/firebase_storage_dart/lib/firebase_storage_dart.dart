@@ -8,6 +8,7 @@ import 'dart:convert' show utf8, base64;
 import 'dart:io' show File;
 import 'dart:typed_data' show Uint8List;
 import 'package:firebase_storage_dart/src/api/api.dart';
+import 'package:firebase_storage_dart/src/implementations/constants.dart';
 import 'package:firebase_storage_dart/src/implementations/location.dart';
 import 'package:firebase_storage_dart/src/implementations/paths.dart' as paths;
 import 'package:http/http.dart' as http;

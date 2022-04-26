@@ -155,7 +155,7 @@ class DesktopFirebaseStorage extends FirebaseStoragePlatform {
     emulatorHost = host;
     emulatorPort = port;
     try {
-      await _delegate!.useStorageEmulator(host, port);
+      await _delegate!.useStorageEmulator(host: host, port: port);
       // await DesktopFirebaseStorage.channel
       //     .invokeMethod('Storage#useEmulator', <String, dynamic>{
       //   'appName': app.name,

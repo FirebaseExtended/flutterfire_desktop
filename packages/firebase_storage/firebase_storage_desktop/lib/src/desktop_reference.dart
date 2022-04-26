@@ -8,9 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:firebase_storage_desktop/src/desktop_firebase_storage.dart';
-import 'package:firebase_storage_desktop/src/desktop_list_result.dart';
 import 'package:firebase_storage_desktop/src/desktop_task.dart';
-import 'package:firebase_storage_desktop/src/utils/exceptions.dart';
 import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
 
 /// An implementation of [ReferencePlatform] that uses [Desktop] to

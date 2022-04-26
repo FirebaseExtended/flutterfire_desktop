@@ -6,6 +6,7 @@
 
 library api;
 
+import 'dart:convert';
 import 'package:firebase_storage_dart/src/api/errors.dart';
 import 'package:firebase_storage_dart/src/firebase_storage_exception.dart';
 import 'package:firebaseapis/firebasestorage/v1beta.dart';
@@ -140,4 +141,8 @@ class API {
       _client!,
     ).projects;
   }
+
+  /// A delegate getter used to perform all requests
+  /// for Identity platform profile related operations.
+  StorageEmulator get emulator => StorageEmulator(apiConfig);
 }

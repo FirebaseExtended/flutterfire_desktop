@@ -36,20 +36,13 @@ class FirebaseStorage {
   /// The storage bucket of this instance.
   String bucket;
 
-  /// The maximum time to retry operations other than uploads or downloads in milliseconds.
-  Duration get maxOperationRetryTime {
-    throw UnimplementedError();
-  }
+  // Same default as the method channel implementation
+  int _maxDownloadRetryTime = const Duration(minutes: 10).inMilliseconds;
 
-  /// The maximum time to retry uploads in milliseconds.
-  Duration get maxUploadRetryTime {
-    throw UnimplementedError();
-  }
-
-  /// The maximum time to retry downloads in milliseconds.
-  Duration get maxDownloadRetryTime {
-    throw UnimplementedError();
-  }
+  // Same default as the method channel implementation
+  int _maxOperationRetryTime = const Duration(minutes: 2).inMilliseconds;
+  // Same default as the method channel implementation
+  int _maxUploadRetryTime = const Duration(minutes: 10).inMilliseconds;
 
   static final Map<String, FirebaseStorage> _cachedInstances = {};
 
@@ -101,6 +94,16 @@ class FirebaseStorage {
     return newInstance;
   }
 
+  /// The Storage emulator host this instance is configured to use. This
+  /// was required since iOS does not persist these settings on instances and
+  /// they need to be set every time when getting a `FIRStorage` instance.
+  String? emulatorHost;
+
+  /// The Storage emulator port this instance is configured to use. This
+  /// was required since iOS does not persist these settings on instances and
+  /// they need to be set every time when getting a `FIRStorage` instance.
+  int? emulatorPort;
+
   /// Returns a new [Reference].
   ///
   /// If the [path] is empty, the reference will point to the root of the
@@ -140,22 +143,37 @@ class FirebaseStorage {
         .ref(path);
   }
 
+  /// The maximum time to retry operations other than uploads or downloads in milliseconds.
+  int get maxOperationRetryTime {
+    return _maxOperationRetryTime;
+  }
+
+  /// The maximum time to retry uploads in milliseconds.
+  int get maxUploadRetryTime {
+    return _maxUploadRetryTime;
+  }
+
+  /// The maximum time to retry downloads in milliseconds.
+  int get maxDownloadRetryTime {
+    return _maxDownloadRetryTime;
+  }
+
   /// Sets the new maximum operation retry time.
-  void setMaxOperationRetryTime(Duration time) {
+  void setMaxOperationRetryTime(int time) {
     assert(!time.isNegative);
-    throw UnimplementedError();
+    _maxOperationRetryTime = time;
   }
 
   /// Sets the new maximum upload retry time.
-  void setMaxUploadRetryTime(Duration time) {
+  void setMaxUploadRetryTime(int time) {
     assert(!time.isNegative);
-    throw UnimplementedError();
+    _maxUploadRetryTime = time;
   }
 
   /// Sets the new maximum download retry time.
-  void setMaxDownloadRetryTime(Duration time) {
+  void setMaxDownloadRetryTime(int time) {
     assert(!time.isNegative);
-    throw UnimplementedError();
+    _maxDownloadRetryTime = time;
   }
 
   /// Changes this instance to point to a Storage emulator running locally.
@@ -172,8 +190,7 @@ class FirebaseStorage {
     assert(host.isNotEmpty);
     assert(!port.isNegative);
 
-    String mappedHost = host;
-    throw UnimplementedError();
+    await useStorageEmulator(host: host, port: port);
   }
 
   /// Changes this instance to point to a Storage emulator running locally.
@@ -183,13 +200,16 @@ class FirebaseStorage {
   ///
   /// Note: Must be called immediately, prior to accessing storage methods.
   /// Do not use with production credentials as emulator traffic is not encrypted.
-  Future<void> useStorageEmulator(String host, int port) async {
+  Future<Map> useStorageEmulator(
+      {String host = 'localhost', int port = 9199}) async {
     assert(host.isNotEmpty);
     assert(!port.isNegative);
 
-    String mappedHost = host;
-
-    throw UnimplementedError();
+    try {
+      return await _api.emulator.useEmulator(host, port);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
