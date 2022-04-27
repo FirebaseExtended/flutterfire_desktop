@@ -8,6 +8,7 @@ import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_functions_dart/firebase_functions_dart.dart';
 import 'package:http/http.dart' as http;
+import 'package:storagebox/storagebox.dart';
 import 'package:test/test.dart';
 
 import 'data.dart' as data;
@@ -154,11 +155,11 @@ Future<void> main() async {
         functions.useFunctionsEmulator('localhost', 5001);
         httpsCallable = functions.httpsCallable('testFunctionAuthorized');
       });
-
       tearDown(() {
+        final config = StorageBox(app.options.projectId);
+
         // Clear auth storage
-        StorageBox.instanceOf(app.options.projectId)
-            .putValue('${app.options.apiKey}:${app.name}', null);
+        config.remove('${app.options.apiKey}:${app.name}');
       });
       test('unauthorized access throws', () async {
         expect(
@@ -167,7 +168,6 @@ Future<void> main() async {
               .having((e) => e.code, 'code', contains('unauthenticated'))),
         );
       });
-
       test('authorized access succeeds', () async {
         final auth = FirebaseAuth.instanceFor(app: app);
         await auth.useAuthEmulator();

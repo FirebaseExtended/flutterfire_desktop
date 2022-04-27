@@ -38,7 +38,7 @@ part 'authentication/sms.dart';
 part 'authentication/token.dart';
 part 'emulator.dart';
 
-/// All API classes calling to IDP API must extend this template.
+/// All API classes calling to Identity Toolkit API must extend this template.
 abstract class APIDelegate {
   /// Construct a new [APIDelegate].
   const APIDelegate(this.api);
@@ -46,7 +46,7 @@ abstract class APIDelegate {
   /// The [API] instance containing required configurations to make the requests.
   final API api;
 
-  /// Convert [DetailedApiRequestError] thrown by idp to [FirebaseAuthException].
+  /// Convert [DetailedApiRequestError] thrown by Identity Toolkit to [FirebaseAuthException].
   FirebaseAuthException makeAuthException(DetailedApiRequestError apiError) {
     try {
       final json = apiError.jsonResponse;
@@ -83,7 +83,7 @@ abstract class APIDelegate {
   }
 }
 
-/// Configurations necessary for making all idp requests.
+/// Configurations necessary for making all Identity Toolkit requests.
 @protected
 class APIConfig {
   /// Construct [APIConfig].
@@ -133,7 +133,7 @@ abstract class SignInResponse {
   }
 }
 
-/// A return type from Idp authentication requests, must be extended by any other response
+/// A return type from Identity Toolkit authentication requests, must be extended by any other response
 /// type for any operation that requires idToken.
 @protected
 abstract class IdTokenResponse {
