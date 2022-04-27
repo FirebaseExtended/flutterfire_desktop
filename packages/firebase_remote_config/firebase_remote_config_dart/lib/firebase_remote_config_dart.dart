@@ -10,6 +10,7 @@ import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:http/http.dart';
+import 'package:meta/meta.dart';
 
 import 'src/remote_config_settings.dart';
 import 'src/remote_config_status.dart';
@@ -24,32 +25,37 @@ part 'src/internal/storage.dart';
 
 /// The entry point for accessing Remote Config.
 ///
-/// You can get an instance by calling [RemoteConfig.instance]. Note
-/// [RemoteConfig.instance] is async.
+/// You can get an instance by calling [FirebaseRemoteConfig.instance]. Note
+/// [FirebaseRemoteConfig.instance] is async.
 // TODO: The flutter implementation uses a ChangeNotifier to let someone listen should we use StateNotifier?
-class RemoteConfig {
-  RemoteConfig._({required this.app, required this.namespace})
-      : _storage = _RemoteConfigStorage(app.options.appId, app.name, '');
+class FirebaseRemoteConfig {
+  /// Creates a new instance of FirebaseRemoteConfig
+  @visibleForTesting
+  FirebaseRemoteConfig({
+    required this.app,
+    this.namespace = 'firebase',
+  }) : _storage = _RemoteConfigStorage(app.options.appId, app.name, namespace);
 
   // Cached instances of [FirebaseRemoteConfig].
-  static final Map<String, RemoteConfig> _firebaseRemoteConfigInstances = {};
+  static final Map<String, FirebaseRemoteConfig>
+      _firebaseRemoteConfigInstances = {};
 
   /// The [FirebaseApp] this instance was initialized with.
   final FirebaseApp app;
 
   /// Returns an instance using the default [FirebaseApp].
-  static RemoteConfig get instance {
-    return RemoteConfig.instanceFor(app: Firebase.app());
+  static FirebaseRemoteConfig get instance {
+    return FirebaseRemoteConfig.instanceFor(app: Firebase.app());
   }
 
   /// Returns an instance using the specified [FirebaseApp].
   // ignore: prefer_constructors_over_static_methods
-  static RemoteConfig instanceFor({
+  static FirebaseRemoteConfig instanceFor({
     required FirebaseApp app,
     String namespace = 'firebase',
   }) {
     return _firebaseRemoteConfigInstances.putIfAbsent(app.name, () {
-      return RemoteConfig._(app: app, namespace: namespace);
+      return FirebaseRemoteConfig(app: app, namespace: namespace);
     });
   }
 
@@ -209,7 +215,10 @@ class RemoteConfig {
   }
 
   /// Sets values to be immediately available
-  void setInitialValues(Map remoteConfigValues) {
+  void setInitialValues({Map? remoteConfigValues}) {
+    if (remoteConfigValues == null) {
+      return;
+    }
     final fetchTimeout = Duration(seconds: remoteConfigValues['fetchTimeout']);
     final minimumFetchInterval =
         Duration(seconds: remoteConfigValues['minimumFetchInterval']);

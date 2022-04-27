@@ -41,8 +41,8 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
       FirebaseRemoteConfigDesktop(app: app ?? Firebase.app());
 
   final core_dart.FirebaseApp _app;
-  late final remote_config.RemoteConfig _remoteConfig =
-      remote_config.RemoteConfig.instanceFor(app: _app);
+  late final remote_config.FirebaseRemoteConfig _remoteConfig =
+      remote_config.FirebaseRemoteConfig.instanceFor(app: _app);
 
   /// Sets any initial values on the instance.
   ///
@@ -53,7 +53,7 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
   FirebaseRemoteConfigPlatform setInitialValues({
     required Map remoteConfigValues,
   }) {
-    _remoteConfig.setInitialValues(remoteConfigValues);
+    _remoteConfig.setInitialValues(remoteConfigValues: remoteConfigValues);
     return this;
   }
 
