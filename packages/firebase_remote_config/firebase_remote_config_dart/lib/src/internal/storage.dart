@@ -48,8 +48,9 @@ class _RemoteConfigStorage {
     return {
       for (final entry in config.entries)
         if (entry.value != null)
-          entry.key:
-              _RemoteConfigJson.fromJson(entry.value! as Map<String, Object?>)
+          entry.key: RemoteConfigValue.fromJson(
+            entry.value! as Map<String, Object?>,
+          )
     };
   }
 
@@ -137,19 +138,6 @@ class _RemoteConfigStorageCache {
   void setActiveConfig(Map<String, RemoteConfigValue> config) {
     _activeConfig = config;
     _storage.activeConfig = config;
-  }
-}
-
-extension _RemoteConfigJson on RemoteConfigValue {
-  static RemoteConfigValue fromJson(Map<String, Object?> remoteConfigValue) {
-    return RemoteConfigValue(
-      remoteConfigValue['value']! as String,
-      ValueSource.values.byName(remoteConfigValue['source']! as String),
-    );
-  }
-
-  Map<String, Object?> toJson() {
-    return {'source': source.name, 'value': asString()};
   }
 }
 

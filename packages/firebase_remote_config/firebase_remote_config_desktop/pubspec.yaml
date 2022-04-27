@@ -12,7 +12,7 @@ dependencies:
   firebase_core: ^1.10.0
   firebase_core_dart: ^0.1.1
   firebase_core_desktop: ^0.1.1
-  firebase_remote_config: ^2.0.5
+  firebase_remote_config_dart: any
   firebase_remote_config_platform_interface: any
   flutter:
     sdk: flutter
@@ -25,6 +25,10 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.0.0
   plugin_platform_interface: ^2.0.2
+
+dependency_overrides:
+  firebase_remote_config_dart:
+    path: ../firebase_remote_config_dart
 
 flutter:
   plugin:

@@ -26,7 +26,7 @@ part 'src/internal/storage.dart';
 ///
 /// You can get an instance by calling [RemoteConfig.instance]. Note
 /// [RemoteConfig.instance] is async.
-// TODO(TimWhiting): Figure out how to introduce ChangeNotifier like class
+// TODO: The flutter implementation uses a ChangeNotifier to let someone listen should we use StateNotifier?
 class RemoteConfig {
   RemoteConfig._({required this.app, required this.namespace})
       : _storage = _RemoteConfigStorage(app.options.appId, app.name, '');
@@ -155,7 +155,7 @@ class RemoteConfig {
   }
 
   /// Returns a Map of all Remote Config parameters.
-  Map<String, RemoteConfigValue>? getAll() {
+  Map<String, RemoteConfigValue> getAll() {
     final allKeys = {
       ...?_storageCache.activeConfig?.keys,
       ..._defaultConfig.keys
@@ -206,5 +206,59 @@ class RemoteConfig {
   /// Sets the default parameter values for the current instance.
   Future<void> setDefaults(Map<String, dynamic> defaultConfig) async {
     _defaultConfig = {...defaultConfig};
+  }
+
+  /// Sets values to be immediately available
+  void setInitialValues(Map remoteConfigValues) {
+    final fetchTimeout = Duration(seconds: remoteConfigValues['fetchTimeout']);
+    final minimumFetchInterval =
+        Duration(seconds: remoteConfigValues['minimumFetchInterval']);
+    final lastFetchMillis = remoteConfigValues['lastFetchTime'];
+    final lastFetchStatus = remoteConfigValues['lastFetchStatus'];
+
+    _settings = RemoteConfigSettings(
+      fetchTimeout: fetchTimeout,
+      minimumFetchInterval: minimumFetchInterval,
+    );
+
+    _storageCache.setLastFetchTime(
+      DateTime.fromMillisecondsSinceEpoch(lastFetchMillis),
+    );
+    _storageCache.setLastFetchStatus(_parseFetchStatus(lastFetchStatus));
+    _storageCache.setActiveConfig(
+      _parseParameters(remoteConfigValues['parameters']),
+    );
+  }
+
+  RemoteConfigFetchStatus _parseFetchStatus(String? status) {
+    try {
+      return status.mapNullable(RemoteConfigFetchStatus.values.byName) ??
+          RemoteConfigFetchStatus.noFetchYet;
+    } on Exception {
+      return RemoteConfigFetchStatus.noFetchYet;
+    }
+  }
+
+  Map<String, RemoteConfigValue> _parseParameters(
+    Map<dynamic, dynamic> rawParameters,
+  ) {
+    final parameters = <String, RemoteConfigValue>{};
+    for (final key in rawParameters.keys) {
+      final rawValue = rawParameters[key] as Map;
+      parameters[key] = RemoteConfigValue(
+        rawValue['value'],
+        _parseValueSource(rawValue['source']),
+      );
+    }
+    return parameters;
+  }
+
+  ValueSource _parseValueSource(String? sourceStr) {
+    try {
+      return sourceStr.mapNullable(ValueSource.values.byName) ??
+          ValueSource.valueStatic;
+    } on Exception {
+      return ValueSource.valueStatic;
+    }
   }
 }

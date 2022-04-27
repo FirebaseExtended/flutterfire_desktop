@@ -30,6 +30,19 @@ class RemoteConfigValue {
     );
   }
 
+  /// Creates a new RemoteConfigValue from json
+  factory RemoteConfigValue.fromJson(Map<String, Object?> remoteConfigValue) {
+    return RemoteConfigValue(
+      remoteConfigValue['value']! as String,
+      ValueSource.values.byName(remoteConfigValue['source']! as String),
+    );
+  }
+
+  /// Converts the RemoteConfigValue to a json map
+  Map<String, Object?> toJson() {
+    return {'source': source.name, 'value': asString()};
+  }
+
   /// Default value for String
   static const String defaultValueForString = '';
 
