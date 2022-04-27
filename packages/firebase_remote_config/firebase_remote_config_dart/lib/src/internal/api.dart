@@ -9,35 +9,48 @@ class _RemoteConfigApiClient {
     this.namespace,
     this.apiKey,
     this.appId,
+    this.storage,
+    this.storageCache,
   );
+  final _api = api.FirebaseRemoteConfigApi(Client());
 
+  final _RemoteConfigStorage storage;
+  final _RemoteConfigStorageCache storageCache;
   final String projectId;
   final String appId;
   final String namespace;
   final String apiKey;
-  Future<void> fetch({String? eTag}) async {
-    // TODO: Firebase installations
-    final client = Client();
-    final response = await client.post(
-      Uri.parse(
-        'https://firebaseremoteconfig.googleapis.com/v1'
-        '/projects/$projectId/namespaces/$namespace:fetch?key=$apiKey',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Encoding': 'gzip',
-        // Deviates from pure decorator by not passing max-age header since we don't currently have
-        // service behavior using that header.
-        'If-None-Match': eTag ?? '*'
-      },
-      body: jsonEncode({
-        // 'sdk_version': this.sdkVersion,
-        // 'app_instance_id': installationId,
-        // 'app_instance_id_token': installationToken,
-        'app_id': appId,
-        // 'language_code': getUserLanguage()
-      }),
-    );
-    // TODO: Timeout
+
+  bool isCachedDataFresh(
+    Duration cacheMaxAge,
+    DateTime? lastSuccessfulFetchTimestamp,
+  ) {
+    if (lastSuccessfulFetchTimestamp == null) {
+      return false;
+    }
+
+    final cacheAgeMillis = DateTime.now().millisecondsSinceEpoch -
+        lastSuccessfulFetchTimestamp.millisecondsSinceEpoch;
+    return cacheAgeMillis <= cacheMaxAge.inMilliseconds;
+  }
+
+  Future<api.RemoteConfig> fetch({
+    String? eTag,
+    required Duration cacheMaxAge,
+  }) async {
+    final lastSuccessfulFetchTimestamp = storage.lastFetchTime;
+    final lastSuccessfulFetchResponse =
+        storage.getLastSuccessfulFetchResponse();
+
+    if (lastSuccessfulFetchResponse != null &&
+        isCachedDataFresh(cacheMaxAge, lastSuccessfulFetchTimestamp)) {
+      return lastSuccessfulFetchResponse;
+    }
+
+    // TODO: Handle errors in fetch
+    final remoteConfig = await _api.projects.getRemoteConfig(projectId);
+    storageCache.setLastFetchTime(DateTime.now());
+    storage.setLastSuccessfulFetchResponse(remoteConfig);
+    return remoteConfig;
   }
 }

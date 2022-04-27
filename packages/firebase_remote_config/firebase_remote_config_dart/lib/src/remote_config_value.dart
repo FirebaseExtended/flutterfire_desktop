@@ -1,6 +1,6 @@
 // ignore_for_file: require_trailing_commas
-import 'dart:convert';
 
+import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:meta/meta.dart';
 
 /// ValueSource defines the possible sources of a config parameter value.
@@ -22,6 +22,14 @@ class RemoteConfigValue {
   @protected
   RemoteConfigValue(this._value, this.source);
 
+  /// Creates a new RemoteConfigValue from the api
+  factory RemoteConfigValue.fromApi(api.RemoteConfigParameter value) {
+    return RemoteConfigValue(
+      value.defaultValue?.value,
+      ValueSource.valueRemote,
+    );
+  }
+
   /// Default value for String
   static const String defaultValueForString = '';
 
@@ -34,7 +42,7 @@ class RemoteConfigValue {
   /// Default value for Bool
   static const bool defaultValueForBool = false;
 
-  final List<int>? _value;
+  final String? _value;
 
   /// Indicates at which source this value came from.
   final ValueSource source;
@@ -42,17 +50,14 @@ class RemoteConfigValue {
   /// Decode value to string.
   String asString() {
     final value = _value;
-    return value != null
-        ? const Utf8Codec().decode(value)
-        : defaultValueForString;
+    return value ?? defaultValueForString;
   }
 
   /// Decode value to int.
   int asInt() {
     final value = _value;
     if (value != null) {
-      final strValue = const Utf8Codec().decode(value);
-      final intValue = int.tryParse(strValue) ?? defaultValueForInt;
+      final intValue = int.tryParse(value) ?? defaultValueForInt;
       return intValue;
     } else {
       return defaultValueForInt;
@@ -63,8 +68,7 @@ class RemoteConfigValue {
   double asDouble() {
     final value = _value;
     if (value != null) {
-      final strValue = const Utf8Codec().decode(value);
-      final doubleValue = double.tryParse(strValue) ?? defaultValueForDouble;
+      final doubleValue = double.tryParse(value) ?? defaultValueForDouble;
       return doubleValue;
     } else {
       return defaultValueForDouble;
@@ -75,8 +79,7 @@ class RemoteConfigValue {
   bool asBool() {
     final value = _value;
     if (value != null) {
-      final strValue = const Utf8Codec().decode(value);
-      final lowerCase = strValue.toLowerCase();
+      final lowerCase = value.toLowerCase();
       return lowerCase == 'true' || lowerCase == '1';
     } else {
       return defaultValueForBool;

@@ -4,10 +4,11 @@
 
 library firebase_remote_config_dart;
 
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:http/http.dart';
 
 import 'src/remote_config_settings.dart';
@@ -27,10 +28,8 @@ part 'src/internal/storage.dart';
 /// [RemoteConfig.instance] is async.
 // TODO(TimWhiting): Figure out how to introduce ChangeNotifier like class
 class RemoteConfig {
-  RemoteConfig._({required this.app})
-      : _storage = _RemoveConfigStorageCache(
-          _RemoteConfigStorage(app.options.appId, app.name, ''),
-        );
+  RemoteConfig._({required this.app, required this.namespace})
+      : _storage = _RemoteConfigStorage(app.options.appId, app.name, '');
 
   // Cached instances of [FirebaseRemoteConfig].
   static final Map<String, RemoteConfig> _firebaseRemoteConfigInstances = {};
@@ -45,25 +44,33 @@ class RemoteConfig {
 
   /// Returns an instance using the specified [FirebaseApp].
   // ignore: prefer_constructors_over_static_methods
-  static RemoteConfig instanceFor({required FirebaseApp app}) {
+  static RemoteConfig instanceFor({
+    required FirebaseApp app,
+    String namespace = 'firebase',
+  }) {
     return _firebaseRemoteConfigInstances.putIfAbsent(app.name, () {
-      return RemoteConfig._(app: app);
+      return RemoteConfig._(app: app, namespace: namespace);
     });
   }
 
   // final _api = _RemoteConfigApiClient();
-  final _RemoveConfigStorageCache _storage;
+  late final _RemoteConfigStorageCache _storageCache =
+      _RemoteConfigStorageCache(_storage);
+  final _RemoteConfigStorage _storage;
+
+  /// The namespace of the remote config instance
+  final String namespace;
 
   /// Returns the [DateTime] of the last successful fetch.
   ///
   /// If no successful fetch has been made a [DateTime] representing
   /// the epoch (1970-01-01 UTC) is returned.
   DateTime get lastFetchTime =>
-      _storage.lastFetchTime ?? DateTime.fromMicrosecondsSinceEpoch(0);
+      _storageCache.lastFetchTime ?? DateTime.fromMicrosecondsSinceEpoch(0);
 
   /// Returns the status of the last fetch attempt.
   RemoteConfigFetchStatus get lastFetchStatus =>
-      _storage.lastFetchStatus ?? RemoteConfigFetchStatus.noFetchYet;
+      _storageCache.lastFetchStatus ?? RemoteConfigFetchStatus.noFetchYet;
 
   /// Returns a copy of the [RemoteConfigSettings] of the current instance.
   RemoteConfigSettings get settings => RemoteConfigSettings(
@@ -73,7 +80,17 @@ class RemoteConfig {
   RemoteConfigSettings _settings = RemoteConfigSettings();
 
   /// Default parameters set via [setDefaults]
-  Map<String, dynamic> _defaultParameters = {};
+  Map<String, Object?> _defaultConfig = {};
+
+  /// Api
+  late final _RemoteConfigApiClient _api = _RemoteConfigApiClient(
+    app.options.projectId,
+    namespace,
+    app.options.apiKey,
+    app.options.appId,
+    _storage,
+    _storageCache,
+  );
 
   /// Makes the last fetched config available to getters.
   ///
@@ -81,27 +98,52 @@ class RemoteConfig {
   /// were activated. Returns a [bool] that is false if the
   /// config parameters were already activated.
   Future<bool> activate() async {
-    // TODO: Load config from storage
-    // final bool configChanged
-    // return configChanged;
-
-    return false;
+    final lastSuccessfulFetchResponse =
+        _storage.getLastSuccessfulFetchResponse();
+    // final activeConfigEtag = _storage.getActiveConfigEtag();
+    if (lastSuccessfulFetchResponse?.parameters == null) {
+      // lastSuccessfulFetchResponse.eTag == null ||
+      // lastSuccessfulFetchResponse.eTag == activeConfigEtag) {
+      return false;
+    } else {
+      _storageCache.setActiveConfig(
+        {
+          for (final entry in lastSuccessfulFetchResponse!.parameters!.entries)
+            entry.key: RemoteConfigValue.fromApi(entry.value)
+        },
+      );
+      // _storage.setActiveConfigEtag(lastSuccessfulFetchResponse.eTag);
+      return true;
+    }
   }
+
+  final _initialized = Completer<void>();
 
   /// Ensures the last activated config are available to getters.
   Future<void> ensureInitialized() async {
-    // Unnecessary for desktop because we do synchronous file reads for storage
+    // Somewhat unnecessary for desktop because we do synchronous file reads for storage
     // Will be necessary if we ever support pure dart on web
+    if (!_initialized.isCompleted) {
+      await _storageCache.loadFromStorage().then((_) {
+        _initialized.complete();
+      });
+    }
+    return _initialized.future;
   }
 
   /// Fetches and caches configuration from the Remote Config service.
   Future<void> fetch() async {
-    // TODO: Implement & wrap in try / catch etc
-    // await _api.fetch();
-    // TODO: Update these parameters in storage
-    // _lastFetchTime = DateTime.now();
-    // _lastFetchStatus = RemoteConfigFetchStatus.success;
-    // _lastFetchedConfig = {};
+    try {
+      await _api
+          .fetch(cacheMaxAge: settings.minimumFetchInterval)
+          .timeout(settings.fetchTimeout);
+    } on TimeoutException {
+      _storageCache.setLastFetchStatus(RemoteConfigFetchStatus.throttle);
+      rethrow; // TODO: Throw Firebase Exception
+    } on Exception {
+      _storageCache.setLastFetchStatus(RemoteConfigFetchStatus.failure);
+      rethrow; // TODO: Throw Firebase Exception
+    }
   }
 
   /// Performs a fetch and activate operation, as a convenience.
@@ -114,7 +156,12 @@ class RemoteConfig {
 
   /// Returns a Map of all Remote Config parameters.
   Map<String, RemoteConfigValue>? getAll() {
-    return _storage.activeConfig;
+    final allKeys = {
+      ...?_storageCache.activeConfig?.keys,
+      ..._defaultConfig.keys
+    };
+    // Get the value for each key, respecting the default config
+    return {for (final key in allKeys) key: getValue(key)};
   }
 
   /// Gets the value for a given key as a bool.
@@ -130,12 +177,17 @@ class RemoteConfig {
   String getString(String key) => getValue(key).asString();
 
   /// Gets the [RemoteConfigValue] for a given key.
-  RemoteConfigValue getValue(String key) =>
-      _storage.activeConfig?[key] ??
-      RemoteConfigValue(
-        const Utf8Codec().encode('${_defaultParameters[key]}'),
-        ValueSource.valueDefault,
-      );
+  RemoteConfigValue getValue(String key) {
+    assert(
+      _initialized.isCompleted,
+      'Please ensure ensureInitialized is called prior to getting a remote config value',
+    );
+    return _storage.activeConfig?[key] ??
+        RemoteConfigValue(
+          _defaultConfig[key].mapNullable((v) => '$v'),
+          ValueSource.valueDefault,
+        );
+  }
 
   /// Sets the [RemoteConfigSettings] for the current instance.
   Future<void> setConfigSettings(
@@ -152,8 +204,7 @@ class RemoteConfig {
   }
 
   /// Sets the default parameter values for the current instance.
-  Future<void> setDefaults(Map<String, dynamic> defaultParameters) async {
-    // TODO: Copy rather than trusting user to not mutate?
-    _defaultParameters = defaultParameters;
+  Future<void> setDefaults(Map<String, dynamic> defaultConfig) async {
+    _defaultConfig = {...defaultConfig};
   }
 }

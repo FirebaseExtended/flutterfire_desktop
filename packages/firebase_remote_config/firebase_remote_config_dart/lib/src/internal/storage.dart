@@ -11,14 +11,12 @@ class _RemoteConfigStorage {
   static const lastFetchStatusKey = 'last_fetch_status';
   static const lastSuccessfulFetchTimeKey =
       'last_successful_fetch_timestamp_millis';
-  // TODO: Finish storage
-  static const activeConfigEtagKey = 'active_config_etag';
   static const lastSuccessfulFetchKey = 'last_successful_fetch_response';
-  static const settingsKey = 'settings';
-  static const throttleMetadataKey = 'throttle_metadata';
 
-  /// The latest cached config loaded from storage or the server
-  final Map<String, RemoteConfigValue> _lastFetchedConfig = {};
+  // TODO: Do we need these in storage?
+  // static const activeConfigEtagKey = 'active_config_etag';
+  // static const settingsKey = 'settings';
+  // static const throttleMetadataKey = 'throttle_metadata';
 
   DateTime? get lastFetchTime =>
       (_storageBox.getValue(lastSuccessfulFetchTimeKey) as int?)
@@ -66,11 +64,21 @@ class _RemoteConfigStorage {
             },
     );
   }
+
+  api.RemoteConfig? getLastSuccessfulFetchResponse() {
+    return _storageBox
+        .getValue(lastSuccessfulFetchKey)
+        .mapNullable((v) => api.RemoteConfig.fromJson(v as Map));
+  }
+
+  void setLastSuccessfulFetchResponse(api.RemoteConfig remoteConfig) {
+    _storageBox.putValue(lastSuccessfulFetchKey, remoteConfig.toJson());
+  }
 }
 
 /// A memory cache layer over storage to support the SDK's synchronous read requirements.
-class _RemoveConfigStorageCache {
-  _RemoveConfigStorageCache(_RemoteConfigStorage storage) : _storage = storage;
+class _RemoteConfigStorageCache {
+  _RemoteConfigStorageCache(_RemoteConfigStorage storage) : _storage = storage;
   final _RemoteConfigStorage _storage;
 
   /// Memory caches.
@@ -88,7 +96,7 @@ class _RemoveConfigStorageCache {
   Map<String, RemoteConfigValue>? _activeConfig;
 
   /// Read-ahead getter
-  void loadFromStorage() {
+  Future<void> loadFromStorage() async {
     // Note:
     // 1. we consistently check for null to avoid clobbering defined values
     //   in memory
@@ -135,9 +143,7 @@ class _RemoveConfigStorageCache {
 extension _RemoteConfigJson on RemoteConfigValue {
   static RemoteConfigValue fromJson(Map<String, Object?> remoteConfigValue) {
     return RemoteConfigValue(
-      const Utf8Codec().encode(
-        remoteConfigValue['value']! as String,
-      ),
+      remoteConfigValue['value']! as String,
       ValueSource.values.byName(remoteConfigValue['source']! as String),
     );
   }

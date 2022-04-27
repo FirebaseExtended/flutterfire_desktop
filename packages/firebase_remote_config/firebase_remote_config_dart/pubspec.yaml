@@ -11,6 +11,7 @@ dependencies:
   collection: ^1.15.0
   firebase_auth_dart: ^0.1.1
   firebase_core_dart: ^0.1.1
+  firebaseapis: ^0.1.1
   http: ^0.13.4
   meta: ^1.7.0
 
