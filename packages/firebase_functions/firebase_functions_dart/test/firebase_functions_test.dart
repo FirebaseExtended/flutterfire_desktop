@@ -11,6 +11,7 @@ import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_functions_dart/firebase_functions_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:storagebox/storagebox.dart';
 import 'package:test/test.dart';
 
 import 'data.dart' as data;
@@ -379,9 +380,12 @@ Future<void> main() async {
         options: firebaseOptions,
         name: 'auth_functions',
       );
+
       // Clear auth storage
-      StorageBox.instanceOf(app.options.projectId)
-          .putValue('${app.options.apiKey}:${app.name}', null);
+      final config = StorageBox(app.options.projectId);
+
+      // Clear auth storage
+      config.remove('${app.options.apiKey}:${app.name}');
       functions = FirebaseFunctions.instanceFor(app: app);
       functions.setApiClient(MockClient(_authCheck));
       httpsCallable = functions.httpsCallable('testFunctionAuthorized');
@@ -389,8 +393,10 @@ Future<void> main() async {
 
     tearDown(() async {
       // Clear auth storage
-      StorageBox.instanceOf(app.options.projectId)
-          .putValue('${app.options.apiKey}:${app.name}', null);
+      final config = StorageBox(app.options.projectId);
+
+      // Clear auth storage
+      config.remove('${app.options.apiKey}:${app.name}');
     });
 
     test('unauthorized access throws', () async {
