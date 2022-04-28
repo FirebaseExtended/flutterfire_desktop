@@ -1,10 +1,13 @@
 // Copyright 2022 Invertase Limited. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
+// ignore_for_file: public_member_api_docs, library_private_types_in_public_api
+
 part of '../../firebase_remote_config_dart.dart';
 
-class _RemoteConfigApiClient {
-  _RemoteConfigApiClient(
+@visibleForTesting
+class RemoteConfigApiClient {
+  RemoteConfigApiClient(
     this.projectId,
     this.namespace,
     this.apiKey,
@@ -12,7 +15,10 @@ class _RemoteConfigApiClient {
     this.storage,
     this.storageCache,
   );
-  final _api = api.FirebaseRemoteConfigApi(Client());
+  Client get httpClient => _httpClient;
+  final _httpClient = Client();
+
+  late final _api = api.FirebaseRemoteConfigApi(httpClient);
 
   final _RemoteConfigStorage storage;
   final _RemoteConfigStorageCache storageCache;

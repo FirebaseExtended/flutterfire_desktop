@@ -5,8 +5,7 @@ class _RemoteConfigStorage {
   final String appId;
   final String appName;
   final String namespace;
-  final StorageBox _storageBox =
-      StorageBox.instanceOf('firebase_remote_config');
+  final StorageBox _storageBox = StorageBox('firebase_remote_config');
   static const activeConfigKey = 'active_config';
   static const lastFetchStatusKey = 'last_fetch_status';
   static const lastSuccessfulFetchTimeKey =
@@ -19,29 +18,33 @@ class _RemoteConfigStorage {
   // static const throttleMetadataKey = 'throttle_metadata';
 
   DateTime? get lastFetchTime =>
-      (_storageBox.getValue(lastSuccessfulFetchTimeKey) as int?)
+      (_storageBox[lastSuccessfulFetchTimeKey] as int?)
           .mapNullable(DateTime.fromMicrosecondsSinceEpoch);
 
   /// Sets the last fetch time
   set lastFetchTime(DateTime? value) {
-    _storageBox.putValue(
-      lastSuccessfulFetchTimeKey,
-      value?.microsecondsSinceEpoch,
-    );
+    if (value == null) {
+      _storageBox.remove(lastSuccessfulFetchKey);
+      return;
+    }
+    _storageBox[lastSuccessfulFetchTimeKey] = value.microsecondsSinceEpoch;
   }
 
   RemoteConfigFetchStatus? get lastFetchStatus =>
-      (_storageBox.getValue(lastFetchStatusKey) as String?)
+      (_storageBox[lastFetchStatusKey] as String?)
           .mapNullable(RemoteConfigFetchStatus.values.byName);
 
   /// Sets the last fetch status
   set lastFetchStatus(RemoteConfigFetchStatus? value) {
-    _storageBox.putValue(lastFetchStatusKey, value);
+    if (value == null) {
+      _storageBox.remove(lastFetchStatusKey);
+      return;
+    }
+    _storageBox[lastFetchStatusKey] = value.name;
   }
 
   Map<String, RemoteConfigValue>? get activeConfig {
-    final config =
-        _storageBox.getValue(activeConfigKey) as Map<String, Object?>?;
+    final config = _storageBox[activeConfigKey] as Map<String, Object?>?;
     if (config == null) {
       return null;
     }
@@ -55,25 +58,22 @@ class _RemoteConfigStorage {
   }
 
   set activeConfig(Map<String, RemoteConfigValue>? config) {
-    _storageBox.putValue(
-      activeConfigKey,
-      config == null
-          ? null
-          : {
-              for (final entry in config.entries)
-                entry.key: entry.value.toJson(),
-            },
-    );
+    if (config == null) {
+      _storageBox.remove(activeConfigKey);
+      return;
+    }
+    _storageBox[activeConfigKey] = {
+      for (final entry in config.entries) entry.key: entry.value.toJson(),
+    };
   }
 
   api.RemoteConfig? getLastSuccessfulFetchResponse() {
-    return _storageBox
-        .getValue(lastSuccessfulFetchKey)
+    return _storageBox[lastSuccessfulFetchKey]
         .mapNullable((v) => api.RemoteConfig.fromJson(v as Map));
   }
 
   void setLastSuccessfulFetchResponse(api.RemoteConfig remoteConfig) {
-    _storageBox.putValue(lastSuccessfulFetchKey, remoteConfig.toJson());
+    _storageBox[lastSuccessfulFetchKey] = remoteConfig.toJson();
   }
 }
 

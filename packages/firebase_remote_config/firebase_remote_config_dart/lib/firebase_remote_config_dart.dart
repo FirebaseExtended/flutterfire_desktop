@@ -6,11 +6,11 @@ library firebase_remote_config_dart;
 
 import 'dart:async';
 
-import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
+import 'package:storagebox/storagebox.dart';
 
 import 'src/remote_config_settings.dart';
 import 'src/remote_config_status.dart';
@@ -34,10 +34,10 @@ class FirebaseRemoteConfig {
   FirebaseRemoteConfig({
     required this.app,
     this.namespace = 'firebase',
-  }) : _storage = _RemoteConfigStorage(app.options.appId, app.name, namespace);
+  }) : storage = _RemoteConfigStorage(app.options.appId, app.name, namespace);
 
   // Cached instances of [FirebaseRemoteConfig].
-  static final Map<String, FirebaseRemoteConfig>
+  static final Map<String, Map<String, FirebaseRemoteConfig>>
       _firebaseRemoteConfigInstances = {};
 
   /// The [FirebaseApp] this instance was initialized with.
@@ -51,18 +51,26 @@ class FirebaseRemoteConfig {
   /// Returns an instance using the specified [FirebaseApp].
   // ignore: prefer_constructors_over_static_methods
   static FirebaseRemoteConfig instanceFor({
-    required FirebaseApp app,
+    FirebaseApp? app,
     String namespace = 'firebase',
   }) {
-    return _firebaseRemoteConfigInstances.putIfAbsent(app.name, () {
-      return FirebaseRemoteConfig(app: app, namespace: namespace);
-    });
+    final _app = app ?? Firebase.app();
+    if (_firebaseRemoteConfigInstances[_app.name] == null) {
+      _firebaseRemoteConfigInstances[_app.name] = {};
+    }
+    return _firebaseRemoteConfigInstances[_app.name]!.putIfAbsent(
+      namespace,
+      () => FirebaseRemoteConfig(app: _app, namespace: namespace),
+    );
   }
 
-  // final _api = _RemoteConfigApiClient();
-  late final _RemoteConfigStorageCache _storageCache =
-      _RemoteConfigStorageCache(_storage);
-  final _RemoteConfigStorage _storage;
+  @visibleForTesting
+  // ignore: library_private_types_in_public_api, public_member_api_docs
+  late final _RemoteConfigStorageCache storageCache =
+      _RemoteConfigStorageCache(storage);
+  @visibleForTesting
+  // ignore: library_private_types_in_public_api, public_member_api_docs
+  final _RemoteConfigStorage storage;
 
   /// The namespace of the remote config instance
   final String namespace;
@@ -72,11 +80,11 @@ class FirebaseRemoteConfig {
   /// If no successful fetch has been made a [DateTime] representing
   /// the epoch (1970-01-01 UTC) is returned.
   DateTime get lastFetchTime =>
-      _storageCache.lastFetchTime ?? DateTime.fromMicrosecondsSinceEpoch(0);
+      storageCache.lastFetchTime ?? DateTime.fromMicrosecondsSinceEpoch(0);
 
   /// Returns the status of the last fetch attempt.
   RemoteConfigFetchStatus get lastFetchStatus =>
-      _storageCache.lastFetchStatus ?? RemoteConfigFetchStatus.noFetchYet;
+      storageCache.lastFetchStatus ?? RemoteConfigFetchStatus.noFetchYet;
 
   /// Returns a copy of the [RemoteConfigSettings] of the current instance.
   RemoteConfigSettings get settings => RemoteConfigSettings(
@@ -89,13 +97,14 @@ class FirebaseRemoteConfig {
   Map<String, Object?> _defaultConfig = {};
 
   /// Api
-  late final _RemoteConfigApiClient _api = _RemoteConfigApiClient(
+  @visibleForTesting
+  late RemoteConfigApiClient api = RemoteConfigApiClient(
     app.options.projectId,
     namespace,
     app.options.apiKey,
     app.options.appId,
-    _storage,
-    _storageCache,
+    storage,
+    storageCache,
   );
 
   /// Makes the last fetched config available to getters.
@@ -105,20 +114,20 @@ class FirebaseRemoteConfig {
   /// config parameters were already activated.
   Future<bool> activate() async {
     final lastSuccessfulFetchResponse =
-        _storage.getLastSuccessfulFetchResponse();
-    // final activeConfigEtag = _storage.getActiveConfigEtag();
+        storage.getLastSuccessfulFetchResponse();
+    // final activeConfigEtag = storage.getActiveConfigEtag();
     if (lastSuccessfulFetchResponse?.parameters == null) {
       // lastSuccessfulFetchResponse.eTag == null ||
       // lastSuccessfulFetchResponse.eTag == activeConfigEtag) {
       return false;
     } else {
-      _storageCache.setActiveConfig(
+      storageCache.setActiveConfig(
         {
           for (final entry in lastSuccessfulFetchResponse!.parameters!.entries)
             entry.key: RemoteConfigValue.fromApi(entry.value)
         },
       );
-      // _storage.setActiveConfigEtag(lastSuccessfulFetchResponse.eTag);
+      // storage.setActiveConfigEtag(lastSuccessfulFetchResponse.eTag);
       return true;
     }
   }
@@ -130,7 +139,7 @@ class FirebaseRemoteConfig {
     // Somewhat unnecessary for desktop because we do synchronous file reads for storage
     // Will be necessary if we ever support pure dart on web
     if (!_initialized.isCompleted) {
-      await _storageCache.loadFromStorage().then((_) {
+      await storageCache.loadFromStorage().then((_) {
         _initialized.complete();
       });
     }
@@ -140,16 +149,17 @@ class FirebaseRemoteConfig {
   /// Fetches and caches configuration from the Remote Config service.
   Future<void> fetch() async {
     try {
-      await _api
+      await api
           .fetch(cacheMaxAge: settings.minimumFetchInterval)
           .timeout(settings.fetchTimeout);
     } on TimeoutException {
-      _storageCache.setLastFetchStatus(RemoteConfigFetchStatus.throttle);
+      storageCache.setLastFetchStatus(RemoteConfigFetchStatus.throttle);
       rethrow; // TODO: Throw Firebase Exception
     } on Exception {
-      _storageCache.setLastFetchStatus(RemoteConfigFetchStatus.failure);
+      storageCache.setLastFetchStatus(RemoteConfigFetchStatus.failure);
       rethrow; // TODO: Throw Firebase Exception
     }
+    storageCache.setLastFetchStatus(RemoteConfigFetchStatus.success);
   }
 
   /// Performs a fetch and activate operation, as a convenience.
@@ -163,7 +173,7 @@ class FirebaseRemoteConfig {
   /// Returns a Map of all Remote Config parameters.
   Map<String, RemoteConfigValue> getAll() {
     final allKeys = {
-      ...?_storageCache.activeConfig?.keys,
+      ...?storageCache.activeConfig?.keys,
       ..._defaultConfig.keys
     };
     // Get the value for each key, respecting the default config
@@ -188,7 +198,7 @@ class FirebaseRemoteConfig {
       _initialized.isCompleted,
       'Please ensure ensureInitialized is called prior to getting a remote config value',
     );
-    return _storage.activeConfig?[key] ??
+    return storage.activeConfig?[key] ??
         RemoteConfigValue(
           _defaultConfig[key].mapNullable((v) => '$v'),
           ValueSource.valueDefault,
@@ -230,11 +240,11 @@ class FirebaseRemoteConfig {
       minimumFetchInterval: minimumFetchInterval,
     );
 
-    _storageCache.setLastFetchTime(
+    storageCache.setLastFetchTime(
       DateTime.fromMillisecondsSinceEpoch(lastFetchMillis),
     );
-    _storageCache.setLastFetchStatus(_parseFetchStatus(lastFetchStatus));
-    _storageCache.setActiveConfig(
+    storageCache.setLastFetchStatus(_parseFetchStatus(lastFetchStatus));
+    storageCache.setActiveConfig(
       _parseParameters(remoteConfigValues['parameters']),
     );
   }
@@ -263,11 +273,15 @@ class FirebaseRemoteConfig {
   }
 
   ValueSource _parseValueSource(String? sourceStr) {
-    try {
-      return sourceStr.mapNullable(ValueSource.values.byName) ??
-          ValueSource.valueStatic;
-    } on Exception {
-      return ValueSource.valueStatic;
+    switch (sourceStr) {
+      case 'remote':
+        return ValueSource.valueRemote;
+      case 'default':
+        return ValueSource.valueDefault;
+      case 'static':
+        return ValueSource.valueStatic;
+      default:
+        return ValueSource.valueStatic;
     }
   }
 }
