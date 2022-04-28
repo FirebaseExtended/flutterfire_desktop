@@ -7,14 +7,20 @@ class IdToken extends APIDelegate {
   // ignore: public_member_api_docs
   IdToken(API api) : super(api);
 
-  /// Refresh a user ID token using the refreshToken,
+  /// Refresh a user's IdToken using a `refreshToken`,
   /// will refresh even if the token hasn't expired.
   ///
+  /// Common error codes:
+  /// - `TOKEN_EXPIRED`: The user's credential is no longer valid. The user must sign in again.
+  /// - `USER_DISABLED`: The user account has been disabled by an administrator.
+  /// - `USER_NOT_FOUND`: The user corresponding to the refresh token was not found. It is likely the user was deleted.
+  /// - `INVALID_REFRESH_TOKEN`: An invalid refresh token is provided.
+  /// - `INVALID_GRANT_TYPE`: the grant type specified is invalid.
+  /// - `MISSING_REFRESH_TOKEN`: no refresh token provided.
+  /// - API key not valid. Please pass a valid API key. (invalid API key provided)
   Future<String?> refreshIdToken(String? refreshToken) async {
     try {
       return await _exchangeRefreshWithIdToken(refreshToken);
-    } on HttpException catch (_) {
-      rethrow;
     } catch (_) {
       rethrow;
     }

@@ -55,13 +55,15 @@ class FirebaseAuth {
     _api.client = client;
   }
 
-  StorageBox<Object> get _userStorage =>
-      StorageBox.instanceOf(app.options.projectId);
+  StorageBox get _userStorage => StorageBox(
+        app.options.projectId,
+        configPathPrefix: '.firebase-auth',
+      );
 
   Map<String, dynamic>? _localUser() {
     try {
-      return (_userStorage.getValue('${app.options.apiKey}:${app.name}')
-          as Map<String, dynamic>)['currentUser'];
+      return (_userStorage['${app.options.apiKey}:${app.name}']
+          as Map<String, dynamic>?)?['currentUser'];
     } catch (e) {
       return null;
     }
@@ -109,10 +111,11 @@ class FirebaseAuth {
   @protected
   void _updateCurrentUserAndEvents(User? user,
       [bool authStateChanged = false]) {
-    _userStorage.putValue(
-      '${app.options.apiKey}:${app.name}',
-      {'currentUser': user?.toMap()},
-    );
+    _userStorage.addAll({
+      '${app.options.apiKey}:${app.name}': {
+        'currentUser': user?.toMap(),
+      },
+    });
 
     _currentUser = user;
 

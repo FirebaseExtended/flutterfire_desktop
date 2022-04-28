@@ -13,6 +13,7 @@ dependencies:
   firebase_core_dart: ^0.1.1
   http: ^0.13.4
   meta: ^1.7.0
+  storagebox: ^0.1.0+1
 
 dev_dependencies:
   test: ^1.16.0
