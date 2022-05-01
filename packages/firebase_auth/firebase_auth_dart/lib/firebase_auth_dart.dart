@@ -7,13 +7,13 @@
 library firebase_auth_dart;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
+import 'package:storagebox/storagebox.dart';
 
 import 'src/api/api.dart';
 import 'src/api/errors.dart';
@@ -46,4 +46,3 @@ part 'src/user.dart';
 part 'src/user_credential.dart';
 part 'src/user_info.dart';
 part 'src/user_metadata.dart';
-part 'src/utils/persistence.dart';

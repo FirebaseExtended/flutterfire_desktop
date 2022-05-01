@@ -178,35 +178,35 @@ void main() {
         });
       });
     });
-    group('StorageBox ', () {
-      test('put a new value.', () {
-        final box = StorageBox.instanceOf('box');
-        box.putValue('key', '123');
+    // group('StorageBox ', () {
+    //   test('put a new value.', () {
+    //     final box = StorageBox.instanceOf('box');
+    //     box.putValue('key', '123');
 
-        expect(box.getValue('key'), '123');
-      });
-      test('put a null value does not add the value.', () {
-        final box = StorageBox.instanceOf('box');
-        box.putValue('key_2', null);
-        expect(
-          () => box.getValue('key_2'),
-          throwsA(isA<StorageBoxException>()),
-        );
-      });
-      test('get a key that does not exist.', () {
-        final box = StorageBox.instanceOf('box');
-        expect(
-          () => box.getValue('random_key'),
-          throwsA(isA<StorageBoxException>()),
-        );
-      });
-      test('get a key from a box that does not exist.', () {
-        final box = StorageBox.instanceOf('box_');
-        expect(
-          () => box.getValue('key'),
-          throwsA(isA<StorageBoxException>()),
-        );
-      });
-    });
+    //     expect(box.getValue('key'), '123');
+    //   });
+    //   test('put a null value does not add the value.', () {
+    //     final box = StorageBox.instanceOf('box');
+    //     box.putValue('key_2', null);
+    //     expect(
+    //       () => box.getValue('key_2'),
+    //       throwsA(isA<StorageBoxException>()),
+    //     );
+    //   });
+    //   test('get a key that does not exist.', () {
+    //     final box = StorageBox.instanceOf('box');
+    //     expect(
+    //       () => box.getValue('random_key'),
+    //       throwsA(isA<StorageBoxException>()),
+    //     );
+    //   });
+    //   test('get a key from a box that does not exist.', () {
+    //     final box = StorageBox.instanceOf('box_');
+    //     expect(
+    //       () => box.getValue('key'),
+    //       throwsA(isA<StorageBoxException>()),
+    //     );
+    //   });
+    // });
   });
 }

@@ -3,7 +3,7 @@ part of api;
 /// A return type from Idp phone authentication requests.
 @internal
 class SignInWithPhoneNumberResponse extends SignInResponse {
-  /// Construct a new [IdTokenResponse].
+  /// Construct a new [SignInWithPhoneNumberResponse].
   SignInWithPhoneNumberResponse._({
     required String idToken,
     required String refreshToken,
