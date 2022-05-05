@@ -37,6 +37,7 @@ Map<String, String?>? partsFromHttpUrl(String url) {
   }
 
   // firebase storage url
+  String? storageHost;
   if (decodedUrl.contains(_firebaseStorageHost) ||
       decodedUrl.contains('localhost')) {
     String origin;
@@ -45,6 +46,7 @@ Map<String, String?>? partsFromHttpUrl(String url) {
       origin = '^http?://${uri.host}:${uri.port}';
     } else {
       origin = '^https?://$_firebaseStorageHost';
+      storageHost = _firebaseStorageHost;
     }
 
     RegExp firebaseStorageRegExp = RegExp(
@@ -61,11 +63,12 @@ Map<String, String?>? partsFromHttpUrl(String url) {
     return {
       'bucket': match.group(1),
       'path': match.group(3),
+      if (storageHost != null) 'host': storageHost,
     };
     // google cloud storage url
   } else {
     RegExp cloudStorageRegExp = RegExp(
-      '^https?://$_cloudStorageHost$_optionalPort/$_bucketDomain/$_cloudStoragePath',
+      '^https?://($_cloudStorageHost)$_optionalPort/$_bucketDomain/$_cloudStoragePath',
       caseSensitive: false,
     );
 
@@ -76,8 +79,9 @@ Map<String, String?>? partsFromHttpUrl(String url) {
     }
 
     return {
-      'bucket': match.group(1),
-      'path': match.group(2),
+      'host': match.group(1),
+      'bucket': match.group(2),
+      'path': match.group(3),
     };
   }
 }

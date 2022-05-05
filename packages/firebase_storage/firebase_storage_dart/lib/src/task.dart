@@ -17,13 +17,15 @@ abstract class Task implements Future<TaskSnapshot> {
   /// If you do not need to know about on-going stream events, you can instead
   /// await this [Task] directly.
   Stream<TaskSnapshot> get snapshotEvents {
-    return _delegate.snapshotEvents
-        .map((snapshotDelegate) => TaskSnapshot._(storage, snapshotDelegate));
+    throw UnimplementedError();
+    // return _delegate.snapshotEvents
+    //     .map((snapshotDelegate) => TaskSnapshot._(storage, snapshotDelegate));
   }
 
   /// The latest [TaskSnapshot] for this task.
   TaskSnapshot get snapshot {
-    return TaskSnapshot._(storage, _delegate.snapshot);
+    throw UnimplementedError();
+    // return TaskSnapshot._(storage, _delegate.snapshot);
   }
 
   /// Pauses the current task.
@@ -34,57 +36,71 @@ abstract class Task implements Future<TaskSnapshot> {
     if (snapshot.state == TaskState.paused) {
       return true;
     }
-
-    final paused = _task.pause();
-    // Wait until the snapshot is paused, then return the value of paused...
-    return snapshotEvents
-        .takeWhile((snapshot) => snapshot.state != TaskState.paused)
-        .last
-        .then<bool>((_) => paused);
+    throw UnimplementedError();
+    // final paused = _task.pause();
+    // // Wait until the snapshot is paused, then return the value of paused...
+    // return snapshotEvents
+    //     .takeWhile((snapshot) => snapshot.state != TaskState.paused)
+    //     .last
+    //     .then<bool>((_) => paused);
   }
 
   /// Resumes the current task.
   ///
   /// Calling this method will trigger a snapshot event with a [TaskState.running]
   /// state.
-  Future<bool> resume() => _delegate.resume();
+  Future<bool> resume() {
+    throw UnimplementedError();
+    // _delegate.resume();
+  }
 
   /// Cancels the current task.
   ///
   /// Calling this method will cause the task to fail. Both the delegating task Future
   /// and stream ([snapshotEvents]) will trigger an error with a [FirebaseException].
-  Future<bool> cancel() => _delegate.cancel();
+  Future<bool> cancel() {
+    throw UnimplementedError();
+    //  _delegate.cancel();
+  }
 
   @override
-  Stream<TaskSnapshot> asStream() =>
-      _delegate.onComplete.asStream().map((_) => snapshot);
+  Stream<TaskSnapshot> asStream() {
+    throw UnimplementedError();
+    // _delegate.onComplete.asStream().map((_) => snapshot);
+  }
 
   @override
   Future<TaskSnapshot> catchError(Function onError,
       {bool Function(Object error)? test}) async {
-    await _delegate.onComplete.catchError(onError, test: test);
-    return snapshot;
+    throw UnimplementedError();
+    // await _delegate.onComplete.catchError(onError, test: test);
+    // return snapshot;
   }
 
   @override
   Future<S> then<S>(FutureOr<S> Function(TaskSnapshot) onValue,
-          {Function? onError}) =>
-      _delegate.onComplete.then((_) {
-        return onValue(snapshot);
-      }, onError: onError);
+      {Function? onError}) {
+    throw UnimplementedError();
+    // _delegate.onComplete.then((_) {
+    //   return onValue(snapshot);
+    // }, onError: onError);
+  }
 
   @override
   Future<TaskSnapshot> whenComplete(FutureOr Function() action) async {
-    await _delegate.onComplete.whenComplete(action);
-    return snapshot;
+    throw UnimplementedError();
+    // await _delegate.onComplete.whenComplete(action);
+    // return snapshot;
   }
 
   @override
   Future<TaskSnapshot> timeout(Duration timeLimit,
-          {FutureOr<TaskSnapshot> Function()? onTimeout}) =>
-      _delegate.onComplete
-          .then((_) => snapshot)
-          .timeout(timeLimit, onTimeout: onTimeout);
+      {FutureOr<TaskSnapshot> Function()? onTimeout}) {
+    throw UnimplementedError();
+    // _delegate.onComplete
+    //   .then((_) => snapshot)
+    //   .timeout(timeLimit, onTimeout: onTimeout);
+  }
 }
 
 /// A class which indicates an on-going upload task.

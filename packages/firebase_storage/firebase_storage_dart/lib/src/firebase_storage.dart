@@ -22,6 +22,14 @@ class FirebaseStorage {
 
   /// The [FirebaseApp] for this current [FirebaseStorage] instance.
   FirebaseApp app;
+  final firebaseVesion = "0.6.30";
+  String _host = 'firebasestorage.googleapis.com';
+  String get host {
+    if (emulatorHost != null) {
+      return emulatorHost!;
+    }
+    return _host;
+  }
 
   /// Initialized [API] instance linked to this instance.
   late final API _api;
@@ -134,6 +142,7 @@ class FirebaseStorage {
 
       bucket = parts!['bucket'];
       path = parts['path'];
+      _host = parts['host'] ?? _host;
     } else {
       bucket = bucketFromGoogleStorageUrl(url);
       path = pathFromGoogleStorageUrl(url);
@@ -206,6 +215,7 @@ class FirebaseStorage {
     assert(!port.isNegative);
 
     try {
+      emulatorHost = host;
       return await _api.emulator.useEmulator(host, port);
     } catch (e) {
       rethrow;

@@ -1,7 +1,8 @@
 part of firebase_storage_dart;
 
 class Reference {
-  Reference.fromPath({required this.storage,required String path}):location=Location(path,storage.bucket);
+  Reference.fromPath({required this.storage, required String path})
+      : location = Location(path, storage.bucket);
   Reference._(this.storage, this.location);
 
   /// The storage service associated with this reference.
@@ -81,25 +82,25 @@ class Reference {
   }
 
   /// Fetches a long lived download URL for this object.
-  Future<String> getDownloadURL() {
+  Future<String> getDownloadURL() async {
     // ref._throwIfRoot('getDownloadURL');
-  const requestInfo = requestsGetDownloadUrl(
-    storage,
-    location,
-    getMappings()
-  );
-  return ref.storage
-    .makeRequestWithTokens(requestInfo, newTextConnection)
-    .then(url => {
-      if (url === null) {
-        throw noDownloadURL();
-      }
-      return url;
-    });
+    try {
+      return await storage._api.refernceApi.getDownloadURL(reference: this);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Fetches metadata for the object at this location, if one exists.
-  Future<FullMetadata> getMetadata() => _delegate.getMetadata();
+  Future<FullMetadata> getMetadata() async {
+    try {
+      return await storage._api.refernceApi.getMetaData(
+        reference: this,
+      );
+    } catch (_) {
+      rethrow;
+    }
+  }
 
   /// List items (files) and prefixes (folders) under this storage reference.
   ///
@@ -116,7 +117,12 @@ class Reference {
     assert(options == null ||
         options.maxResults == null ||
         options.maxResults! > 0 && options.maxResults! <= 1000);
-    return ListResult._(storage, await _delegate.list(options));
+    try {
+      return await storage._api.refernceApi
+          .getRefListData(reference: this, options: options);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// List all items (files) and prefixes (folders) under this storage reference.
@@ -130,7 +136,15 @@ class Reference {
   /// Warning: [listAll] may potentially consume too many resources if there are
   /// too many results.
   Future<ListResult> listAll() async {
-    return ListResult._(storage, await _delegate.listAll());
+    ListResult result = await list();
+    List<String> _items = result._items.toList();
+    List<String> _prefixes = result._prefixes.toList();
+    while (result.nextPageToken != null) {
+      result = await list(ListOptions(pageToken: result.nextPageToken));
+      _items.addAll(result._items);
+      _prefixes.addAll(result._prefixes);
+    }
+    return ListResult(storage, null, _items, _prefixes);
   }
 
   /// Asynchronously downloads the object at the StorageReference to a list in memory.
@@ -141,7 +155,12 @@ class Reference {
   /// default the [maxSize] is 10mb (10485760 bytes).
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
     assert(maxSize > 0);
-    return _delegate.getData(maxSize);
+    try {
+      return await storage._api.refernceApi
+          .getData(reference: this, maxSize: maxSize);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Uploads data to this reference's location.
@@ -150,7 +169,12 @@ class Reference {
   ///
   /// Optionally, you can also set metadata onto the uploaded object.
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {
-    return UploadTask._(storage, _delegate.putData(data, metadata));
+    try {
+      return storage._api.refernceApi
+          .putData(reference: this, data: data, metadata: metadata);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Upload a [Blob]. Note; this is only supported on web platforms.
@@ -158,7 +182,12 @@ class Reference {
   /// Optionally, you can also set metadata onto the uploaded object.
   UploadTask putBlob(dynamic blob, [SettableMetadata? metadata]) {
     assert(blob != null);
-    return UploadTask._(storage, _delegate.putBlob(blob, metadata));
+    try {
+      return storage._api.refernceApi
+          .putBlob(reference: this, blob: blob, metadata: metadata);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Upload a [File] from the filesystem. The file must exist.
@@ -166,7 +195,12 @@ class Reference {
   /// Optionally, you can also set metadata onto the uploaded object.
   UploadTask putFile(File file, [SettableMetadata? metadata]) {
     assert(file.absolute.existsSync());
-    return UploadTask._(storage, _delegate.putFile(file, metadata));
+    try {
+      return storage._api.refernceApi
+          .putFile(reference: this, file: file, metadata: metadata);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Upload a [String] value as a storage object.
@@ -220,20 +254,34 @@ class Reference {
         );
       }
     }
-    return UploadTask._(
-        storage, _delegate.putString(_data, _format, _metadata));
+
+    try {
+      return storage._api.refernceApi.putString(
+          reference: this, data: _data, format: _format, metadata: metadata);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Updates the metadata on a storage object.
   Future<FullMetadata> updateMetadata(SettableMetadata metadata) {
-    return _delegate.updateMetadata(metadata);
+    try {
+      return storage._api.refernceApi
+          .updateMetadata(reference: this, metadata: metadata);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Writes a remote storage object to the local filesystem.
   ///
   /// If a file already exists at the given location, it will be overwritten.
   DownloadTask writeToFile(File file) {
-    return DownloadTask._(storage, _delegate.writeToFile(file));
+    try {
+      return storage._api.refernceApi.writeToFile(reference: this, file: file);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   @override

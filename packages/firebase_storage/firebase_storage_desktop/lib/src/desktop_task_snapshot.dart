@@ -10,7 +10,7 @@ import 'package:firebase_storage_platform_interface/firebase_storage_platform_in
 class DesktopTaskSnapshot extends TaskSnapshotPlatform {
   // ignore: public_member_api_docs
   DesktopTaskSnapshot(this.storage, TaskState state, this._data)
-      : super(state, _data);
+      : super(state, _data..addAll({'state': state}));
 
   /// The [FirebaseStoragePlatform] used to create the task.
   final FirebaseStoragePlatform storage;

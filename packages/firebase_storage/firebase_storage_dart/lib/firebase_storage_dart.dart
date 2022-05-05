@@ -4,13 +4,14 @@
 library firebase_storage_dart;
 
 import 'dart:async';
-import 'dart:convert' show utf8, base64;
+import 'dart:convert' show base64, jsonDecode, utf8;
 import 'dart:io' show File;
 import 'dart:typed_data' show Uint8List;
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_storage_dart/src/api/api.dart';
-import 'package:firebase_storage_dart/src/implementations/constants.dart';
 import 'package:firebase_storage_dart/src/implementations/location.dart';
 import 'package:firebase_storage_dart/src/implementations/paths.dart' as paths;
+import 'package:firebase_storage_dart/src/implementations/urls.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';

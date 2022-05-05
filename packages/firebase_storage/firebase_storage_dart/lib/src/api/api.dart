@@ -6,16 +6,30 @@
 
 library api;
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebase_storage_dart/firebase_storage_dart.dart';
 import 'package:firebase_storage_dart/src/api/errors.dart';
+import 'package:firebase_storage_dart/src/data_models/list_options.dart';
+import 'package:firebase_storage_dart/src/data_models/put_string_format.dart';
+import 'package:firebase_storage_dart/src/data_models/settable_metadata.dart';
 import 'package:firebase_storage_dart/src/firebase_storage_exception.dart';
+import 'package:firebase_storage_dart/src/implementations/location.dart';
+import 'package:firebase_storage_dart/src/implementations/urls.dart';
 import 'package:firebaseapis/firebasestorage/v1beta.dart';
 import 'package:firebaseapis/src/user_agent.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:googleapis_auth/auth_io.dart'
     if (dart.library.html) 'package:googleapis_auth/auth_browser.dart';
+import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 part 'emulator.dart';
+part 'reference_api.dart';
+part 'ref_api.dart';
 
 /// All API classes calling to IDP API must extend this template.
 abstract class APIDelegate {
@@ -26,7 +40,8 @@ abstract class APIDelegate {
   final API api;
 
   /// Convert [DetailedApiRequestError] thrown by idp to [FirebaseStorageException].
-  FirebaseStorageException makeAuthException(DetailedApiRequestError apiError) {
+  FirebaseStorageException makeStorageException(
+      DetailedApiRequestError apiError) {
     try {
       final json = apiError.jsonResponse;
       var serverErrorCode = apiError.message ?? '';
@@ -58,6 +73,35 @@ abstract class APIDelegate {
     } catch (e) {
       rethrow;
     }
+  }
+
+  FirebaseStorageException handleResponseErrorCodes(
+      int errorStatus, String ErrorText, StorageErrorCode error) {
+    StorageErrorCode storageErrorCode;
+    if (errorStatus == 401) {
+      if (
+          // This exact message string is the only consistent part of the
+          // server's error response that identifies it as an App Check error.
+          ErrorText.contains('Firebase App Check token is invalid')) {
+        storageErrorCode = StorageErrorCode.UNAUTHORIZED_APP;
+      } else {
+        storageErrorCode = StorageErrorCode.UNAUTHENTICATED;
+      }
+    } else {
+      if (errorStatus == 402) {
+        storageErrorCode = StorageErrorCode.QUOTA_EXCEEDED;
+      } else {
+        if (errorStatus == 403) {
+          storageErrorCode = StorageErrorCode.UNAUTHORIZED;
+        } else {
+          storageErrorCode = error;
+        }
+      }
+    }
+    return FirebaseStorageException(
+      storageErrorCode,
+      message: ErrorText,
+    );
   }
 }
 
@@ -145,4 +189,15 @@ class API {
   /// A delegate getter used to perform all requests
   /// for Identity platform profile related operations.
   StorageEmulator get emulator => StorageEmulator(apiConfig);
+
+  commons.ApiRequester get _requester {
+    if (apiConfig.emulator != null) {
+      return commons.ApiRequester(
+          _client!, apiConfig.emulator!.rootUrl, '', requestHeaders);
+    }
+    return commons.ApiRequester(_client!,
+        'https://firebasestorage.googleapis.com/', '', requestHeaders);
+  }
+
+  RefApi get refernceApi => RefApi(this);
 }

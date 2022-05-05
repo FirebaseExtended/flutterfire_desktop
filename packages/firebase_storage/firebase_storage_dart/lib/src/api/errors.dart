@@ -118,3 +118,39 @@ StorageError invalidUrl(String url) {
   return StorageError(
       StorageErrorCode.INVALID_URL, "Invalid URL '" + url + "'.");
 }
+
+StorageError invalidArgument(String message) {
+  return StorageError(StorageErrorCode.INVALID_ARGUMENT, message);
+}
+
+String codeForHTTPStatus(int status) {
+  switch (status) {
+    case 0:
+      // This can happen if the server returns 500.
+      return 'internal';
+    case 400:
+      return 'invalid-argument';
+    case 401:
+      return 'unauthenticated';
+    case 403:
+      return 'permission-denied';
+    case 404:
+      return 'not-found';
+    case 409:
+      return 'aborted';
+    case 429:
+      return 'resource-exhausted';
+    case 499:
+      return 'cancelled';
+    case 500:
+      return 'internal';
+    case 501:
+      return 'unimplemented';
+    case 503:
+      return 'unavailable';
+    case 504:
+      return 'deadline-exceeded';
+    default:
+      return 'unknown';
+  }
+}
