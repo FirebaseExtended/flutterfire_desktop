@@ -1,3 +1,8 @@
+## 0.1.3
+
+ - **FEAT**: Github auth provider (#74).
+ - **FEAT**: web support (#72).
+
 ## 0.1.2
 
  - **REFACTOR**: errors (#64).
