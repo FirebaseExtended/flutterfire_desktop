@@ -10,7 +10,7 @@ const _kProviderId = 'github.com';
 
 /// This class should be used to either create a new GitHub credential with an
 /// access code, or use the provider to trigger user authentication flows.
-/// 
+///
 /// If authenticating with GitHub via a 3rd party, use the returned
 /// `accessToken` to sign-in or link the user with the created credential, for
 /// example:
