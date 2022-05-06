@@ -140,6 +140,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               'https://upload.wikimedia.org/wikipedia/commons/0/09/IOS_Google_icon.png',
                             ),
                           ),
+                        if (userProviders.contains('github.com'))
+                          SizedBox(
+                            width: 24,
+                            child: Image.asset('assets/github.png'),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 40),
