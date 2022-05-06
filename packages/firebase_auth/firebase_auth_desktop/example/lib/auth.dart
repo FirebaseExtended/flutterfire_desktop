@@ -1,30 +1,14 @@
 // ignore_for_file: use_build_context_synchronously, public_member_api_docs
 
-import 'dart:convert';
-import 'dart:math';
-
-import 'package:crypto/crypto.dart';
-import 'package:desktop_webview_auth/desktop_webview_auth.dart';
-import 'package:desktop_webview_auth/facebook.dart';
-import 'package:desktop_webview_auth/google.dart';
-import 'package:desktop_webview_auth/twitter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'animated_error.dart';
+import 'auth_service.dart';
 import 'sms_dialog.dart';
-
-final FirebaseAuth _auth = FirebaseAuth.instance;
-const redirectUri =
-    'https://react-native-firebase-testing.firebaseapp.com/__/auth/handler';
-const twitterApiKey = 'YEXSiWv5UeCHyy0c61O2LBC3B';
-const twitterApiSecretKey =
-    'DOd9dCCRFgtnqMDQT7A68YuGZtvcO4WP1mEFS4mEJAUooM4yaE';
-const facebookClientId = '128693022464535';
 
 /// Helper class to show a snackbar using the passed context.
 class ScaffoldSnackbar {
@@ -54,12 +38,32 @@ class ScaffoldSnackbar {
 /// The mode of the current auth session, either [AuthMode.login] or [AuthMode.register].
 enum AuthMode { login, register, phone }
 
+/// Supported Social OAuth providers.
+enum SocialOAuthProvider { google, facebook, twitter, github, apple }
+
 extension on AuthMode {
   String get label => this == AuthMode.login
       ? 'Sign in'
       : this == AuthMode.phone
           ? 'Sign in'
           : 'Register';
+}
+
+extension on SocialOAuthProvider {
+  Buttons get button {
+    switch (this) {
+      case SocialOAuthProvider.google:
+        return Buttons.Google;
+      case SocialOAuthProvider.facebook:
+        return Buttons.Facebook;
+      case SocialOAuthProvider.twitter:
+        return Buttons.Twitter;
+      case SocialOAuthProvider.github:
+        return Buttons.GitHub;
+      case SocialOAuthProvider.apple:
+        return Buttons.Apple;
+    }
+  }
 }
 
 /// Entrypoint example for various sign-in flows with Firebase.
@@ -71,6 +75,8 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
+  final authService = AuthService();
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
@@ -96,10 +102,11 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future _resetPassword() async {
+  Future<void> _resetPassword() async {
     resetError();
 
     String? email;
+
     await showDialog(
       context: context,
       builder: (context) {
@@ -131,7 +138,7 @@ class _AuthGateState extends State<AuthGate> {
 
     if (email != null) {
       try {
-        await FirebaseAuth.instance.sendPasswordResetEmail(email: email!);
+        await authService.resetPassword(email!);
         ScaffoldSnackbar.of(context).show('Password reset email is sent');
       } catch (e) {
         ScaffoldSnackbar.of(context).show('Error resetting');
@@ -139,26 +146,18 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future _emailAuth() async {
+  Future<void> _emailAuth() async {
     resetError();
 
     if (formKey.currentState?.validate() ?? false) {
       setIsLoading();
 
       try {
-        if (mode == AuthMode.login) {
-          await _auth.signInWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
-          );
-        } else if (mode == AuthMode.register) {
-          await _auth.createUserWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
-          );
-        } else {
-          await _onPhoneAuth();
-        }
+        await authService.emailAuth(
+          mode,
+          email: emailController.text,
+          password: passwordController.text,
+        );
       } on FirebaseAuthException catch (e) {
         setIsLoading();
 
@@ -175,7 +174,7 @@ class _AuthGateState extends State<AuthGate> {
     setIsLoading();
 
     try {
-      await _auth.signInAnonymously();
+      await authService.anonymousAuth();
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';
@@ -189,353 +188,302 @@ class _AuthGateState extends State<AuthGate> {
     }
   }
 
-  Future<void> _onPhoneAuth() async {
-    resetError();
-
-    if (mode != AuthMode.phone) {
-      setState(() {
-        mode = AuthMode.phone;
-      });
-    } else {
-      try {
-        final confirmationResult = await FirebaseAuth.instance
-            .signInWithPhoneNumber(phoneController.text);
-
-        final smsCode =
-            await ExampleDialog.of(context).show('SMS Code:', 'Sign in');
-
-        if (smsCode != null) {
-          await confirmationResult.confirm(smsCode);
-        }
-      } catch (e) {
-        setState(() {
-          error = '$e';
-        });
-      } finally {
-        setIsLoading();
-      }
-    }
-  }
-
-  Future _onGoogleSignIn() async {
+  Future<void> _phoneAuth() async {
     resetError();
 
     try {
-      final result = await DesktopWebviewAuth.signIn(
-        GoogleSignInArgs(
-          clientId:
-              '448618578101-sg12d2qin42cpr00f8b0gehs5s7inm0v.apps.googleusercontent.com',
-          redirectUri: redirectUri,
-          scope: 'https://www.googleapis.com/auth/userinfo.email',
-        ),
+      setIsLoading();
+      await authService.phoneAuth(
+        phoneNumber: phoneController.text,
+        smsCode: () {
+          return ExampleDialog.of(context).show('SMS Code:', 'Sign in');
+        },
       );
+    } catch (e) {
+      setState(() {
+        error = '$e';
+      });
+    } finally {
+      setIsLoading();
+    }
+  }
 
-      if (result != null) {
-        // Create a new credential
-        final credential = GoogleAuthProvider.credential(
-          idToken: result.idToken,
-          accessToken: result.accessToken,
-        );
+  Future<void> _googleSignIn() async {
+    resetError();
 
-        // Once signed in, return the UserCredential
-        await _auth.signInWithCredential(credential);
-      }
+    try {
+      setIsLoading();
+      await authService.googleSignIn();
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';
       });
+    } finally {
+      setIsLoading();
     }
   }
 
-  Future _onTwitterSignIn() async {
+  Future<void> _twitterSignIn() async {
     resetError();
 
     try {
-      final result = await DesktopWebviewAuth.signIn(
-        TwitterSignInArgs(
-          apiKey: twitterApiKey,
-          apiSecretKey: twitterApiSecretKey,
-          redirectUri: redirectUri,
-        ),
-      );
-
-      if (result != null) {
-        // Create a new credential
-        final credential = TwitterAuthProvider.credential(
-          secret: result.tokenSecret!,
-          accessToken: result.accessToken!,
-        );
-
-        // Once signed in, return the UserCredential
-        await _auth.signInWithCredential(credential);
-      }
+      setIsLoading();
+      await authService.twitterSignIn();
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';
       });
+    } finally {
+      setIsLoading();
     }
   }
 
-  Future _onFacebookSignIn() async {
+  Future<void> _facebookSignIn() async {
     resetError();
 
     try {
-      final result = await DesktopWebviewAuth.signIn(
-        FacebookSignInArgs(
-          clientId: facebookClientId,
-          redirectUri: redirectUri,
-        ),
-      );
-
-      if (result != null) {
-        // Create a new credential
-        final credential = FacebookAuthProvider.credential(result.accessToken!);
-
-        // Once signed in, return the UserCredential
-        await _auth.signInWithCredential(credential);
-      }
+      setIsLoading();
+      await authService.facebookSignIn();
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';
       });
+    } finally {
+      setIsLoading();
     }
   }
 
-  /// Generates a cryptographically secure random nonce, to be included in a
-  /// credential request.
-  String generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
-        .join();
-  }
+  Future<void> _githubSignIn() async {
+    resetError();
 
-  /// Returns the sha256 hash of [input] in hex notation.
-  String sha256ofString(String input) {
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-
-  Future _onAppleSignIn() async {
     try {
-      final rawNonce = generateNonce();
-      final nonce = sha256ofString(rawNonce);
-
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      debugPrint('${credential.state}');
-
-      if (credential.identityToken != null) {
-        // Create an `OAuthCredential` from the credential returned by Apple.
-        final oauthCredential = OAuthProvider('apple.com').credential(
-          idToken: credential.identityToken,
-          rawNonce: nonce,
-        );
-
-        // Sign in the user with Firebase. If the nonce we generated earlier does
-        // not match the nonce in `appleCredential.identityToken`, sign in will fail.
-        return await FirebaseAuth.instance
-            .signInWithCredential(oauthCredential);
-      }
+      setIsLoading();
+      await authService.githubSignIn();
     } on FirebaseAuthException catch (e) {
       setState(() {
         error = '${e.message}';
       });
+    } finally {
+      setIsLoading();
+    }
+  }
+
+  Future _appleSignIn() async {
+    try {
+      setIsLoading();
+      await authService.appleSignIn();
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = '${e.message}';
+      });
+    } finally {
+      setIsLoading();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: SizedBox(
-              width: 400,
-              child: Form(
-                key: formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedError(text: error, show: error.isNotEmpty),
-                    const SizedBox(height: 20),
-                    if (mode != AuthMode.phone)
-                      Column(
-                        children: [
-                          TextFormField(
-                            controller: emailController,
-                            decoration:
-                                const InputDecoration(hintText: 'Email'),
-                            validator: (value) =>
-                                value != null && value.isNotEmpty
-                                    ? null
-                                    : 'Required',
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
-                            decoration:
-                                const InputDecoration(hintText: 'Password'),
-                            validator: (value) =>
-                                value != null && value.isNotEmpty
-                                    ? null
-                                    : 'Required',
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 10),
-                    if (mode != AuthMode.phone)
-                      TextButton(
-                        onPressed: _resetPassword,
-                        child: const Text('Forgot password?'),
-                      ),
-                    if (mode == AuthMode.phone)
-                      TextFormField(
-                        controller: phoneController,
-                        decoration: const InputDecoration(
-                          hintText: '+16505550101',
-                          labelText: 'Phone number',
-                        ),
-                        validator: (value) => value != null && value.isNotEmpty
-                            ? null
-                            : 'Required',
-                      ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : _emailAuth,
-                        child: isLoading
-                            ? const CircularProgressIndicator.adaptive()
-                            : Text(mode.label),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: SignInButton(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Buttons.Google
-                            : Buttons.GoogleDark,
-                        onPressed: _onGoogleSignIn,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: SignInButton(
-                        Buttons.Twitter,
-                        onPressed: _onTwitterSignIn,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: SignInButton(
-                        Buttons.FacebookNew,
-                        onPressed: _onFacebookSignIn,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (defaultTargetPlatform == TargetPlatform.macOS)
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: SignInButton(
-                          Buttons.Apple,
-                          onPressed: _onAppleSignIn,
-                        ),
-                      ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                if (mode != AuthMode.phone) {
-                                  setState(() {
-                                    mode = AuthMode.phone;
-                                  });
-                                } else {
-                                  setState(() {
-                                    mode = AuthMode.login;
-                                  });
-                                }
-                              },
-                        child: isLoading
-                            ? const CircularProgressIndicator.adaptive()
-                            : Text(
-                                mode != AuthMode.phone
-                                    ? 'Sign in with Phone Number'
-                                    : 'sign in with Email and Password',
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: SizedBox(
+                  width: 400,
+                  child: Form(
+                    key: formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedError(text: error, show: error.isNotEmpty),
+                        const SizedBox(height: 20),
+                        if (mode != AuthMode.phone)
+                          Column(
+                            children: [
+                              TextFormField(
+                                controller: emailController,
+                                decoration:
+                                    const InputDecoration(hintText: 'Email'),
+                                validator: (value) =>
+                                    value != null && value.isNotEmpty
+                                        ? null
+                                        : 'Required',
                               ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (mode != AuthMode.phone)
-                      RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyText1,
-                          children: [
-                            TextSpan(
-                              text: mode == AuthMode.login
-                                  ? "Don't have an account? "
-                                  : 'You have an account? ',
-                            ),
-                            TextSpan(
-                              text: mode == AuthMode.login
-                                  ? 'Register now'
-                                  : 'Click to login',
-                              style: const TextStyle(color: Colors.blue),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  setState(() {
-                                    mode = mode == AuthMode.login
-                                        ? AuthMode.register
-                                        : AuthMode.login;
-                                  });
-                                },
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 10),
-                    RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyText1,
-                        children: [
-                          const TextSpan(text: 'Or '),
-                          TextSpan(
-                            text: 'continue as guest',
-                            style: const TextStyle(color: Colors.blue),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = _anonymousAuth,
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                controller: passwordController,
+                                obscureText: true,
+                                decoration:
+                                    const InputDecoration(hintText: 'Password'),
+                                validator: (value) =>
+                                    value != null && value.isNotEmpty
+                                        ? null
+                                        : 'Required',
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        const SizedBox(height: 10),
+                        if (mode != AuthMode.phone)
+                          TextButton(
+                            onPressed: _resetPassword,
+                            child: const Text('Forgot password?'),
+                          ),
+                        if (mode == AuthMode.phone)
+                          TextFormField(
+                            controller: phoneController,
+                            decoration: const InputDecoration(
+                              hintText: '+16505550101',
+                              labelText: 'Phone number',
+                            ),
+                            validator: (value) =>
+                                value != null && value.isNotEmpty
+                                    ? null
+                                    : 'Required',
+                          ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : mode == AuthMode.phone
+                                    ? _phoneAuth
+                                    : _emailAuth,
+                            child: Text(mode.label),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ...SocialOAuthProvider.values
+                            .skipWhile(
+                          (provider) => defaultTargetPlatform ==
+                                  TargetPlatform.macOS
+                              ? provider == SocialOAuthProvider.apple
+                              : defaultTargetPlatform != TargetPlatform.macOS,
+                        )
+                            .map((provider) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: SignInButton(
+                                provider.button,
+                                onPressed: () {
+                                  if (!isLoading) {
+                                    switch (provider) {
+                                      case SocialOAuthProvider.google:
+                                        _googleSignIn();
+                                        break;
+                                      case SocialOAuthProvider.facebook:
+                                        _facebookSignIn();
+                                        break;
+                                      case SocialOAuthProvider.twitter:
+                                        _twitterSignIn();
+                                        break;
+                                      case SocialOAuthProvider.github:
+                                        _githubSignIn();
+                                        break;
+                                      case SocialOAuthProvider.apple:
+                                        _appleSignIn();
+                                        break;
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: OutlinedButton(
+                            onPressed: isLoading
+                                ? null
+                                : () {
+                                    if (mode != AuthMode.phone) {
+                                      setState(() {
+                                        mode = AuthMode.phone;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        mode = AuthMode.login;
+                                      });
+                                    }
+                                  },
+                            child: Text(
+                              mode != AuthMode.phone
+                                  ? 'Sign in with Phone Number'
+                                  : 'sign in with Email and Password',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        if (mode != AuthMode.phone)
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodyText1,
+                              children: [
+                                TextSpan(
+                                  text: mode == AuthMode.login
+                                      ? "Don't have an account? "
+                                      : 'You have an account? ',
+                                ),
+                                TextSpan(
+                                  text: mode == AuthMode.login
+                                      ? 'Register now'
+                                      : 'Click to login',
+                                  style: const TextStyle(color: Colors.blue),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      setState(() {
+                                        mode = mode == AuthMode.login
+                                            ? AuthMode.register
+                                            : AuthMode.login;
+                                      });
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyText1,
+                            children: [
+                              const TextSpan(text: 'Or '),
+                              TextSpan(
+                                text: 'continue as guest',
+                                style: const TextStyle(color: Colors.blue),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = _anonymousAuth,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: isLoading
+                ? Container(
+                    color: Colors.black.withOpacity(0.8),
+                    child: const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
+                  )
+                : const SizedBox(),
+          )
+        ],
       ),
     );
   }

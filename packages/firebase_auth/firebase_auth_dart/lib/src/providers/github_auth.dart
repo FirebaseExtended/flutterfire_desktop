@@ -6,49 +6,35 @@
 
 import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 
-const _kProviderId = 'facebook.com';
+const _kProviderId = 'github.com';
 
-/// This class should be used to either create a new Facebook credential with an
+/// This class should be used to either create a new GitHub credential with an
 /// access code, or use the provider to trigger user authentication flows.
 ///
-/// For example, on web based platforms pass the provider to a Firebase method
-/// (such as [FirebaseAuth.signInWithPopup]):
-///
-/// ```dart
-/// var facebookProvider = FacebookAuthProvider();
-/// facebookProvider.addScope('user_birthday');
-/// facebookProvider.setCustomParameters({
-///   'display': 'popup',
-/// });
-///
-/// FirebaseAuth.instance.signInWithPopup(facebookProvider)
-///   .then(...);
-/// ```
-///
-/// If authenticating with Facebook via a 3rd party, use the returned
-/// `accessToken` to sign-in or link the user with the created credential,
-/// for example:
+/// If authenticating with GitHub via a 3rd party, use the returned
+/// `accessToken` to sign-in or link the user with the created credential, for
+/// example:
 ///
 /// ```dart
 /// String accessToken = '...'; // From 3rd party provider
-/// var facebookAuthCredential = FacebookAuthProvider.credential(accessToken);
+/// var githubAuthCredential = GithubAuthProvider.credential(accessToken);
 ///
-/// FirebaseAuth.instance.signInWithCredential(facebookAuthCredential)
+/// FirebaseAuth.instance.signInWithCredential(githubAuthCredential)
 ///   .then(...);
 /// ```
-class FacebookAuthProvider extends AuthProvider {
+class GithubAuthProvider extends AuthProvider {
   /// Creates a new instance.
-  FacebookAuthProvider() : super(_kProviderId);
+  GithubAuthProvider() : super(_kProviderId);
 
-  /// Create a new [FacebookAuthCredential] from a provided [accessToken];
+  /// Create a new [GithubAuthCredential] from a provided [accessToken];
   static OAuthCredential credential(String accessToken) {
-    return FacebookAuthCredential._credential(
+    return GithubAuthCredential._credential(
       accessToken,
     );
   }
 
   /// This corresponds to the sign-in method identifier.
-  static String get FACEBOOK_SIGN_IN_METHOD {
+  static String get GITHUB_SIGN_IN_METHOD {
     return _kProviderId;
   }
 
@@ -70,15 +56,15 @@ class FacebookAuthProvider extends AuthProvider {
     return _parameters;
   }
 
-  /// Adds Facebook OAuth scope.
-  FacebookAuthProvider addScope(String scope) {
+  /// Adds GitHub OAuth scope.
+  GithubAuthProvider addScope(String scope) {
     _scopes.add(scope);
     return this;
   }
 
-  /// Sets the OAuth custom parameters to pass in a Facebook OAuth
+  /// Sets the OAuth custom parameters to pass in a GitHub OAuth
   /// request for popup and redirect sign-in operations.
-  FacebookAuthProvider setCustomParameters(
+  GithubAuthProvider setCustomParameters(
     Map<dynamic, dynamic> customOAuthParameters,
   ) {
     _parameters = customOAuthParameters;
@@ -87,16 +73,16 @@ class FacebookAuthProvider extends AuthProvider {
 }
 
 /// The auth credential returned from calling
-/// [FacebookAuthProvider.credential].
-class FacebookAuthCredential extends OAuthCredential {
-  FacebookAuthCredential._({
+/// [GithubAuthProvider.credential].
+class GithubAuthCredential extends OAuthCredential {
+  GithubAuthCredential._({
     required String accessToken,
   }) : super(
             providerId: _kProviderId,
             signInMethod: _kProviderId,
             accessToken: accessToken);
 
-  factory FacebookAuthCredential._credential(String accessToken) {
-    return FacebookAuthCredential._(accessToken: accessToken);
+  factory GithubAuthCredential._credential(String accessToken) {
+    return GithubAuthCredential._(accessToken: accessToken);
   }
 }
