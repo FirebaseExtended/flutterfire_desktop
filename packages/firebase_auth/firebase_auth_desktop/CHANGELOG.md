@@ -1,3 +1,7 @@
+## 0.1.3
+
+ - **FEAT**: Github auth provider (#74).
+
 ## 0.1.2
 
  - **REFACTOR**: 🔨 identity toolkit api layer (#61).
