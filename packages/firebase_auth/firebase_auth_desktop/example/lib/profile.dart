@@ -1,11 +1,10 @@
 import 'dart:developer';
 
-import 'package:desktop_webview_auth/desktop_webview_auth.dart';
-import 'package:desktop_webview_auth/google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'auth.dart';
+import 'auth_service.dart';
 import 'sms_dialog.dart';
 
 /// Displayed as a profile image if the user doesn't have one.
@@ -23,6 +22,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final authService = AuthService();
+
   late User user;
   late TextEditingController controller;
 
@@ -106,26 +107,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             user.photoURL ?? placeholderImage,
                           ),
                         ),
-                        // TODO once storage is supported
-                        // Positioned.directional(
-                        //   textDirection: Directionality.of(context),
-                        //   end: 0,
-                        //   bottom: 0,
-                        //   child: Material(
-                        //     clipBehavior: Clip.antiAlias,
-                        //     color: Theme.of(context).colorScheme.secondary,
-                        //     borderRadius: BorderRadius.circular(40),
-                        //     child: InkWell(
-                        //       onTap: () {},
-                        //       radius: 50,
-                        //       child: const SizedBox(
-                        //         width: 35,
-                        //         height: 35,
-                        //         child: Icon(Icons.edit),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // )
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -209,25 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _linkWithOAuth() async {
     try {
-      final result = await DesktopWebviewAuth.signIn(
-        GoogleSignInArgs(
-          clientId:
-              '448618578101-sg12d2qin42cpr00f8b0gehs5s7inm0v.apps.googleusercontent.com',
-          redirectUri: redirectUri,
-          scope: 'https://www.googleapis.com/auth/userinfo.email',
-        ),
-      );
-
-      if (result != null) {
-        // Create a new credential
-        final credential = GoogleAuthProvider.credential(
-          accessToken: result.accessToken,
-          idToken: result.idToken,
-        );
-
-        // Once signed in, return the UserCredential
-        await user.linkWithCredential(credential);
-      }
+      await authService.linkWithGoogle();
     } on FirebaseAuthException catch (e) {
       ScaffoldSnackbar.of(context).show('${e.message}');
       log('$e');
@@ -293,8 +256,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Example code for sign out.
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await authService.signOut();
   }
 }
