@@ -28,6 +28,8 @@ auth_dart.AuthCredential mapAuthCredentialFromPlatform(
     );
   } else if (credential is FacebookAuthCredential) {
     return auth_dart.FacebookAuthProvider.credential(credential.accessToken!);
+  } else if (credential is GithubAuthCredential) {
+    return auth_dart.GithubAuthProvider.credential(credential.accessToken!);
   } else if (credential is OAuthCredential) {
     return auth_dart.OAuthProvider(credential.providerId).credential(
       accessToken: credential.accessToken,
@@ -71,6 +73,8 @@ AuthCredential mapAuthCredentialFromDart(auth_dart.AuthCredential credential) {
     );
   } else if (credential is auth_dart.FacebookAuthCredential) {
     return FacebookAuthProvider.credential(credential.accessToken!);
+  } else if (credential is auth_dart.GithubAuthCredential) {
+    return GithubAuthProvider.credential(credential.accessToken!);
   } else if (credential is auth_dart.OAuthCredential) {
     return OAuthProvider(credential.providerId).credential(
       accessToken: credential.accessToken,
