@@ -31,9 +31,10 @@ flutter:
   plugin:
     implements: cloud_functions
     platforms:
-      macos:
-        dartPluginClass: FirebaseFunctionsDesktop
-        pluginClass: none
+      # TODO when doing development on macOS, uncomment this.
+      # macos:
+      #   dartPluginClass: FirebaseFunctionsDesktop
+      #   pluginClass: none
       linux:
         dartPluginClass: FirebaseFunctionsDesktop
         pluginClass: none
