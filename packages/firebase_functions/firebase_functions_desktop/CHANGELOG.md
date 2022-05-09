@@ -1,3 +1,9 @@
+## 0.2.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **REFACTOR**: remove macOS support.
+
 ## 0.1.0+2
 
  - Update a dependency to the latest release.

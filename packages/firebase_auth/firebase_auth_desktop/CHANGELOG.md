@@ -1,3 +1,9 @@
+## 0.2.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **REFACTOR**: remove macOS support.
+
 ## 0.1.3
 
  - **FEAT**: Github auth provider (#74).
