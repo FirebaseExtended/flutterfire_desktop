@@ -26,9 +26,10 @@ flutter:
   plugin:
     implements: firebase_core
     platforms:
-      macos:
-        dartPluginClass: FirebaseCore
-        pluginClass: none
+      # TODO when doing development on macOS, uncomment this.
+      # macos:
+      #   dartPluginClass: FirebaseCore
+      #   pluginClass: none
       linux:
         dartPluginClass: FirebaseCore
         pluginClass: none
