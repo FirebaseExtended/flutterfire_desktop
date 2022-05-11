@@ -200,7 +200,7 @@ class HttpsCallable {
     } on TimeoutException catch (e, st) {
       throw FirebaseFunctionsException(
         message: 'Firebase functions timeout',
-        code: 'timeout',
+        code: 'deadline-exceeded',
         details:
             '${options.timeout} millisecond timeout occurred on request to $_url with $encodedData',
         stackTrace: st,
