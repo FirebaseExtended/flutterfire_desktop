@@ -28,7 +28,17 @@ class FirebaseCoreDelegate {
     final _name = name ?? defaultFirebaseAppName;
 
     if (_apps.containsKey(_name)) {
-      throw duplicateApp(_name);
+      final existingApp = _apps[name]!;
+      if (options.apiKey != existingApp.options.apiKey ||
+          (options.databaseURL != null &&
+              options.databaseURL != existingApp.options.databaseURL) ||
+          (options.storageBucket != null &&
+              options.storageBucket != existingApp.options.storageBucket)) {
+        // Options are different; throw.
+        throw duplicateApp(_name);
+      } else {
+        return existingApp;
+      }
     }
 
     final _delegate = _FirebaseAppDelegete(this, _name, options);
