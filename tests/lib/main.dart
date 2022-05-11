@@ -12,7 +12,10 @@ FirebaseOptions get firebaseOptions => const FirebaseOptions(
       measurementId: 'G-F79DJ0VFGS',
     );
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: firebaseOptions);
   runApp(const MyApp());
 }
 
