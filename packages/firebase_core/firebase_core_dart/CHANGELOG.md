@@ -1,3 +1,9 @@
+## 1.0.0
+
+ - First stable release.
+
+ - **FIX**: return existing app if options are matching if the same app is initialized twice.
+
 ## 0.1.1
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
