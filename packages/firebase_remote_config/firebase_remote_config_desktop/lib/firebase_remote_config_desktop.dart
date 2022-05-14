@@ -20,6 +20,10 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
   })  : _app = core_dart.Firebase.app(app.name),
         super(appInstance: app);
 
+  FirebaseRemoteConfigDesktop._()
+      : _app = null,
+        super(appInstance: null);
+
   /// Called by PluginRegistry to register this plugin as the implementation for Desktop
   static void registerWith() {
     FirebaseRemoteConfigPlatform.instance =
@@ -31,7 +35,7 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
   ///
   // ignore: prefer_constructors_over_static_methods
   static FirebaseRemoteConfigDesktop get instance {
-    return FirebaseRemoteConfigDesktop(app: Firebase.app());
+    return FirebaseRemoteConfigDesktop._();
   }
 
   @override
@@ -40,7 +44,7 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
   }) =>
       FirebaseRemoteConfigDesktop(app: app ?? Firebase.app());
 
-  final core_dart.FirebaseApp _app;
+  final core_dart.FirebaseApp? _app;
   late final remote_config.FirebaseRemoteConfig _remoteConfig =
       remote_config.FirebaseRemoteConfig.instanceFor(app: _app);
 
@@ -53,6 +57,21 @@ class FirebaseRemoteConfigDesktop extends FirebaseRemoteConfigPlatform {
   FirebaseRemoteConfigPlatform setInitialValues({
     required Map remoteConfigValues,
   }) {
+    if (!remoteConfigValues.containsKey('fetchTimeout')) {
+      remoteConfigValues['fetchTimeout'] = 60;
+    }
+    if (!remoteConfigValues.containsKey('minimumFetchInterval')) {
+      remoteConfigValues['minimumFetchInterval'] = 12 * 60;
+    }
+    if (!remoteConfigValues.containsKey('lastFetchStatus')) {
+      remoteConfigValues['lastFetchStatus'] = 'noFetchYet';
+    }
+    if (!remoteConfigValues.containsKey('lastFetchTime')) {
+      remoteConfigValues['lastFetchTime'] = 0;
+    }
+    if (!remoteConfigValues.containsKey('parameters')) {
+      remoteConfigValues['parameters'] = {};
+    }
     _remoteConfig.setInitialValues(remoteConfigValues: remoteConfigValues);
     return this;
   }

@@ -5,9 +5,9 @@
 library firebase_remote_config_dart;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
-import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 import 'package:storagebox/storagebox.dart';
@@ -115,18 +115,19 @@ class FirebaseRemoteConfig {
   Future<bool> activate() async {
     final lastSuccessfulFetchResponse =
         storage.getLastSuccessfulFetchResponse();
+
     // final activeConfigEtag = storage.getActiveConfigEtag();
-    if (lastSuccessfulFetchResponse?.parameters == null) {
+    if (lastSuccessfulFetchResponse?['entries'] == null) {
       // lastSuccessfulFetchResponse.eTag == null ||
       // lastSuccessfulFetchResponse.eTag == activeConfigEtag) {
       return false;
     } else {
-      storageCache.setActiveConfig(
-        {
-          for (final entry in lastSuccessfulFetchResponse!.parameters!.entries)
-            entry.key: RemoteConfigValue.fromApi(entry.value)
-        },
-      );
+      final newConfig = <String, RemoteConfigValue>{
+        for (final entry
+            in (lastSuccessfulFetchResponse!['entries'] as Map).entries)
+          entry.key: RemoteConfigValue(entry.value, ValueSource.valueRemote)
+      };
+      storageCache.setActiveConfig(newConfig);
       // storage.setActiveConfigEtag(lastSuccessfulFetchResponse.eTag);
       return true;
     }

@@ -67,13 +67,12 @@ class _RemoteConfigStorage {
     };
   }
 
-  api.RemoteConfig? getLastSuccessfulFetchResponse() {
-    return _storageBox[lastSuccessfulFetchKey]
-        .mapNullable((v) => api.RemoteConfig.fromJson(v as Map));
+  Map? getLastSuccessfulFetchResponse() {
+    return _storageBox[lastSuccessfulFetchKey].mapNullable((v) => v as Map);
   }
 
-  void setLastSuccessfulFetchResponse(api.RemoteConfig remoteConfig) {
-    _storageBox[lastSuccessfulFetchKey] = remoteConfig.toJson();
+  void setLastSuccessfulFetchResponse(Map remoteConfig) {
+    _storageBox[lastSuccessfulFetchKey] = remoteConfig;
   }
 }
 

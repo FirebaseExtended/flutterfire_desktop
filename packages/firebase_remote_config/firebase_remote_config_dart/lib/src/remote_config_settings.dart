@@ -15,4 +15,8 @@ class RemoteConfigSettings {
   /// Maximum age of a cached config before it is considered stale. Defaults
   /// to twelve hours.
   Duration minimumFetchInterval;
+
+  @override
+  String toString() =>
+      'RemoteConfigSettings(fetchTimeout: $fetchTimeout, minimumFetchInterval: $minimumFetchInterval)';
 }

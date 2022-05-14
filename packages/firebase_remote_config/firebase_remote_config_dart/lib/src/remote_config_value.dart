@@ -98,4 +98,9 @@ class RemoteConfigValue {
       return defaultValueForBool;
     }
   }
+
+  @override
+  String toString() {
+    return 'RemoteConfigValue(value: $_value, source: $source)';
+  }
 }
