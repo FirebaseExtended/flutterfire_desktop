@@ -1,6 +1,5 @@
 // ignore_for_file: require_trailing_commas
 
-import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:meta/meta.dart';
 
 /// ValueSource defines the possible sources of a config parameter value.
@@ -21,14 +20,6 @@ class RemoteConfigValue {
   /// Wraps a value with metadata and type-safe getters.
   @protected
   RemoteConfigValue(this._value, this.source);
-
-  /// Creates a new RemoteConfigValue from the api
-  factory RemoteConfigValue.fromApi(api.RemoteConfigParameter value) {
-    return RemoteConfigValue(
-      value.defaultValue?.value,
-      ValueSource.valueRemote,
-    );
-  }
 
   /// Creates a new RemoteConfigValue from json
   factory RemoteConfigValue.fromJson(Map<String, Object?> remoteConfigValue) {
