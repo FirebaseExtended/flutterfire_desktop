@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.description      = pubspec['description']
   s.homepage         = pubspec['homepage']
   s.license          = { :file => '../LICENSE' }
-  s.authors          = 'The Chromium Authors'
+  s.authors          = 'Invertase'
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   
