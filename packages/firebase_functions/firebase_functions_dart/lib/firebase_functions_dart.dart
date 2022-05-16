@@ -154,6 +154,7 @@ class HttpsCallable {
         headers: {
           'Content-Type': 'application/json',
           if (authToken != null) 'Authorization': 'Bearer $authToken',
+          // TODO add back once installations is supported.
           // if (messagingToken != null)
           // 'Firebase-Instance-ID-Token': '$messagingToken',
           // if (appCheckToken != null)
