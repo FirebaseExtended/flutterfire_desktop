@@ -1,7 +1,7 @@
 name: firebase_auth_dart
-description: TODO
+description: Pure Dart implementation of FlutterFire Auth API
 homepage: https://firebase.flutter.dev
-repository: https://github.com/invertase/flutterfire_dart
+repository: https://github.com/invertase/flutterfire_desktop
 version: 1.0.0
 
 environment:

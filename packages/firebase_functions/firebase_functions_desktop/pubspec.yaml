@@ -1,7 +1,7 @@
 name: firebase_functions_desktop
 description: Desktop implementation of cloud_functions
 homepage: https://firebase.flutter.dev
-repository: https://github.com/invertase/flutterfire_dart
+repository: https://github.com/invertase/flutterfire_desktop
 version: 0.2.0+1
 
 environment:
