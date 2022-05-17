@@ -11,9 +11,9 @@ import 'package:firebase_functions_dart/firebase_functions_dart.dart'
 
 import 'desktop_utils.dart' as desktop_utils;
 
-/// Desktop implementation of FirebaseFunctionsPlatform for managing FirebaseFunctions
+/// Desktop implementation of [FirebaseFunctionsPlatform] for managing FirebaseFunctions.
 class FirebaseFunctionsDesktop extends FirebaseFunctionsPlatform {
-  /// Constructs a FirebaseFunctionsDesktop
+  /// Constructs a FirebaseFunctionsDesktop.
   FirebaseFunctionsDesktop({
     required FirebaseApp? app,
     String region = functions_dart.FirebaseFunctions.defaultRegion,
@@ -23,14 +23,13 @@ class FirebaseFunctionsDesktop extends FirebaseFunctionsPlatform {
       : _dartFunctions = null,
         super(null, functions_dart.FirebaseFunctions.defaultRegion);
 
-  /// Called by PluginRegistry to register this plugin as the implementation for Desktop
+  /// Called by PluginRegistry to register this plugin as the implementation for Desktop.
   static void registerWith() {
     FirebaseFunctionsPlatform.instance = FirebaseFunctionsDesktop.instance;
   }
 
   /// Stub initializer to allow creating an instance without
   /// registering delegates or listeners.
-  ///
   // ignore: prefer_constructors_over_static_methods
   static FirebaseFunctionsDesktop get instance {
     return FirebaseFunctionsDesktop._();
@@ -46,14 +45,6 @@ class FirebaseFunctionsDesktop extends FirebaseFunctionsPlatform {
       region: region,
     );
   }
-
-  // /// The dart functions instance for this app
-  // @visibleForTesting
-  // late final functions_dart.FirebaseFunctions dartFunctions =
-  //     functions_dart.FirebaseFunctions.instanceFor(
-  //   app: _app,
-  //   region: region,
-  // );
 
   @override
   FirebaseFunctionsPlatform delegateFor({
@@ -77,19 +68,19 @@ class HttpsCallableDesktop extends HttpsCallablePlatform {
   /// Constructs a HttpsCallableDesktop
   HttpsCallableDesktop(
     FirebaseFunctionsDesktop functions,
-    this._dartFunctions,
+    this._delegate,
     String? origin,
     String name,
     HttpsCallableOptions options,
   ) : super(functions, origin, name, options);
 
-  /// The dart functions instance for accessing the cloud functions API
-  final functions_dart.FirebaseFunctions _dartFunctions;
+  /// The dart functions instance for accessing the cloud functions API.
+  final functions_dart.FirebaseFunctions _delegate;
 
   @override
   Future<dynamic> call([dynamic parameters]) async {
     if (origin != null) {
-      _dartFunctions.useFunctionsEmulator(
+      _delegate.useFunctionsEmulator(
         origin!.substring(
           origin!.indexOf('://') + 3,
           origin!.lastIndexOf(':'),
@@ -103,7 +94,7 @@ class HttpsCallableDesktop extends HttpsCallablePlatform {
     functions_dart.HttpsCallableResult response;
 
     try {
-      response = await _dartFunctions
+      response = await _delegate
           .httpsCallable(
             name,
             options:
