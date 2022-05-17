@@ -1,3 +1,7 @@
+## 1.0.0
+
+ - First stable release.
+
 ## 0.1.3
 
  - **FEAT**: Github auth provider (#74).

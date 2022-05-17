@@ -1,3 +1,7 @@
+## 1.0.0
+
+ - First stable release.
+
 ## 0.2.0
 
 > Note: This release has breaking changes.
