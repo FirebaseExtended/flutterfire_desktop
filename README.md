@@ -1,7 +1,5 @@
 # FlutterFire Desktop
 
-
-
 A work in progress pure Dart implementation of Firebase with initial support aimed at FlutterFire for Linux & Windows.
 
 A FlutterFire dev preview release will be available soon making these packages available for Linux and Windows.
@@ -19,8 +17,6 @@ dependencies:
   firebase_core: ^1.9.0
   firebase_core_desktop: ^0.1.1-dev.0
 ```
-
-*Note: the plugin will override macOS implementation as it's currently being used for development purposes.*
 
 ## Firebase App Initialization
 
