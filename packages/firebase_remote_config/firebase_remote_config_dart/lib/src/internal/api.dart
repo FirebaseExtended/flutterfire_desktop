@@ -15,7 +15,7 @@ class RemoteConfigApiClient {
     this.storage,
     this.storageCache,
   );
-  final remoteConfigClient = api.FirebaseRemoteConfigApi(Client());
+  late final remoteConfigClient = api.FirebaseRemoteConfigApi(Client());
 
   final _RemoteConfigStorage storage;
   final _RemoteConfigStorageCache storageCache;
@@ -58,16 +58,13 @@ class RemoteConfigApiClient {
         sdkVersion: '0.1.0', // TODO: Sync with pubspec
       ),
       projectId,
-      'firebase',
+      namespace,
     );
-    // print('Calling api');
-    // final response = await remoteConfigClient.projects.namespaces
-    //     .getRemoteConfig('projects/$projectId');
 
     storageCache.setLastFetchTime(DateTime.now());
     print('Got ${response.entries}');
 
-    storage.setLastSuccessfulFetchResponse({});
-    return {};
+    storage.setLastSuccessfulFetchResponse(response.entries ?? {});
+    return response.entries ?? {};
   }
 }

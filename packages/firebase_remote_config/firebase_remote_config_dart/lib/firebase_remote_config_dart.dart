@@ -153,10 +153,12 @@ class FirebaseRemoteConfig {
       await api
           .fetch(cacheMaxAge: settings.minimumFetchInterval)
           .timeout(settings.fetchTimeout);
-    } on TimeoutException {
+    } on TimeoutException catch (e) {
+      print(e);
       storageCache.setLastFetchStatus(RemoteConfigFetchStatus.throttle);
       rethrow; // TODO: Throw Firebase Exception
-    } on Exception {
+    } on Exception catch (e) {
+      print(e);
       storageCache.setLastFetchStatus(RemoteConfigFetchStatus.failure);
       rethrow; // TODO: Throw Firebase Exception
     }
