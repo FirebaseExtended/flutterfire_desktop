@@ -15,8 +15,7 @@ class RemoteConfigApiClient {
     this.storage,
     this.storageCache,
   );
-  Client get httpClient => _httpClient;
-  final _httpClient = Client();
+  final remoteConfigClient = api.FirebaseRemoteConfigApi(Client());
 
   final _RemoteConfigStorage storage;
   final _RemoteConfigStorageCache storageCache;
@@ -51,34 +50,24 @@ class RemoteConfigApiClient {
       return lastSuccessfulFetchResponse;
     }
 
-    // TODO: Handle errors in fetch
-    final response = await _httpClient.post(
-      Uri.parse(
-        'https://firebaseremoteconfig.googleapis.com/v1/projects/$projectId/namespaces/firebase:fetch?key=$apiKey',
+    print('Calling api');
+    final response = await remoteConfigClient.projects.namespaces.fetch(
+      api.FetchRemoteConfigRequest(
+        appId: appId,
+        appInstanceId: '1', // TODO: get from installations
+        sdkVersion: '0.1.0', // TODO: Sync with pubspec
       ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Encoding': 'gzip',
-        'If-None-Match': eTag ?? '*'
-      },
-      body: json.encode({
-        // TODO: Sync this with pubspec.yaml
-        'sdk_version': '0.1.0',
-        // TODO: Replace this with installation id
-        'app_instance_id': '1',
-        'app_id': appId,
-      }),
+      projectId,
+      'firebase',
     );
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Failed to fetch remote config: ${response.statusCode} ${response.body}',
-      );
-    }
+    // print('Calling api');
+    // final response = await remoteConfigClient.projects.namespaces
+    //     .getRemoteConfig('projects/$projectId');
 
-    final remoteConfig = json.decode(response.body);
     storageCache.setLastFetchTime(DateTime.now());
+    print('Got ${response.entries}');
 
-    storage.setLastSuccessfulFetchResponse(remoteConfig);
-    return remoteConfig;
+    storage.setLastSuccessfulFetchResponse({});
+    return {};
   }
 }

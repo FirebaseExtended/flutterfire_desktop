@@ -5,9 +5,9 @@
 library firebase_remote_config_dart;
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 import 'package:storagebox/storagebox.dart';
