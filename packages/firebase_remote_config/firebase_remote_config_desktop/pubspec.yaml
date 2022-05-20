@@ -1,7 +1,7 @@
 name: firebase_remote_config_desktop
 description: Desktop implementation of remote_config
 homepage: https://firebase.flutter.dev
-repository: https://github.com/invertase/flutterfire_dart
+repository: https://github.com/invertase/flutterfire_desktop
 version: 0.1.0-dev.0
 
 environment:
