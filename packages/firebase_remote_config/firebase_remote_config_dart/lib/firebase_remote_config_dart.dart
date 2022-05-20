@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebaseapis/firebaseremoteconfig/v1.dart' as api;
-import 'package:http/http.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:meta/meta.dart';
 import 'package:storagebox/storagebox.dart';
 
@@ -116,19 +116,14 @@ class FirebaseRemoteConfig {
     final lastSuccessfulFetchResponse =
         storage.getLastSuccessfulFetchResponse();
 
-    // final activeConfigEtag = storage.getActiveConfigEtag();
-    if (lastSuccessfulFetchResponse?['entries'] == null) {
-      // lastSuccessfulFetchResponse.eTag == null ||
-      // lastSuccessfulFetchResponse.eTag == activeConfigEtag) {
+    if (lastSuccessfulFetchResponse == null) {
       return false;
     } else {
       final newConfig = <String, RemoteConfigValue>{
-        for (final entry
-            in (lastSuccessfulFetchResponse!['entries'] as Map).entries)
+        for (final entry in lastSuccessfulFetchResponse.entries)
           entry.key: RemoteConfigValue(entry.value, ValueSource.valueRemote)
       };
       storageCache.setActiveConfig(newConfig);
-      // storage.setActiveConfigEtag(lastSuccessfulFetchResponse.eTag);
       return true;
     }
   }

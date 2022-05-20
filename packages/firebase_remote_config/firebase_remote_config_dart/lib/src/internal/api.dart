@@ -15,7 +15,8 @@ class RemoteConfigApiClient {
     this.storage,
     this.storageCache,
   );
-  late final remoteConfigClient = api.FirebaseRemoteConfigApi(Client());
+  late final remoteConfigClient =
+      api.FirebaseRemoteConfigApi(clientViaApiKey(apiKey));
 
   final _RemoteConfigStorage storage;
   final _RemoteConfigStorageCache storageCache;
@@ -50,7 +51,6 @@ class RemoteConfigApiClient {
       return lastSuccessfulFetchResponse;
     }
 
-    print('Calling api');
     final response = await remoteConfigClient.projects.namespaces.fetch(
       api.FetchRemoteConfigRequest(
         appId: appId,
@@ -62,7 +62,6 @@ class RemoteConfigApiClient {
     );
 
     storageCache.setLastFetchTime(DateTime.now());
-    print('Got ${response.entries}');
 
     storage.setLastSuccessfulFetchResponse(response.entries ?? {});
     return response.entries ?? {};
