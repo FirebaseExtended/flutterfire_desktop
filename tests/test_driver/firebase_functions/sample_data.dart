@@ -15,11 +15,20 @@ Map<String, dynamic> map = <String, dynamic>{
 List<dynamic> list = ['1', 2, true, false];
 
 Map<String, dynamic> deepMap = <String, dynamic>{
+  'number': 123,
+  'string': 'foo',
+  'booleanTrue': true,
+  'booleanFalse': false,
+  'null': null,
   'list': list,
   'map': map,
 };
 
 List<dynamic> deepList = [
+  '1',
+  2,
+  true,
+  false,
   list,
   map,
 ];

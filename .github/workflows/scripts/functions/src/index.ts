@@ -9,53 +9,18 @@ export const listFruit = functions.https.onCall(() => {
 
 // For e2e testing a custom region.
 // noinspection JSUnusedGlobalSymbols
-export const testFunctionCustomRegion = functions
-  .region('europe-west1')
-  .https.onCall(() => 'europe-west1');
+export const testFunctionCustomRegion = functions.region('europe-west1').https.onCall(() => 'europe-west1');
 
 // For e2e testing timeouts.
 export const testFunctionTimeout = functions.https.onCall((data) => {
   console.log(JSON.stringify({ data }));
   return new Promise((resolve, reject) => {
     if (data && data.testTimeout) {
-      setTimeout(
-        () => resolve({ timeLimit: 'exceeded' }),
-        parseInt(data.testTimeout, 10)
-      );
+      setTimeout(() => resolve({ timeLimit: 'exceeded' }), parseInt(data.testTimeout, 10));
     } else {
-      reject(
-        new functions.https.HttpsError(
-          'invalid-argument',
-          'testTimeout must be provided.'
-        )
-      );
+      reject(new functions.https.HttpsError('invalid-argument', 'testTimeout must be provided.'));
     }
   });
-});
-export const foo = functions.https.onCall((data) => {
-  return data
-});
-// For e2e testing that the caller is authorized
-export const testFunctionAuthorized = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "testFunctionAuthorized must be called while authenticated."
-    );
-  }
-  try {
-    return 'authorized';
-  } catch (e) {
-    throw new functions.https.HttpsError("internal", e.message, e.details);
-  }
-});
-
-// For e2e testing that the caller is authorized
-export const testExceptions = functions.https.onCall(async (data, context) => {
-  if (data == 'bad-status') {
-    throw new functions.https.HttpsError("invalid-argument", "", "");
-  }
-  return {};
 });
 
 // For e2e testing errors & return values.
@@ -84,6 +49,10 @@ export const testFunctionDefaultRegion = functions.https.onCall((data) => {
 
   if (Array.isArray(data)) {
     return 'array';
+  }
+
+  if (data.type === 'rawData') {
+    return data;
   }
 
   const sampleData: {
@@ -141,10 +110,7 @@ export const testFunctionDefaultRegion = functions.https.onCall((data) => {
     inputData?: any;
   } = data;
   if (!Object.hasOwnProperty.call(sampleData, type)) {
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      'Invalid test requested.'
-    );
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid test requested.');
   }
 
   const outputData = sampleData[type];
@@ -156,7 +122,7 @@ export const testFunctionDefaultRegion = functions.https.onCall((data) => {
     throw new functions.https.HttpsError(
       'invalid-argument',
       'Input and Output types did not match.',
-      e.message
+      (e as any).message
     );
   }
 
