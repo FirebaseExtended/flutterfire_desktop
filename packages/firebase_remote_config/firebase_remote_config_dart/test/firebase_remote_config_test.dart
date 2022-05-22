@@ -213,19 +213,19 @@ class FakeConfigClient extends RemoteConfigApiClient {
     storageCache,
   ) : super(projectId, namespace, apiKey, appId, storage, storageCache);
   @override
-  Client httpClient = MockClient(
-    (request) => Future<Response>.value(
-      Response(
-        '''
+  Client get httpClient => MockClient(
+        (request) => Future<Response>.value(
+          Response(
+            '''
 {
   "parameters": {
     "bar": {"defaultValue": {"value": "bar"}},
     "foo": {"defaultValue": {"value": "real foo"}}
   }
 }''',
-        200,
-        headers: {'content-type': 'application/json'},
-      ),
-    ),
-  );
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
 }

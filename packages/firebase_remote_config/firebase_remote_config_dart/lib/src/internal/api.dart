@@ -15,8 +15,8 @@ class RemoteConfigApiClient {
     this.storage,
     this.storageCache,
   );
-  late final remoteConfigClient =
-      api.FirebaseRemoteConfigApi(clientViaApiKey(apiKey));
+  late final httpClient = clientViaApiKey(apiKey);
+  late final remoteConfigClient = api.FirebaseRemoteConfigApi(httpClient);
 
   final _RemoteConfigStorage storage;
   final _RemoteConfigStorageCache storageCache;
