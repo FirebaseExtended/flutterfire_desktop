@@ -22,10 +22,10 @@ environment:
 
 dependencies:
   crypto: ^3.0.1
-  desktop_webview_auth: ^0.0.8
-  firebase_auth: ^3.3.7
+  desktop_webview_auth: ^0.0.9
+  firebase_auth: ^3.4.1
   firebase_auth_desktop: ^1.0.0
-  firebase_core: ^1.12.0
+  firebase_core: ^1.19.1
   firebase_core_desktop: ^1.0.0
   flutter:
     sdk: flutter
