@@ -1,3 +1,7 @@
+## 1.0.1
+
+ - **FIX**: update repository and description in pubspec.
+
 ## 1.0.0
 
  - First stable release.

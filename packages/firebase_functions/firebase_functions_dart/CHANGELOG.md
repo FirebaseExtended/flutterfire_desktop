@@ -1,3 +1,8 @@
+## 0.1.1+2
+
+ - **REFACTOR**: refactor and add tests (#76).
+ - **FIX**: update repository and description in pubspec.
+
 ## 0.1.1+1
 
  - Update a dependency to the latest release.
