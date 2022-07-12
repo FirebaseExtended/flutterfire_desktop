@@ -18,9 +18,23 @@ class FirebaseCore extends FirebasePlatform {
   }
 
   FirebaseApp _mapDartToPlatfromApp(core_dart.FirebaseApp app) {
+    final options = app.options;
+
     return FirebaseApp._(
       app.name,
-      FirebaseOptions.fromMap(app.options.asMap),
+      FirebaseOptions(
+        apiKey: options.apiKey,
+        appId: options.appId,
+        messagingSenderId: options.messagingSenderId,
+        authDomain: options.authDomain,
+        projectId: options.projectId,
+        databaseURL: options.databaseURL,
+        measurementId: options.measurementId,
+        storageBucket: options.storageBucket,
+        trackingId: options.trackingId,
+        appGroupId: options.appGroupId,
+        deepLinkURLScheme: options.deepLinkURLScheme,
+      ),
     );
   }
 
