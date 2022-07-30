@@ -57,6 +57,7 @@ class RecaptchaVerifierFactoryDesktop extends RecaptchaVerifierFactoryPlatform {
 
   @override
   RecaptchaVerifierFactoryPlatform delegateFor({
+    required FirebaseAuthPlatform auth,
     String? container,
     RecaptchaVerifierSize size = RecaptchaVerifierSize.normal,
     RecaptchaVerifierTheme theme = RecaptchaVerifierTheme.light,

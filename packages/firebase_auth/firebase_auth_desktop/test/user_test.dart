@@ -5,6 +5,7 @@
 // ignore_for_file: require_trailing_commas, prefer_mixin
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_desktop/firebase_auth_desktop.dart';
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_auth_platform_interface/src/method_channel/method_channel_firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -373,7 +374,7 @@ class MockFirebaseAuth extends Mock
   }
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) {
+  FirebaseAuthPlatform delegateFor({FirebaseApp? app, Persistence? persistence}) {
     return super.noSuchMethod(
       Invocation.method(#delegateFor, const [], {#app: app}),
       returnValue: TestFirebaseAuthPlatform(),
@@ -554,7 +555,7 @@ class TestFirebaseAuthPlatform extends FirebaseAuthPlatform {
   TestFirebaseAuthPlatform() : super();
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) => this;
+  FirebaseAuthPlatform delegateFor({FirebaseApp? app, Persistence? persistence}) => this;
 
   @override
   FirebaseAuthPlatform setInitialValues({
@@ -567,7 +568,7 @@ class TestFirebaseAuthPlatform extends FirebaseAuthPlatform {
 
 class TestUserPlatform extends UserPlatform {
   TestUserPlatform(FirebaseAuthPlatform auth, Map<String, dynamic> data)
-      : super(auth, data);
+      : super(auth, MultiFactorImpl(auth), data);
 }
 
 class TestUserCredentialPlatform extends UserCredentialPlatform {

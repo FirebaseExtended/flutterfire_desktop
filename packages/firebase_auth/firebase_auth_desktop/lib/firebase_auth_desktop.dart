@@ -12,12 +12,19 @@ import 'package:firebase_auth_dart/firebase_auth_dart.dart' as auth_dart;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
+import 'package:meta/meta.dart';
 
 import 'src/confirmation_result.dart';
 import 'src/firebase_auth_user.dart';
 import 'src/firebase_auth_user_credential.dart';
 import 'src/recaptcha_verifier.dart';
 import 'src/utils/desktop_utils.dart';
+
+// ignore: public_member_api_docs
+class MultiFactorImpl extends MultiFactorPlatform {
+  // ignore: public_member_api_docs
+  MultiFactorImpl(FirebaseAuthPlatform auth) : super(auth);
+}
 
 /// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
@@ -37,7 +44,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       if (dartUser == null) {
         return null;
       }
-      return User(this, dartUser);
+      return User(this, MultiFactorImpl(this), dartUser);
     }).listen((User? user) {
       _authStateChangesListeners[app.name]!.add(user);
     });
@@ -46,7 +53,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       if (dartUser == null) {
         return null;
       }
-      return User(this, dartUser);
+      return User(this, MultiFactorImpl(this), dartUser);
     }).listen((User? user) {
       _idTokenChangesListeners[app.name]!.add(user);
       _userChangesListeners[app.name]!.add(user);
@@ -86,7 +93,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       return null;
     }
 
-    return User(this, _delegate!.currentUser!);
+    return User(this, MultiFactorImpl(this), _delegate!.currentUser!);
   }
 
   static final Map<String, StreamController<UserPlatform?>>
@@ -99,7 +106,7 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
       _idTokenChangesListeners = <String, StreamController<UserPlatform?>>{};
 
   @override
-  FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
+  FirebaseAuthPlatform delegateFor({required FirebaseApp app, Persistence? persistence}) {
     return FirebaseAuthDesktop(app: app);
   }
 
@@ -347,16 +354,19 @@ class FirebaseAuthDesktop extends FirebaseAuthPlatform {
     }
   }
 
-  @override
-  Future<void> verifyPhoneNumber(
-      {required String phoneNumber,
-      required PhoneVerificationCompleted verificationCompleted,
-      required PhoneVerificationFailed verificationFailed,
-      required PhoneCodeSent codeSent,
-      required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
-      Duration timeout = const Duration(seconds: 30),
-      int? forceResendingToken,
-      String? autoRetrievedSmsCodeForTesting}) {
+  Future<void> verifyPhoneNumber({
+    String? phoneNumber,
+    PhoneMultiFactorInfo? multiFactorInfo,
+    required PhoneVerificationCompleted verificationCompleted,
+    required PhoneVerificationFailed verificationFailed,
+    required PhoneCodeSent codeSent,
+    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
+    Duration timeout = const Duration(seconds: 30),
+    int? forceResendingToken,
+    MultiFactorSession? multiFactorSession,
+    // ignore: invalid_use_of_visible_for_testing_member
+    @visibleForTesting String? autoRetrievedSmsCodeForTesting,
+  }) {
     throw UnimplementedError(
         'verifyPhoneNumber() is not implemented for Web and Desktop based platforms.');
   }

@@ -14,7 +14,7 @@ import 'utils/desktop_utils.dart';
 /// Dart delegate implementation of [UserPlatform].
 class User extends UserPlatform {
   // ignore: public_member_api_docs
-  User(FirebaseAuthPlatform auth, this._user) : super(auth, _user.toMap());
+  User(FirebaseAuthPlatform auth, MultiFactorPlatform multiFactor, this._user) : super(auth, multiFactor, _user.toMap());
 
   final auth_dart.User _user;
 
@@ -144,7 +144,7 @@ class User extends UserPlatform {
   @override
   Future<UserPlatform> unlink(String providerId) async {
     try {
-      return User(auth, await _user.unlink(providerId));
+      return User(auth, multiFactor, await _user.unlink(providerId));
     } catch (e) {
       throw getFirebaseAuthException(e);
     }
