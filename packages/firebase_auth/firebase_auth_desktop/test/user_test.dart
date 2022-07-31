@@ -554,7 +554,9 @@ class TestFirebaseAuthPlatform extends FirebaseAuthPlatform {
   TestFirebaseAuthPlatform() : super();
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) => this;
+  FirebaseAuthPlatform delegateFor(
+          {FirebaseApp? app, Persistence? persistence}) =>
+      this;
 
   @override
   FirebaseAuthPlatform setInitialValues({
