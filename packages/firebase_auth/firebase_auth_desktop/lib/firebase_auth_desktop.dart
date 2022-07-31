@@ -19,7 +19,7 @@ import 'src/firebase_auth_user_credential.dart';
 import 'src/recaptcha_verifier.dart';
 import 'src/utils/desktop_utils.dart';
 
-/// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
+/// A Dart only implementation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDesktop] class.
   FirebaseAuthDesktop({required FirebaseApp app})
