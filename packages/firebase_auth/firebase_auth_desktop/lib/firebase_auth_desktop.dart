@@ -26,7 +26,7 @@ class MultiFactorImpl extends MultiFactorPlatform {
   MultiFactorImpl(FirebaseAuthPlatform auth) : super(auth);
 }
 
-/// A Dart only implmentation of `FirebaseAuth` for managing Firebase users.
+/// A Dart only implementation of `FirebaseAuth` for managing Firebase users.
 class FirebaseAuthDesktop extends FirebaseAuthPlatform {
   /// Entry point for the [FirebaseAuthDesktop] class.
   FirebaseAuthDesktop({required FirebaseApp app})

@@ -3,7 +3,7 @@
 // that can be found in the LICENSE file.
 
 /// Support for Firebase authentication methods
-/// with pure dart implmentation.
+/// with pure dart implementation.
 library firebase_auth_dart;
 
 import 'dart:async';
