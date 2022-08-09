@@ -91,4 +91,7 @@ class RecaptchaVerifierFactoryDesktop extends RecaptchaVerifierFactoryPlatform {
 
   @override
   String get type => _type;
+
+  @override
+  void clear() {}
 }
