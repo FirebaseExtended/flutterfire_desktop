@@ -24,9 +24,9 @@ dependencies:
   crypto: ^3.0.1
   desktop_webview_auth: ^0.0.9
   firebase_auth: ^3.4.1
-  firebase_auth_desktop: ^1.0.1
+  firebase_auth_desktop: ^1.0.2
   firebase_core: ^1.19.1
-  firebase_core_desktop: ^1.0.1
+  firebase_core_desktop: ^1.0.2
   flutter:
     sdk: flutter
   flutter_lints: ^1.0.4
