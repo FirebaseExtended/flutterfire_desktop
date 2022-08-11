@@ -373,7 +373,8 @@ class MockFirebaseAuth extends Mock
   }
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) {
+  FirebaseAuthPlatform delegateFor(
+      {FirebaseApp? app, Persistence? persistence}) {
     return super.noSuchMethod(
       Invocation.method(#delegateFor, const [], {#app: app}),
       returnValue: TestFirebaseAuthPlatform(),
@@ -569,7 +570,11 @@ class TestFirebaseAuthPlatform extends FirebaseAuthPlatform {
 
 class TestUserPlatform extends UserPlatform {
   TestUserPlatform(FirebaseAuthPlatform auth, Map<String, dynamic> data)
-      : super(auth, data);
+      : super(auth, TestMultiFactor(auth), data);
+}
+
+class TestMultiFactor extends MultiFactorPlatform {
+  TestMultiFactor(FirebaseAuthPlatform auth) : super(auth);
 }
 
 class TestUserCredentialPlatform extends UserCredentialPlatform {

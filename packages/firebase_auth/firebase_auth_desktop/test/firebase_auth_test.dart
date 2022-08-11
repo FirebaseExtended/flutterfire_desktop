@@ -720,7 +720,8 @@ class MockFirebaseAuth extends Mock
   }
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) {
+  FirebaseAuthPlatform delegateFor(
+      {FirebaseApp? app, Persistence? persistence}) {
     return super.noSuchMethod(
       Invocation.method(#delegateFor, [], {#app: app}),
       returnValue: TestFirebaseAuthPlatform(),
@@ -980,12 +981,14 @@ class MockFirebaseAuth extends Mock
   @override
   Future<void> verifyPhoneNumber({
     String? phoneNumber,
-    Object? verificationCompleted,
-    Object? verificationFailed,
-    Object? codeSent,
-    Object? codeAutoRetrievalTimeout,
-    Duration? timeout = const Duration(seconds: 30),
+    PhoneMultiFactorInfo? multiFactorInfo,
+    required PhoneVerificationCompleted verificationCompleted,
+    required PhoneVerificationFailed verificationFailed,
+    required PhoneCodeSent codeSent,
+    required PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout,
+    Duration timeout = const Duration(seconds: 30),
     int? forceResendingToken,
+    MultiFactorSession? multiFactorSession,
     String? autoRetrievedSmsCodeForTesting,
   }) {
     return super.noSuchMethod(
@@ -1014,7 +1017,8 @@ class FakeFirebaseAuthPlatform extends Fake
   String? tenantId;
 
   @override
-  FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
+  FirebaseAuthPlatform delegateFor(
+      {required FirebaseApp app, Persistence? persistence}) {
     return this;
   }
 
@@ -1074,7 +1078,8 @@ class TestFirebaseAuthPlatform extends FirebaseAuthPlatform {
   }) {}
 
   @override
-  FirebaseAuthPlatform delegateFor({FirebaseApp? app}) {
+  FirebaseAuthPlatform delegateFor(
+      {FirebaseApp? app, Persistence? persistence}) {
     return this;
   }
 
@@ -1149,7 +1154,11 @@ class TestAuthProvider extends AuthProvider {
 
 class TestUserPlatform extends UserPlatform {
   TestUserPlatform(FirebaseAuthPlatform auth, Map<String, dynamic> data)
-      : super(auth, data);
+      : super(auth, TestMultiFactor(auth), data);
+}
+
+class TestMultiFactor extends MultiFactorPlatform {
+  TestMultiFactor(FirebaseAuthPlatform auth) : super(auth);
 }
 
 class TestUserCredentialPlatform extends UserCredentialPlatform {

@@ -9,12 +9,14 @@ import 'package:firebase_auth_platform_interface/firebase_auth_platform_interfac
 
 import 'confirmation_result.dart';
 import 'firebase_auth_user_credential.dart';
+import 'multi_factor.dart';
 import 'utils/desktop_utils.dart';
 
 /// Dart delegate implementation of [UserPlatform].
 class User extends UserPlatform {
   // ignore: public_member_api_docs
-  User(FirebaseAuthPlatform auth, this._user) : super(auth, _user.toMap());
+  User(FirebaseAuthPlatform auth, this._user)
+      : super(auth, MultiFactorDesktop(auth), _user.toMap());
 
   final auth_dart.User _user;
 
