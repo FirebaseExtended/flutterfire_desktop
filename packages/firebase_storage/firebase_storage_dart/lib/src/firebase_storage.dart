@@ -1,6 +1,12 @@
 part of firebase_storage_dart;
 
 class FirebaseStorage {
+  final FirebaseApp app;
+  late final String _bucketName;
+  String get bucket => 'gs://$_bucketName';
+
+  late StorageApiClient _apiClient;
+
   FirebaseStorage._({required this.app, String? bucket}) {
     assert(bucket != null || app.options.storageBucket != null);
 
@@ -8,17 +14,16 @@ class FirebaseStorage {
         app.options.storageBucket ??
         '${app.options.appId}.appspot.com';
 
-    this.bucket = 'gs://$bucketName';
+    _bucketName = bucketName;
+    _apiClient = StorageApiClient(clientViaApiKey(app.options.apiKey));
   }
-
-  final FirebaseApp app;
-
-  late final String bucket;
 
   static FirebaseStorage get instance => instanceFor(app: Firebase.app());
 
+  static final Map<FirebaseApp, FirebaseStorage> _instances = {};
+
   static FirebaseStorage instanceFor({required FirebaseApp app}) {
-    return FirebaseStorage._(app: app);
+    return _instances[app] ??= FirebaseStorage._(app: app);
   }
 
   Reference ref([String? path]) {
@@ -36,7 +41,13 @@ class FirebaseStorage {
   }
 
   Future<void> useStorageEmulator(String host, int port) async {
-    // TODO:
+    final uri = Uri(
+      scheme: 'http',
+      host: host,
+      port: port,
+    );
+
+    _apiClient = _apiClient.withServiceUri(uri);
   }
 
   Duration get maxOperationRetryTime {

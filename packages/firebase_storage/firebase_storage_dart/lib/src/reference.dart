@@ -45,9 +45,11 @@ class Reference {
   }
 
   Reference child(String path) {
+    final sanitized = path.split('/').join('');
+
     return Reference._(
       bucket: bucket,
-      path: '$fullPath/$path',
+      path: '$fullPath/$sanitized',
       storage: storage,
     );
   }
@@ -67,8 +69,18 @@ class Reference {
   }
 
   Future<ListResult> list([ListOptions? options]) async {
-    // TODO:
-    throw UnimplementedError();
+    // TODO: use options
+    final res = await storage._apiClient.list(
+      storage._bucketName,
+      fullPath,
+    );
+
+    return ListResult._(
+      storage: storage,
+      src: this,
+      items: res.items,
+      prefixes: res.prefixes,
+    );
   }
 
   Future<ListResult> listAll() async {
