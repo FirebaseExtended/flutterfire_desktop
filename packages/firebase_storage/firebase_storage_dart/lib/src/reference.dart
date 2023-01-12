@@ -17,16 +17,21 @@ class Reference {
     required String path,
   }) {
     _pathComponents = [
-      ...path.split('/'),
+      ...path.split('/').where((element) => element.isNotEmpty),
     ];
 
-    fullPath = _pathComponents.join('/');
-    name = _pathComponents.last;
+    if (_pathComponents.isEmpty) {
+      fullPath = '/';
+      name = "";
+    } else {
+      fullPath = _pathComponents.join('/');
+      name = _pathComponents.last;
+    }
   }
 
-  Reference get parent {
-    if (_pathComponents.length == 1) {
-      return this;
+  Reference? get parent {
+    if (_pathComponents.isEmpty) {
+      return null;
     }
 
     return Reference._(
@@ -45,7 +50,7 @@ class Reference {
   }
 
   Reference child(String path) {
-    final sanitized = path.split('/').join('');
+    final sanitized = path.split('/').where((e) => e.isNotEmpty).join('/');
 
     return Reference._(
       bucket: bucket,
@@ -69,23 +74,27 @@ class Reference {
   }
 
   Future<ListResult> list([ListOptions? options]) async {
-    // TODO: use options
-    final res = await storage._apiClient.list(
-      storage._bucketName,
+    final objects = await storage._apiClient.list(
       fullPath,
+      options,
     );
 
-    return ListResult._(
-      storage: storage,
+    return ListResult._fromObjects(
+      objects: objects,
       src: this,
-      items: res.items,
-      prefixes: res.prefixes,
     );
   }
 
   Future<ListResult> listAll() async {
-    // TODO:
-    throw UnimplementedError();
+    ListResult result = await list();
+
+    while (result.nextPageToken != null) {
+      final options = ListOptions(pageToken: result.nextPageToken);
+      final pageResult = await list(options);
+      result = result._concat(pageResult);
+    }
+
+    return result;
   }
 
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
@@ -138,5 +147,5 @@ class Reference {
 
   @override
   String toString() =>
-      '$Reference(app: ${storage.app.name}, fullPath: $fullPath)';
+      'Reference(app: ${storage.app.name}, fullPath: $fullPath)';
 }
