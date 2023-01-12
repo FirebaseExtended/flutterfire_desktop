@@ -6,9 +6,12 @@ void main(List<String> arguments) async {
   await Firebase.initializeApp(options: firebaseOptions);
   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
 
-  await FirebaseStorage.instance.ref().list().then((value) {
+  await FirebaseStorage.instance.ref('flutter-tests').list().then((value) {
     print(value.prefixes.map((e) => e.name));
     print(value.items.map((e) => e.name));
+    return Future.wait(value.items.map((e) => e.getMetadata()));
+  }).then((value) {
+    print(value);
   });
 
   // final storage = FirebaseStorage.instance;

@@ -6,11 +6,21 @@ class StorageApiClient {
   final String bucket;
 
   StorageApiClient(this.bucket, this._client, [gapi.StorageApi? api]) {
-    _api = api ?? gapi.StorageApi(_client);
+    _api = api ??
+        gapi.StorageApi(
+          _client,
+          rootUrl: 'https://firebasestorage.googleapis.com/',
+          servicePath: 'v0/',
+        );
   }
 
   StorageApiClient withServiceUri(Uri uri) {
-    final api = gapi.StorageApi(_client, rootUrl: '${uri.toString()}/');
+    final api = gapi.StorageApi(
+      _client,
+      rootUrl: '${uri.toString()}/',
+      servicePath: 'v0/',
+    );
+
     return StorageApiClient(bucket, _client, api);
   }
 
@@ -35,9 +45,13 @@ class StorageApiClient {
       delimiter: '/',
       maxResults: options?.maxResults,
       endOffset: options?.pageToken,
-      includeTrailingDelimiter: false,
     );
 
     return res;
+  }
+
+  Future<FullMetadata> getMetadata(String fullPath) async {
+    final object = await _api.objects.get(bucket, fullPath) as gapi.Object;
+    return FullMetadata._fromObject(fullPath, object);
   }
 }

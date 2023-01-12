@@ -69,8 +69,8 @@ class Reference {
   }
 
   Future<FullMetadata> getMetadata() async {
-    // TODO:
-    throw UnimplementedError();
+    final res = await storage._apiClient.getMetadata(fullPath);
+    return res;
   }
 
   Future<ListResult> list([ListOptions? options]) async {

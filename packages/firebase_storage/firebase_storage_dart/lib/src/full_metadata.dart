@@ -1,77 +1,60 @@
 part of firebase_storage_dart;
 
 class FullMetadata {
-  FullMetadata._(this._metadata);
+  final String? bucket;
+  final String? cacheControl;
+  final String? contentDisposition;
+  final String? contentEncoding;
+  final String? contentLanguage;
+  final String? contentType;
+  final Map<String, String>? customMetadata;
+  final String fullPath;
+  final String? generation;
+  final String? metadataGeneration;
+  final String? md5Hash;
+  final String? metageneration;
+  final String name;
+  final int? size;
+  final DateTime? timeCreated;
+  final DateTime? updated;
 
-  final Map<String, dynamic> _metadata;
+  FullMetadata._({
+    required this.fullPath,
+    required this.name,
+    this.bucket,
+    this.cacheControl,
+    this.contentDisposition,
+    this.contentEncoding,
+    this.contentLanguage,
+    this.contentType,
+    this.customMetadata,
+    this.generation,
+    this.metadataGeneration,
+    this.md5Hash,
+    this.metageneration,
+    this.size,
+    this.timeCreated,
+    this.updated,
+  });
 
-  String? get bucket {
-    return _metadata['bucket'];
-  }
-
-  String? get cacheControl {
-    return _metadata['cacheControl'];
-  }
-
-  String? get contentDisposition {
-    return _metadata['contentDisposition'];
-  }
-
-  String? get contentEncoding {
-    return _metadata['contentEncoding'];
-  }
-
-  String? get contentLanguage {
-    return _metadata['contentLanguage'];
-  }
-
-  String? get contentType {
-    return _metadata['contentType'];
-  }
-
-  Map<String, String>? get customMetadata {
-    return _metadata['customMetadata'] == null
-        ? null
-        : Map<String, String>.from(_metadata['customMetadata']);
-  }
-
-  String get fullPath {
-    return _metadata['fullPath'];
-  }
-
-  String? get generation {
-    return _metadata['generation'];
-  }
-
-  String? get metadataGeneration {
-    return _metadata['metadataGeneration'];
-  }
-
-  String? get md5Hash {
-    return _metadata['md5Hash'];
-  }
-
-  String? get metageneration {
-    return _metadata['metageneration'];
-  }
-
-  String get name {
-    return _metadata['name'];
-  }
-
-  int? get size {
-    return _metadata['size'];
-  }
-
-  DateTime? get timeCreated {
-    return _metadata['creationTimeMillis'] == null
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(_metadata['creationTimeMillis']);
-  }
-
-  DateTime? get updated {
-    return _metadata['updatedTimeMillis'] == null
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(_metadata['updatedTimeMillis']);
+  factory FullMetadata._fromObject(String fullPath, gapi.Object object) {
+    return FullMetadata._(
+      fullPath: fullPath,
+      name: object.name!,
+      bucket: object.bucket,
+      cacheControl: object.cacheControl,
+      contentDisposition: object.contentDisposition,
+      contentEncoding: object.contentEncoding,
+      contentLanguage: object.contentLanguage,
+      contentType: object.contentType,
+      customMetadata: object.metadata,
+      generation: object.generation,
+      md5Hash: object.md5Hash,
+      metadataGeneration: object.metageneration,
+      metageneration: object.metageneration,
+      size: int.tryParse(object.size ?? ''),
+      timeCreated: object.timeCreated,
+      updated: object.updated,
+    );
   }
 }

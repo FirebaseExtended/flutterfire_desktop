@@ -13,7 +13,7 @@ class FirebaseStorage {
     final bucketName =
         bucket ?? options.storageBucket ?? '${options.appId}.appspot.com';
 
-    bucket = 'gs://$bucketName';
+    this.bucket = 'gs://$bucketName';
 
     _apiClient = StorageApiClient(
       bucketName,
