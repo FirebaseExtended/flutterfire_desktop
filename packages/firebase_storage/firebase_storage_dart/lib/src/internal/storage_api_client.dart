@@ -1,34 +1,53 @@
 part of firebase_storage_dart;
 
 class StorageApiClient {
-  late final http.Client _client;
-  late final gapi.StorageApi _api;
   final String bucket;
 
-  StorageApiClient(this.bucket, this._client, [gapi.StorageApi? api]) {
-    _api = api ??
-        gapi.StorageApi(
-          _client,
-          rootUrl: 'https://firebasestorage.googleapis.com/',
-          servicePath: 'v0/',
-        );
+  late final http.Client _client;
+  late final Uri uri;
+
+  StorageApiClient(this.bucket, [Uri? uri]) {
+    _client = http.Client();
+    this.uri = uri ??
+        Uri.parse('https://firebasestorage.googleapis.com/v0/b/$bucket/o');
   }
 
   StorageApiClient withServiceUri(Uri uri) {
-    final api = gapi.StorageApi(
-      _client,
-      rootUrl: '${uri.toString()}/',
-      servicePath: 'v0/',
+    return StorageApiClient(
+      bucket,
+      Uri(
+        scheme: uri.scheme,
+        host: uri.host,
+        port: uri.port,
+        pathSegments: [
+          'v0',
+          'b',
+          bucket,
+          'o',
+        ],
+      ),
     );
+  }
 
-    return StorageApiClient(bucket, _client, api);
+  Uri _buildRequestUri({
+    Map<String, dynamic>? queryParameters,
+    List<String>? pathSegments,
+  }) {
+    return Uri(
+      host: uri.host,
+      scheme: uri.scheme,
+      port: uri.port,
+      pathSegments: [...uri.pathSegments, ...pathSegments ?? []],
+      queryParameters: queryParameters,
+    );
   }
 
   Future<void> delete(String fullPath) async {
-    await _api.objects.delete(bucket, fullPath);
+    final uri = _buildRequestUri(pathSegments: [Uri.encodeComponent(fullPath)]);
+    await _client.delete(uri);
   }
 
-  Future<gapi.Objects> list(
+  Future<Map<String, dynamic>> list(
     String path, [
     ListOptions? options,
   ]) async {
@@ -39,19 +58,41 @@ class StorageApiClient {
       prefix = '$path/';
     }
 
-    final res = await _api.objects.list(
-      bucket,
-      prefix: prefix,
-      delimiter: '/',
-      maxResults: options?.maxResults,
-      endOffset: options?.pageToken,
-    );
+    final uri = _buildRequestUri(queryParameters: {
+      'prefix': Uri.encodeFull(prefix),
+      'delimiter': Uri.encodeFull('/'),
+    });
 
-    return res;
+    final res = await _client.get(uri);
+    return json.decode(res.body);
   }
 
-  Future<FullMetadata> getMetadata(String fullPath) async {
-    final object = await _api.objects.get(bucket, fullPath) as gapi.Object;
-    return FullMetadata._fromObject(fullPath, object);
+  Future<Map<String, dynamic>> getMetadata(String fullPath) async {
+    final uri = _buildRequestUri(pathSegments: [Uri.encodeComponent(fullPath)]);
+
+    final res = await _client.get(uri);
+    return json.decode(res.body);
+  }
+
+  Uri _buildDownloadURL(Map<String, dynamic> metadata, String fullPath) {
+    final tokensString = metadata['downloadTokens'] as String;
+    final tokens = tokensString.split(',');
+    final token = tokens[0];
+
+    final encodedPath = Uri.encodeComponent(fullPath);
+    final downloadUri = _buildRequestUri(
+      pathSegments: [encodedPath],
+      queryParameters: {
+        'alt': 'media',
+        'token': token,
+      },
+    );
+
+    return downloadUri;
+  }
+
+  Future<String> getDownloadURL(String fullPath) async {
+    final metadata = await getMetadata(fullPath);
+    return _buildDownloadURL(metadata, fullPath).toString();
   }
 }

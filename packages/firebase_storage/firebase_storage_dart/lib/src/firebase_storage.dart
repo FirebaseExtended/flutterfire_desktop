@@ -15,10 +15,7 @@ class FirebaseStorage {
 
     this.bucket = 'gs://$bucketName';
 
-    _apiClient = StorageApiClient(
-      bucketName,
-      clientViaApiKey(app.options.apiKey),
-    );
+    _apiClient = StorageApiClient(bucketName);
 
     if (_emulatorUri != null) {
       _apiClient = _apiClient.withServiceUri(_emulatorUri!);

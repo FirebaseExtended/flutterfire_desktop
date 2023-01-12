@@ -64,25 +64,22 @@ class Reference {
   }
 
   Future<String> getDownloadURL() async {
-    // TODO:
-    throw UnimplementedError();
+    final downloadUrl = await storage._apiClient.getDownloadURL(fullPath);
+    return downloadUrl;
   }
 
   Future<FullMetadata> getMetadata() async {
-    final res = await storage._apiClient.getMetadata(fullPath);
-    return res;
+    final json = await storage._apiClient.getMetadata(fullPath);
+    return FullMetadata._fromJson(json);
   }
 
   Future<ListResult> list([ListOptions? options]) async {
-    final objects = await storage._apiClient.list(
+    final json = await storage._apiClient.list(
       fullPath,
       options,
     );
 
-    return ListResult._fromObjects(
-      objects: objects,
-      src: this,
-    );
+    return ListResult._fromJson(storage, json);
   }
 
   Future<ListResult> listAll() async {
@@ -98,8 +95,22 @@ class Reference {
   }
 
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
-    // TODO:
-    throw UnimplementedError();
+    final metadata = await storage._apiClient.getMetadata(fullPath);
+    final size = metadata['size'] as int;
+
+    if (size > maxSize) {
+      return null;
+    }
+
+    final uri = storage._apiClient._buildDownloadURL(metadata, fullPath);
+    final res = await http.get(uri);
+
+    if (res.statusCode == 200) {
+      return res.bodyBytes;
+    } else {
+      // TODO:
+      throw Exception();
+    }
   }
 
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {

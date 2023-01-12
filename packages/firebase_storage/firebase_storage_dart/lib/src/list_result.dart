@@ -13,28 +13,19 @@ class ListResult {
     this.nextPageToken,
   });
 
-  factory ListResult._fromObjects({
-    required gapi.Objects objects,
-    required Reference src,
-  }) {
-    final items = <Reference>[];
-
-    for (var item in objects.items ?? <gapi.Object>[]) {
-      final name = path.basename(item.name!);
-      if (name.isEmpty || name == src.name) continue;
-
-      items.add(src.child(name));
-    }
-
-    final prefixes = (objects.prefixes ?? <String>[])
-        .map((e) => src.storage.ref(e))
-        .toList();
-
+  factory ListResult._fromJson(
+    FirebaseStorage storage,
+    Map<String, dynamic> json,
+  ) {
     return ListResult._(
-      storage: src.storage,
-      items: items,
-      prefixes: prefixes,
-      nextPageToken: objects.nextPageToken,
+      storage: storage,
+      items: (json['items'] as List)
+          .map((e) => storage.ref(e['name'] as String))
+          .toList(),
+      prefixes: (json['prefixes'] as List)
+          .map((e) => storage.ref(e as String))
+          .toList(),
+      nextPageToken: json['nextPageToken'] as String?,
     );
   }
 

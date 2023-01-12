@@ -37,24 +37,28 @@ class FullMetadata {
     this.updated,
   });
 
-  factory FullMetadata._fromObject(String fullPath, gapi.Object object) {
+  factory FullMetadata._fromJson(Map<String, dynamic> json) {
     return FullMetadata._(
-      fullPath: fullPath,
-      name: object.name!,
-      bucket: object.bucket,
-      cacheControl: object.cacheControl,
-      contentDisposition: object.contentDisposition,
-      contentEncoding: object.contentEncoding,
-      contentLanguage: object.contentLanguage,
-      contentType: object.contentType,
-      customMetadata: object.metadata,
-      generation: object.generation,
-      md5Hash: object.md5Hash,
-      metadataGeneration: object.metageneration,
-      metageneration: object.metageneration,
-      size: int.tryParse(object.size ?? ''),
-      timeCreated: object.timeCreated,
-      updated: object.updated,
+      fullPath: json['fullPath'] as String,
+      name: json['name'] as String,
+      bucket: json['bucket'] as String?,
+      cacheControl: json['cacheControl'] as String?,
+      contentDisposition: json['contentDisposition'] as String?,
+      contentEncoding: json['contentEncoding'] as String?,
+      contentLanguage: json['contentLanguage'] as String?,
+      contentType: json['contentType'] as String?,
+      customMetadata: json['customMetadata'] as Map<String, String>,
+      generation: json['generation'] as String?,
+      md5Hash: json['md5Hash'] as String?,
+      metageneration: json['metageneration'] as String?,
+      metadataGeneration: json['metageneration'] as String?,
+      size: json['size'] as int?,
+      timeCreated: json['timeCreated'] == null
+          ? null
+          : DateTime.parse(json['timeCreated'] as String),
+      updated: json['updated'] == null
+          ? null
+          : DateTime.parse(json['timeCreated'] as String),
     );
   }
 }

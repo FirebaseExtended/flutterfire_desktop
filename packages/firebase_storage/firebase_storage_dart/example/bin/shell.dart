@@ -9,7 +9,7 @@ void main(List<String> arguments) async {
   await FirebaseStorage.instance.ref('flutter-tests').list().then((value) {
     print(value.prefixes.map((e) => e.name));
     print(value.items.map((e) => e.name));
-    return Future.wait(value.items.map((e) => e.getMetadata()));
+    return value.items[0].getDownloadURL();
   }).then((value) {
     print(value);
   });
