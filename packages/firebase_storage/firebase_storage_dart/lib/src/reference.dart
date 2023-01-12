@@ -60,7 +60,7 @@ class Reference {
   }
 
   Future<void> delete() async {
-    // TODO:
+    await storage._apiClient.delete(fullPath);
   }
 
   Future<String> getDownloadURL() async {

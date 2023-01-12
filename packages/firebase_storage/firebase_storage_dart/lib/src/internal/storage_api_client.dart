@@ -14,6 +14,10 @@ class StorageApiClient {
     return StorageApiClient(bucket, _client, api);
   }
 
+  Future<void> delete(String fullPath) async {
+    await _api.objects.delete(bucket, fullPath);
+  }
+
   Future<gapi.Objects> list(
     String path, [
     ListOptions? options,
