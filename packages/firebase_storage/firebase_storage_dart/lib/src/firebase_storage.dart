@@ -3,23 +3,20 @@ part of firebase_storage_dart;
 class FirebaseStorage {
   final FirebaseApp app;
   late final String bucket;
+  late final StorageApiClient _apiClient;
 
-  late StorageApiClient _apiClient;
+  static Uri? _emulatorUri;
 
   FirebaseStorage._({required this.app, String? bucket}) {
     assert(bucket != null || app.options.storageBucket != null);
     final options = app.options;
+    final storageBucket = options.storageBucket;
+    final appId = options.appId;
 
-    final bucketName =
-        bucket ?? options.storageBucket ?? '${options.appId}.appspot.com';
-
+    final bucketName = bucket ?? storageBucket ?? '$appId.appspot.com';
     this.bucket = 'gs://$bucketName';
 
-    _apiClient = StorageApiClient(bucketName);
-
-    if (_emulatorUri != null) {
-      _apiClient = _apiClient.withServiceUri(_emulatorUri!);
-    }
+    _apiClient = StorageApiClient(bucketName, _emulatorUri);
   }
 
   static FirebaseStorage get instance => instanceFor(app: Firebase.app());
@@ -29,8 +26,6 @@ class FirebaseStorage {
   static FirebaseStorage instanceFor({required FirebaseApp app}) {
     return _instances[app] ??= FirebaseStorage._(app: app);
   }
-
-  static Uri? _emulatorUri;
 
   Reference ref([String? path]) {
     path ??= '/';
@@ -48,13 +43,7 @@ class FirebaseStorage {
   }
 
   Future<void> useStorageEmulator(String host, int port) async {
-    _emulatorUri = Uri(
-      scheme: 'http',
-      host: host,
-      port: port,
-    );
-
-    _apiClient = _apiClient.withServiceUri(_emulatorUri!);
+    _emulatorUri = _apiClient.useEmulator(host, port);
   }
 
   Duration get maxOperationRetryTime {

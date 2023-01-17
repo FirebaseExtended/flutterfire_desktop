@@ -10,6 +10,7 @@ class Reference {
   late final String name;
 
   late final List<String> _pathComponents;
+  late final String _gsUrl;
 
   Reference._({
     required this.storage,
@@ -23,9 +24,11 @@ class Reference {
     if (_pathComponents.isEmpty) {
       fullPath = '/';
       name = "";
+      _gsUrl = 'gs://$bucket/';
     } else {
       fullPath = _pathComponents.join('/');
       name = _pathComponents.last;
+      _gsUrl = 'gs://$bucket/$fullPath';
     }
   }
 
@@ -114,13 +117,19 @@ class Reference {
   }
 
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {
-    // TODO:
-    throw UnimplementedError();
+    if (data.length <= _resumableUploadBaseChunkSize) {
+      return MultipartUploadTask._(storage, fullPath, data, metadata);
+    } else {
+      // TODO:
+      throw UnimplementedError();
+    }
   }
 
   UploadTask putBlob(dynamic blob, [SettableMetadata? metadata]) {
-    // TODO:
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'putBlob() is not supported on native platforms.'
+      'Use putData, putFile or putString instead.',
+    );
   }
 
   UploadTask putFile(File file, [SettableMetadata? metadata]) {
@@ -157,6 +166,5 @@ class Reference {
   int get hashCode => Object.hash(storage, fullPath);
 
   @override
-  String toString() =>
-      'Reference(app: ${storage.app.name}, fullPath: $fullPath)';
+  String toString() => _gsUrl;
 }

@@ -85,6 +85,9 @@ abstract class Task implements Future<TaskSnapshot> {
   }
 }
 
+const _multipartUploadMaxSize = 256 * 1024 * 1024;
+const _resumableUploadBaseChunkSize = 256 * 1024;
+
 /// A class which indicates an on-going upload task.
 class UploadTask extends Task {
   UploadTask._(FirebaseStorage storage) : super._(storage);
@@ -93,4 +96,88 @@ class UploadTask extends Task {
 /// A class which indicates an on-going download task.
 class DownloadTask extends Task {
   DownloadTask._(FirebaseStorage storage) : super._(storage);
+}
+
+class MultipartUploadTask implements UploadTask {
+  final StreamController<TaskSnapshot> controller = StreamController();
+  @override
+  final FirebaseStorage storage;
+  final Uint8List data;
+  final SettableMetadata? metadata;
+  final String fullPath;
+
+  @override
+  late TaskSnapshot snapshot;
+
+  late StreamSubscription<TaskSnapshot> _subscription;
+
+  MultipartUploadTask._(
+    this.storage,
+    this.fullPath,
+    this.data, [
+    this.metadata,
+  ]) {
+    _subscription = controller.stream.listen(_onSnapshot);
+  }
+
+  void _onSnapshot(TaskSnapshot snapshot) {
+    this.snapshot = snapshot;
+  }
+
+  @override
+  Stream<TaskSnapshot> asStream() {
+    return controller.stream;
+  }
+
+  @override
+  Future<bool> cancel() async {
+    if (snapshot.state == TaskState.running) {
+      _subscription.cancel();
+      return true;
+    }
+
+    return false;
+  }
+
+  @override
+  Future<TaskSnapshot> catchError(
+    Function onError, {
+    bool Function(Object error)? test,
+  }) {
+    return controller.stream.last.catchError(onError, test: test);
+  }
+
+  @override
+  Future<bool> pause() async {
+    return false;
+  }
+
+  @override
+  Future<bool> resume() async {
+    return false;
+  }
+
+  @override
+  Stream<TaskSnapshot> get snapshotEvents => asStream();
+
+  @override
+  Future<S> then<S>(
+    FutureOr<S> Function(TaskSnapshot p1) onValue, {
+    Function? onError,
+  }) {
+    return controller.stream.last.then(onValue, onError: onError);
+  }
+
+  @override
+  Future<TaskSnapshot> timeout(
+    Duration timeLimit, {
+    FutureOr<TaskSnapshot> Function()? onTimeout,
+  }) {
+    return controller.stream.last.timeout(timeLimit, onTimeout: onTimeout);
+  }
+
+  @override
+  Future<TaskSnapshot> whenComplete(FutureOr Function() action) {
+    return controller.stream.last.whenComplete(action);
+  }
 }

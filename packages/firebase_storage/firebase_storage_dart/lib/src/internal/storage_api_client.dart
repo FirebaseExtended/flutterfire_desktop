@@ -2,49 +2,37 @@ part of firebase_storage_dart;
 
 class StorageApiClient {
   final String bucket;
+  late HttpClient client;
 
-  late final http.Client _client;
-  late final Uri uri;
+  StorageApiClient(this.bucket, [Uri? serviceUri]) {
+    final defaultUri = Uri(
+      scheme: 'https',
+      host: 'firebasestorage.googleapis.com',
+      pathSegments: ['v0', 'b', bucket, 'o'],
+    );
 
-  StorageApiClient(this.bucket, [Uri? uri]) {
-    _client = http.Client();
-    this.uri = uri ??
-        Uri.parse('https://firebasestorage.googleapis.com/v0/b/$bucket/o');
+    final uri = serviceUri ?? defaultUri;
+    client = HttpClient(uri);
   }
 
-  StorageApiClient withServiceUri(Uri uri) {
-    return StorageApiClient(
-      bucket,
-      Uri(
-        scheme: uri.scheme,
-        host: uri.host,
-        port: uri.port,
-        pathSegments: [
-          'v0',
-          'b',
-          bucket,
-          'o',
-        ],
-      ),
-    );
-  }
+  Uri useEmulator(String host, int port) {
+    client.dispose();
 
-  Uri _buildRequestUri({
-    Map<String, dynamic>? queryParameters,
-    List<String>? pathSegments,
-  }) {
-    return Uri(
-      host: uri.host,
-      scheme: uri.scheme,
-      port: uri.port,
-      pathSegments: [...uri.pathSegments, ...pathSegments ?? []],
-      queryParameters: queryParameters,
+    final pathSegments = ['v0', 'b', bucket, 'o'];
+    final emulatorUri = Uri(
+      scheme: 'http',
+      host: host,
+      port: port,
+      pathSegments: pathSegments,
     );
+
+    client = HttpClient(emulatorUri);
+
+    return emulatorUri;
   }
 
   Future<void> delete(String fullPath) async {
-    final uri = _buildRequestUri(pathSegments: [Uri.encodeComponent(fullPath)]);
-    await _client.delete(uri);
+    await client.delete(pathSegments: [Uri.encodeComponent(fullPath)]);
   }
 
   Future<Map<String, dynamic>> list(
@@ -58,19 +46,18 @@ class StorageApiClient {
       prefix = '$path/';
     }
 
-    final uri = _buildRequestUri(queryParameters: {
-      'prefix': Uri.encodeFull(prefix),
-      'delimiter': Uri.encodeFull('/'),
-    });
+    final res = await client.get(
+      queryParameters: {
+        'prefix': Uri.encodeFull(prefix),
+        'delimiter': Uri.encodeFull('/'),
+      },
+    );
 
-    final res = await _client.get(uri);
     return json.decode(res.body);
   }
 
   Future<Map<String, dynamic>> getMetadata(String fullPath) async {
-    final uri = _buildRequestUri(pathSegments: [Uri.encodeComponent(fullPath)]);
-
-    final res = await _client.get(uri);
+    final res = await client.get(pathSegments: [Uri.encodeComponent(fullPath)]);
     return json.decode(res.body);
   }
 
@@ -80,7 +67,7 @@ class StorageApiClient {
     final token = tokens[0];
 
     final encodedPath = Uri.encodeComponent(fullPath);
-    final downloadUri = _buildRequestUri(
+    final downloadUri = client.getRequestUri(
       pathSegments: [encodedPath],
       queryParameters: {
         'alt': 'media',
@@ -94,5 +81,19 @@ class StorageApiClient {
   Future<String> getDownloadURL(String fullPath) async {
     final metadata = await getMetadata(fullPath);
     return _buildDownloadURL(metadata, fullPath).toString();
+  }
+
+  Future<void> uploadMultipart(String fullPath, Uint8List data) async {
+    await client.postMultipart(pathSegments: [
+      Uri.encodeComponent(fullPath)
+    ], queryParameters: {
+      'uploadType': 'multipart',
+    }, files: [
+      http.MultipartFile.fromBytes(
+        'file',
+        data,
+        filename: fullPath,
+      ),
+    ]);
   }
 }
