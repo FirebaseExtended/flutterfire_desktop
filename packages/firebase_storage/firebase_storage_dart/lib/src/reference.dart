@@ -86,15 +86,21 @@ class Reference {
   }
 
   Future<ListResult> listAll() async {
-    ListResult result = await list();
+    try {
+      ListResult result = await list();
 
-    while (result.nextPageToken != null) {
-      final options = ListOptions(pageToken: result.nextPageToken);
-      final pageResult = await list(options);
-      result = result._concat(pageResult);
+      while (result.nextPageToken != null) {
+        final options = ListOptions(pageToken: result.nextPageToken);
+        final pageResult = await list(options);
+        result = result._concat(pageResult);
+      }
+
+      return result;
+    } on FirebaseStorageException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw FirebaseStorageException._unknown(stackTrace);
     }
-
-    return result;
   }
 
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
@@ -106,30 +112,28 @@ class Reference {
     }
 
     final uri = storage._apiClient._buildDownloadURL(metadata, fullPath);
-    final res = await http.get(uri);
+    try {
+      final res = await http.get(uri);
 
-    if (res.statusCode == 200) {
-      return res.bodyBytes;
-    } else {
-      // TODO:
-      throw Exception();
+      if (res.statusCode == 200) {
+        return res.bodyBytes;
+      } else {
+        throw FirebaseStorageException._fromHttpStatusCode(res.statusCode);
+      }
+    } on FirebaseStorageException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw FirebaseStorageException._unknown(stackTrace);
     }
   }
 
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {
-    if (data.length <= _resumableUploadBaseChunkSize) {
-      return MultipartUploadTask._(storage, fullPath, data, metadata);
+    if (data.length <= _chunkedUploadBaseChunkSize) {
+      return _MultipartUploadTask._(this, fullPath, data, metadata);
     } else {
-      // TODO:
-      throw UnimplementedError();
+      final source = BufferSource(data.buffer.asByteData());
+      return _ChunkedUploadTask._(this, fullPath, source, metadata);
     }
-  }
-
-  UploadTask putBlob(dynamic blob, [SettableMetadata? metadata]) {
-    throw UnimplementedError(
-      'putBlob() is not supported on native platforms.'
-      'Use putData, putFile or putString instead.',
-    );
   }
 
   UploadTask putFile(File file, [SettableMetadata? metadata]) {
@@ -138,12 +142,41 @@ class Reference {
   }
 
   UploadTask putString(
-    String data, {
+    String string, {
     PutStringFormat format = PutStringFormat.raw,
     SettableMetadata? metadata,
   }) {
-    // TODO:
-    throw UnimplementedError();
+    Uint8List bytes;
+    String? contentType = metadata?.contentType;
+
+    switch (format) {
+      case PutStringFormat.raw:
+        bytes = Uint8List.fromList(utf8.encode(string));
+        break;
+      case PutStringFormat.base64:
+        bytes = base64.decode(string);
+        break;
+      case PutStringFormat.base64Url:
+        bytes = base64.decode(Uri.decodeFull(string));
+        break;
+      case PutStringFormat.dataUrl:
+        final uri = Uri.dataFromString(string);
+        final mime = uri.data!.mimeType;
+        contentType = mime;
+        bytes = uri.data!.contentAsBytes();
+        break;
+    }
+
+    final newMetadata = SettableMetadata(
+      contentType: contentType ?? 'text/plain',
+      customMetadata: metadata?.customMetadata,
+      cacheControl: metadata?.cacheControl,
+      contentDisposition: metadata?.contentDisposition,
+      contentEncoding: metadata?.contentEncoding,
+      contentLanguage: metadata?.contentLanguage,
+    );
+
+    return putData(bytes, newMetadata);
   }
 
   // TODO:

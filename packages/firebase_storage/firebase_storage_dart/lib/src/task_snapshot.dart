@@ -7,20 +7,16 @@ part of firebase_storage_dart;
 
 /// A [TaskSnapshot] is returned as the result or on-going process of a [Task].
 class TaskSnapshot {
-  TaskSnapshot._(this.storage, this.ref);
-
   /// The [FirebaseStorage] instance used to create the task.
-  final FirebaseStorage storage;
+  FirebaseStorage get storage => ref.storage;
 
   /// The current transferred bytes of this task.
-  // TODO:
-  int get bytesTransferred => throw UnimplementedError();
+  final int bytesTransferred;
 
   /// The [FullMetadata] associated with this task.
   ///
   /// May be `null` if no metadata exists.
-  // TODO:
-  FullMetadata? get metadata => throw UnimplementedError();
+  final FullMetadata? metadata;
 
   /// The [Reference] for this snapshot.
   final Reference ref;
@@ -29,15 +25,22 @@ class TaskSnapshot {
   ///
   /// The state indicates the current progress of the task, such as whether it
   /// is running, paused or completed.
-  // TODO:
-  TaskState get state => throw UnimplementedError();
+  final TaskState state;
 
   /// The total bytes of the task.
   ///
   /// Note; when performing a download task, the value of `-1` will be provided
   /// whilst the total size of the remote file is being determined.
-  // TODO:
-  int get totalBytes => throw UnimplementedError();
+  final int totalBytes;
+
+  TaskSnapshot._({
+    required this.ref,
+    required this.bytesTransferred,
+    required this.totalBytes,
+    required this.state,
+    // ignore: unused_element
+    this.metadata,
+  });
 
   @override
   bool operator ==(Object other) =>

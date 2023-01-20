@@ -3,11 +3,16 @@ library firebase_storage_dart;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
 
+part 'src/internal/source.dart';
+part 'src/internal/errors.dart';
+part 'src/internal/storage_multipart_request_builder.dart';
 part 'src/internal/http_client.dart';
 part 'src/internal/storage_api_client.dart';
 part 'src/full_metadata.dart';

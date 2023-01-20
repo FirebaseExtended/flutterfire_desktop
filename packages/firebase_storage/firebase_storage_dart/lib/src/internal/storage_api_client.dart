@@ -83,17 +83,92 @@ class StorageApiClient {
     return _buildDownloadURL(metadata, fullPath).toString();
   }
 
-  Future<void> uploadMultipart(String fullPath, Uint8List data) async {
-    await client.postMultipart(pathSegments: [
-      Uri.encodeComponent(fullPath)
-    ], queryParameters: {
-      'uploadType': 'multipart',
-    }, files: [
-      http.MultipartFile.fromBytes(
-        'file',
+  Future<Map<String, dynamic>> uploadMultipart(
+    String fullPath,
+    Uint8List data, [
+    SettableMetadata? metadata,
+  ]) async {
+    final metadataJson = metadata?.asMap() ?? {};
+
+    final builder = MultipartBuilder()
+      ..add(
+        'application/json; charset=utf-8',
+        utf8.encode(json.encode(metadataJson)),
+      )
+      ..add(
+        metadataJson['contentType'] as String? ?? 'application/octet-stream',
         data,
-        filename: fullPath,
-      ),
-    ]);
+      );
+
+    final content = builder.buildContent();
+
+    final res = await client.post(
+      headers: {
+        'Content-Type': 'multipart/related; boundary=${content.boundary}',
+        'X-Goog-Upload-Protocol': 'multipart',
+      },
+      queryParameters: {'name': fullPath},
+      bodyBytes: content.getBodyBytes(),
+    );
+
+    return json.decode(res.body);
+  }
+
+  Future<String> startChunkedUpload({
+    required String fullPath,
+    required int length,
+    SettableMetadata? metadata,
+  }) async {
+    final contentType = lookupMimeType(fullPath) ?? 'application/octet-stream';
+
+    final res = await client.post(
+      headers: {
+        'X-Goog-Upload-Command': 'start',
+        'X-Goog-Upload-Header-Content-Length': length.toString(),
+        'X-Goog-Upload-Header-Content-Type': contentType,
+        'X-Goog-Upload-Protocol': 'resumable',
+      },
+      queryParameters: {
+        'name': Uri.encodeComponent(fullPath),
+      },
+      bodyBytes: utf8.encode(json.encode({
+        'contentType': contentType,
+        'name': fullPath,
+        ...metadata?.asMap() ?? {},
+      })),
+    );
+
+    if (res.statusCode != 200) {
+      throw FirebaseStorageException._fromHttpStatusCode(res.statusCode);
+    }
+
+    final url = res.headers['x-goog-upload-url'];
+
+    if (url == null) {
+      throw FirebaseStorageException._unknown();
+    }
+
+    return url;
+  }
+
+  Future<void> uploadChunk({
+    required String name,
+    required String uploadId,
+    required int offset,
+    required Uint8List data,
+    bool finalize = false,
+  }) async {
+    await client.post(
+      queryParameters: {
+        'name': name,
+        'upload_id': uploadId,
+        'upload_protocol': 'resumable',
+      },
+      headers: {
+        'X-Goog-Upload-Command': finalize ? 'upload, finalize' : 'upload',
+        'X-Goog-Upload-Offset': offset.toString(),
+      },
+      bodyBytes: data,
+    );
   }
 }
