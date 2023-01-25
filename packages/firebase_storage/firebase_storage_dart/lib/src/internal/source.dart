@@ -18,6 +18,7 @@ class BufferSource implements Source {
 
   @override
   Future<Uint8List> read(int offset, int length) async {
-    return data.buffer.asUint8List(offset, length);
+    final actualLength = length.clamp(0, data.lengthInBytes - offset);
+    return data.buffer.asUint8List(offset, actualLength);
   }
 }

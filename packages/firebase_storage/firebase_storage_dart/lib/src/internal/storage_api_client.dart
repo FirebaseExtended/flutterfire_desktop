@@ -1,5 +1,18 @@
 part of firebase_storage_dart;
 
+class Signal {
+  late final void Function() _onDispose;
+  bool _isDisposed = false;
+
+  void onReceive(void Function() callback) {
+    _onDispose = callback;
+  }
+
+  void send() {
+    _onDispose();
+  }
+}
+
 class StorageApiClient {
   final String bucket;
   late HttpClient client;
@@ -129,7 +142,7 @@ class StorageApiClient {
         'X-Goog-Upload-Protocol': 'resumable',
       },
       queryParameters: {
-        'name': Uri.encodeComponent(fullPath),
+        'name': fullPath,
       },
       bodyBytes: utf8.encode(json.encode({
         'contentType': contentType,
@@ -142,13 +155,13 @@ class StorageApiClient {
       throw FirebaseStorageException._fromHttpStatusCode(res.statusCode);
     }
 
-    final url = res.headers['x-goog-upload-url'];
+    final uploadId = res.headers['x-gupload-uploadid'];
 
-    if (url == null) {
+    if (uploadId == null) {
       throw FirebaseStorageException._unknown();
     }
 
-    return url;
+    return uploadId;
   }
 
   Future<void> uploadChunk({
@@ -157,7 +170,10 @@ class StorageApiClient {
     required int offset,
     required Uint8List data,
     bool finalize = false,
+    Signal? cancelSignal,
   }) async {
+    cancelSignal?.onReceive(client._rawHttpClient.close);
+
     await client.post(
       queryParameters: {
         'name': name,

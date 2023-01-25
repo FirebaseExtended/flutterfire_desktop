@@ -3,10 +3,10 @@ part of firebase_storage_dart;
 class HttpClient {
   final Uri baseUri;
   static final Map<String, HttpClient> _requests = {};
-  late final http.Client _client;
+  late final http.Client _rawHttpClient;
 
   HttpClient._(this.baseUri) {
-    _client = http.Client();
+    _rawHttpClient = http.Client();
   }
 
   factory HttpClient(Uri baseUri) {
@@ -49,7 +49,7 @@ class HttpClient {
     }
 
     return await asyncGuard(() async {
-      final streamedRes = await _client.send(req);
+      final streamedRes = await _rawHttpClient.send(req);
       final res = await http.Response.fromStream(streamedRes);
 
       if (res.statusCode ~/ 100 != 2) {
@@ -164,6 +164,6 @@ class HttpClient {
 
   void dispose() {
     final key = baseUri.toString();
-    _requests[key]?._client.close();
+    _requests[key]?._rawHttpClient.close();
   }
 }

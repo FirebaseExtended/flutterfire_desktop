@@ -133,16 +133,16 @@ class _MultipartUploadTask implements UploadTask {
   Future<S> then<S>(
     FutureOr<S> Function(TaskSnapshot p1) onValue, {
     Function? onError,
-  }) {
-    return _completer.future.then(onValue, onError: onError);
+  }) async {
+    return await _completer.future.then(onValue, onError: onError);
   }
 
   @override
   Future<TaskSnapshot> timeout(
     Duration timeLimit, {
     FutureOr<TaskSnapshot> Function()? onTimeout,
-  }) {
-    return _completer.future.timeout(timeLimit, onTimeout: onTimeout);
+  }) async {
+    return await _completer.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
@@ -170,12 +170,7 @@ class _MultipartUploadTask implements UploadTask {
 
 class _ChunkedUploadTask extends UploadTask {
   final _controller = StreamController<TaskSnapshot>.broadcast();
-  late final _subscription = _controller.stream.listen(
-    _onSnapshot,
-    onDone: _onDone,
-    onError: _onError,
-    cancelOnError: true,
-  );
+  late final StreamSubscription<TaskSnapshot> _subscription;
 
   final Completer<TaskSnapshot> _completer = Completer<TaskSnapshot>();
 
@@ -188,6 +183,8 @@ class _ChunkedUploadTask extends UploadTask {
   late String _uploadId;
   int _offset = 0;
   int _chunkSize = _chunkedUploadBaseChunkSize;
+
+  Signal _cancelSignal = Signal();
 
   @override
   TaskSnapshot get snapshot => _snapshot;
@@ -203,12 +200,18 @@ class _ChunkedUploadTask extends UploadTask {
     this._source, [
     this._metadata,
   ]) {
+    _subscription = _controller.stream.listen(
+      _onSnapshot,
+      onDone: _onDone,
+      onError: _onError,
+    );
+
     _startUpload();
   }
 
   @override
   Stream<TaskSnapshot> asStream() {
-    return _completer.future.asStream();
+    return _controller.stream;
   }
 
   @override
@@ -237,18 +240,18 @@ class _ChunkedUploadTask extends UploadTask {
 
   @override
   Future<bool> pause() {
-    if (snapshot.state == TaskState.paused) {
-      return Future.value(false);
+    if (snapshot.state == TaskState.running) {
+      _currentSnapshot = TaskSnapshot._(
+        ref: _ref,
+        bytesTransferred: snapshot.bytesTransferred,
+        totalBytes: snapshot.totalBytes,
+        state: TaskState.paused,
+      );
+
+      return Future.value(true);
     }
 
-    _currentSnapshot = TaskSnapshot._(
-      ref: _ref,
-      bytesTransferred: snapshot.bytesTransferred,
-      totalBytes: snapshot.totalBytes,
-      state: TaskState.paused,
-    );
-
-    return Future.value(true);
+    return Future.value(false);
   }
 
   @override
@@ -271,7 +274,8 @@ class _ChunkedUploadTask extends UploadTask {
   }
 
   @override
-  Stream<TaskSnapshot> get snapshotEvents => _controller.stream;
+  Stream<TaskSnapshot> get snapshotEvents =>
+      _controller.stream.asBroadcastStream();
 
   @override
   FirebaseStorage get storage => throw UnimplementedError();
@@ -298,12 +302,14 @@ class _ChunkedUploadTask extends UploadTask {
   }
 
   void _startUpload() {
-    _currentSnapshot = TaskSnapshot._(
-      ref: _ref,
-      bytesTransferred: 0,
-      totalBytes: _source.getTotalSize(),
-      state: TaskState.running,
-    );
+    Future.microtask(() {
+      _currentSnapshot = TaskSnapshot._(
+        ref: _ref,
+        bytesTransferred: 0,
+        totalBytes: _source.getTotalSize(),
+        state: TaskState.running,
+      );
+    });
   }
 
   void _onSnapshot(TaskSnapshot snapshot) {
@@ -315,12 +321,14 @@ class _ChunkedUploadTask extends UploadTask {
         break;
 
       case TaskState.canceled:
+        _cancelSignal.send();
+
         final errorCode = StorageErrorCode.canceled;
         _controller.addError(errorCode);
         break;
 
       case TaskState.paused:
-        // TODO:
+        _cancelSignal.send();
         break;
 
       case TaskState.running:
@@ -330,15 +338,11 @@ class _ChunkedUploadTask extends UploadTask {
   }
 
   void _onDone() {
-    if (!_completer.isCompleted) {
-      _completer.complete(snapshot);
-    }
+    _completer.complete(snapshot);
   }
 
   void _onError(error) {
-    if (!_completer.isCompleted) {
-      _completer.completeError(error);
-    }
+    _completer.completeError(error);
   }
 
   void _handleRunning(TaskSnapshot snapshot) {
@@ -352,7 +356,7 @@ class _ChunkedUploadTask extends UploadTask {
           .then(_receiveUploadId)
           .catchError(_controller.addError);
     } else if (snapshot.bytesTransferred != snapshot.totalBytes) {
-      _uploadNextChunk();
+      Future.microtask(() => _uploadNextChunk());
     } else {
       _currentSnapshot = TaskSnapshot._(
         ref: _ref,
@@ -369,30 +373,35 @@ class _ChunkedUploadTask extends UploadTask {
   }
 
   Future<void> _uploadNextChunk() async {
-    final chunkSize = (_chunkSize * 2).clamp(
+    final chunkSize = _chunkSize.clamp(
       _chunkedUploadBaseChunkSize,
       _uploadChunkMaxSize,
     );
 
     try {
       final data = await _source.read(_offset, chunkSize);
-      final isFinalChunk = _offset + data.length == _source.getTotalSize();
+      final isFinalChunk = data.length < chunkSize ||
+          _offset + data.length == _source.getTotalSize();
 
       void onSuccess(_) {
-        _offset += data.length;
-        _chunkSize = chunkSize;
+        if (snapshot.state == TaskState.running) {
+          _offset += data.length;
+          _chunkSize = chunkSize * 2;
 
-        _snapshot = TaskSnapshot._(
-          ref: _ref,
-          bytesTransferred: _offset + data.length,
-          totalBytes: _source.getTotalSize(),
-          state: isFinalChunk ? TaskState.success : TaskState.running,
-        );
+          _currentSnapshot = TaskSnapshot._(
+            ref: _ref,
+            bytesTransferred: _offset,
+            totalBytes: _source.getTotalSize(),
+            state: isFinalChunk ? TaskState.success : TaskState.running,
+          );
+        }
       }
 
       void onError(err) {
         _controller.addError(err);
       }
+
+      _cancelSignal = Signal();
 
       _ref.storage._apiClient
           .uploadChunk(
@@ -401,6 +410,7 @@ class _ChunkedUploadTask extends UploadTask {
             offset: _offset,
             data: data,
             finalize: isFinalChunk,
+            cancelSignal: _cancelSignal,
           )
           .then(onSuccess)
           .catchError(onError);
