@@ -96,11 +96,34 @@ class StorageApiClient {
     return _buildDownloadURL(metadata, fullPath).toString();
   }
 
+  Future<Uint8List> getData(Uri uri) async {
+    final res = await client._rawHttpClient.get(uri);
+    return res.bodyBytes;
+  }
+
+  Future<Stream<List<int>>> getStreamedData(
+    Uri uri, {
+    int? offset,
+    Signal? cancelSignal,
+  }) async {
+    final req = http.Request('GET', uri);
+    if (offset != null) {
+      req.headers['Range'] = 'bytes=$offset-';
+    }
+
+    cancelSignal?.onReceive(client._rawHttpClient.close);
+
+    final res = await client._rawHttpClient.send(req);
+
+    return res.stream;
+  }
+
   Future<Map<String, dynamic>> uploadMultipart(
     String fullPath,
-    Uint8List data, [
+    Uint8List data, {
     SettableMetadata? metadata,
-  ]) async {
+    Signal? cancelSignal,
+  }) async {
     final metadataJson = metadata?.asMap() ?? {};
 
     final builder = MultipartBuilder()
@@ -114,6 +137,8 @@ class StorageApiClient {
       );
 
     final content = builder.buildContent();
+
+    cancelSignal?.onReceive(client._rawHttpClient.close);
 
     final res = await client.post(
       headers: {

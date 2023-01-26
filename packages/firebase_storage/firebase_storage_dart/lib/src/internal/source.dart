@@ -7,7 +7,6 @@ abstract class Source {
 
 class BufferSource implements Source {
   final ByteData data;
-  int cursor = 0;
 
   BufferSource(this.data);
 
@@ -20,5 +19,28 @@ class BufferSource implements Source {
   Future<Uint8List> read(int offset, int length) async {
     final actualLength = length.clamp(0, data.lengthInBytes - offset);
     return data.buffer.asUint8List(offset, actualLength);
+  }
+}
+
+class FileSource implements Source {
+  final Future<RandomAccessFile> _raf;
+  int _size;
+
+  FileSource(File file, this._size) : _raf = file.open();
+
+  @override
+  int getTotalSize() => _size;
+
+  @override
+  Future<Uint8List> read(int offset, int length) async {
+    final f = await _raf;
+    final actualLength = length.clamp(0, _size - offset);
+
+    final buffer = Uint8List(actualLength);
+
+    await f.setPosition(offset);
+    await f.readInto(buffer);
+
+    return buffer;
   }
 }

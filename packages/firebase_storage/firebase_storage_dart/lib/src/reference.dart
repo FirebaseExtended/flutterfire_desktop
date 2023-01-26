@@ -73,7 +73,7 @@ class Reference {
 
   Future<FullMetadata> getMetadata() async {
     final json = await storage._apiClient.getMetadata(fullPath);
-    return FullMetadata._fromJson(json);
+    return FullMetadata._fromJson(json, fullPath);
   }
 
   Future<ListResult> list([ListOptions? options]) async {
@@ -105,26 +105,14 @@ class Reference {
 
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
     final metadata = await storage._apiClient.getMetadata(fullPath);
-    final size = metadata['size'] as int;
+    final size = int.parse(metadata['size']);
 
     if (size > maxSize) {
       return null;
     }
 
     final uri = storage._apiClient._buildDownloadURL(metadata, fullPath);
-    try {
-      final res = await http.get(uri);
-
-      if (res.statusCode == 200) {
-        return res.bodyBytes;
-      } else {
-        throw FirebaseStorageException._fromHttpStatusCode(res.statusCode);
-      }
-    } on FirebaseStorageException {
-      rethrow;
-    } catch (e, stackTrace) {
-      throw FirebaseStorageException._unknown(stackTrace);
-    }
+    return await storage._apiClient.getData(uri);
   }
 
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {
@@ -137,8 +125,19 @@ class Reference {
   }
 
   UploadTask putFile(File file, [SettableMetadata? metadata]) {
-    // TODO:
-    throw UnimplementedError();
+    final size = file.lengthSync();
+
+    if (size <= _chunkedUploadBaseChunkSize) {
+      return _MultipartUploadTask._(
+        this,
+        fullPath,
+        file.readAsBytesSync(),
+        metadata,
+      );
+    } else {
+      final source = FileSource(file, size);
+      return _ChunkedUploadTask._(this, fullPath, source, metadata);
+    }
   }
 
   UploadTask putString(
@@ -186,7 +185,7 @@ class Reference {
 
   // TODO:
   DownloadTask writeToFile(File file) {
-    throw UnimplementedError();
+    return _DownloadTask(this, fullPath, file);
   }
 
   @override

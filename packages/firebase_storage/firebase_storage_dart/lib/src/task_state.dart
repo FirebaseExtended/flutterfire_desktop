@@ -10,17 +10,21 @@ part of firebase_storage_dart;
 /// The state can be accessed directly via a [TaskSnapshot].
 enum TaskState {
   /// Indicates the task has been paused by the user.
-  paused,
+  paused(false),
 
   /// Indicates the task is currently in-progress.
-  running,
+  running(false),
 
   /// Indicates the task has successfully completed.
-  success,
+  success(true),
 
   /// Indicates the task was canceled.
-  canceled,
+  canceled(true),
 
   /// Indicates the task failed with an error.
-  error,
+  error(true);
+
+  const TaskState(this._isFinal);
+
+  final bool _isFinal;
 }
