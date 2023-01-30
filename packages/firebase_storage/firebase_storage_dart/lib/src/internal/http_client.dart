@@ -43,7 +43,7 @@ class HttpClient {
     final req = http.Request(method, uri);
 
     if (_authToken != null) {
-      headers = headers ?? {};
+      headers ??= {};
       headers.addAll({'Authorization': 'Firebase $_authToken'});
     }
 
