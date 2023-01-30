@@ -3,6 +3,8 @@ part of firebase_storage_dart;
 class HttpClient {
   final Uri baseUri;
   static final Map<String, HttpClient> _requests = {};
+  static String? _authToken;
+
   late final http.Client _rawHttpClient;
 
   HttpClient._(this.baseUri) {
@@ -39,6 +41,11 @@ class HttpClient {
     );
 
     final req = http.Request(method, uri);
+
+    if (_authToken != null) {
+      headers = headers ?? {};
+      headers.addAll({'Authorization': 'Firebase $_authToken'});
+    }
 
     if (headers != null) {
       req.headers.addAll(headers);
@@ -165,5 +172,6 @@ class HttpClient {
   void dispose() {
     final key = baseUri.toString();
     _requests[key]?._rawHttpClient.close();
+    _requests[key] = HttpClient._(baseUri);
   }
 }

@@ -44,6 +44,10 @@ class StorageApiClient {
     return emulatorUri;
   }
 
+  set _idToken(String token) {
+    HttpClient._authToken = token;
+  }
+
   Future<void> delete(String fullPath) async {
     await client.delete(pathSegments: [Uri.encodeComponent(fullPath)]);
   }
