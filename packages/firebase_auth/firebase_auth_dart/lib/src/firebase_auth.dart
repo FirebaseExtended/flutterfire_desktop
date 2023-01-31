@@ -20,7 +20,9 @@ class FirebaseAuth {
     _changeController = StreamController<User?>.broadcast(sync: true);
 
     if (_localUser() != null) {
-      _currentUser = User(_localUser()!, this);
+      final userMap = _localUser()!;
+      _currentUser = User(userMap, this);
+      firebasePluginPublish(Topics.currentUser(app), userMap);
     }
   }
 
@@ -109,13 +111,23 @@ class FirebaseAuth {
 
   /// Helper method to update currentUser and events.
   @protected
-  void _updateCurrentUserAndEvents(User? user,
-      [bool authStateChanged = false]) {
+  void _updateCurrentUserAndEvents(
+    User? user, [
+    bool authStateChanged = false,
+  ]) {
+    final userMap = user?.toMap();
+
     _userStorage.addAll({
       '${app.options.apiKey}:${app.name}': {
-        'currentUser': user?.toMap(),
+        'currentUser': userMap,
       },
     });
+
+    // allows other plugins to receive an auth update
+    firebasePluginPublish(
+      Topics.currentUser(app),
+      userMap,
+    );
 
     _currentUser = user;
 

@@ -7,6 +7,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
+import 'package:firebase_core_dart/ipc.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 

@@ -23,6 +23,11 @@ class FirebaseStorage {
     this.bucket = 'gs://$_bucketName';
 
     _apiClient = StorageApiClient(_bucketName, _emulatorUri);
+
+    firebasePluginSubscribe(Topics.currentUser(app), (message) {
+      final idToken = message['idToken'];
+      _apiClient._idToken = idToken;
+    });
   }
 
   static FirebaseStorage get instance => instanceFor(app: Firebase.app());
