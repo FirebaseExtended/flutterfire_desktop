@@ -73,7 +73,7 @@ class Reference {
 
   Future<FullMetadata> getMetadata() async {
     final json = await storage._apiClient.getMetadata(fullPath);
-    return FullMetadata._fromJson(json, fullPath);
+    return FullMetadata._fromJson(json);
   }
 
   Future<ListResult> list([ListOptions? options]) async {
@@ -178,12 +178,11 @@ class Reference {
     return putData(bytes, newMetadata);
   }
 
-  // TODO:
-  Future<FullMetadata> updateMetadata(SettableMetadata metadata) {
-    throw UnimplementedError();
+  Future<FullMetadata> updateMetadata(SettableMetadata metadata) async {
+    final resJson = await storage._apiClient.updateMetadata(fullPath, metadata);
+    return FullMetadata._fromJson(resJson);
   }
 
-  // TODO:
   DownloadTask writeToFile(File file) {
     return _DownloadTask(this, fullPath, file);
   }

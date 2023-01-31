@@ -59,7 +59,7 @@ class HttpClient {
       final streamedRes = await _rawHttpClient.send(req);
       final res = await http.Response.fromStream(streamedRes);
 
-      if (res.statusCode ~/ 100 != 2) {
+      if (res.statusCode ~/ 100 == 4) {
         throw FirebaseStorageException._fromHttpStatusCode(
           res.statusCode,
           StackTrace.current,

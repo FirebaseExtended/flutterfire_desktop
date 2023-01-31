@@ -24,7 +24,7 @@ class BufferSource implements Source {
 
 class FileSource implements Source {
   final Future<RandomAccessFile> _raf;
-  int _size;
+  final int _size;
 
   FileSource(File file, this._size) : _raf = file.open();
 

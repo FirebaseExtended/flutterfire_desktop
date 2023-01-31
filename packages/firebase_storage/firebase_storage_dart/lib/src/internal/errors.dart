@@ -33,7 +33,8 @@ enum StorageErrorCode {
   ),
   invalidChecksum(
     'invalid-checksum',
-    'File on the client does not match the checksum of the file received by the server.',
+    'File on the client does not match the checksum of the file received by '
+        'the server.',
   ),
   canceled('canceled', 'User cancelled the operation.');
 
@@ -80,9 +81,16 @@ class FirebaseStorageException extends FirebaseException {
           StorageErrorCode.unauthenticated,
           stackTrace,
         );
+
       case 403:
         return FirebaseStorageException._fromCode(
           StorageErrorCode.unauthorized,
+          stackTrace,
+        );
+
+      case 404:
+        return FirebaseStorageException._fromCode(
+          StorageErrorCode.objectNotFound,
           stackTrace,
         );
 

@@ -26,5 +26,6 @@ enum TaskState {
 
   const TaskState(this._isFinal);
 
+  /// Indicates that no more state transitions will occur.
   final bool _isFinal;
 }

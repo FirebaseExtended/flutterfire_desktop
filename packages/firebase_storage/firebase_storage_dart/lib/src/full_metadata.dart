@@ -37,17 +37,20 @@ class FullMetadata {
     this.updated,
   });
 
-  factory FullMetadata._fromJson(Map<String, dynamic> json, String fullPath) {
+  factory FullMetadata._fromJson(Map<String, dynamic> json) {
+    final fullPath = json['name'] as String;
+    final name = basename(fullPath);
+
     return FullMetadata._(
       fullPath: fullPath,
-      name: json['name'] as String,
+      name: name,
       bucket: json['bucket'] as String?,
       cacheControl: json['cacheControl'] as String?,
       contentDisposition: json['contentDisposition'] as String?,
       contentEncoding: json['contentEncoding'] as String?,
       contentLanguage: json['contentLanguage'] as String?,
       contentType: json['contentType'] as String?,
-      customMetadata: json['customMetadata'] as Map<String, String>? ?? {},
+      customMetadata: (json['metadata'] as Map? ?? {}).cast<String, String>(),
       generation: json['generation'] as String?,
       md5Hash: json['md5Hash'] as String?,
       metageneration: json['metageneration'] as String?,

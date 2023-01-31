@@ -48,7 +48,7 @@ class SettableMetadata {
       'contentEncoding': contentEncoding,
       'contentLanguage': contentLanguage,
       'contentType': contentType,
-      'customMetadata': customMetadata,
+      'metadata': customMetadata,
     };
   }
 }

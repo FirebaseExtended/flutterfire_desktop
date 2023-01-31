@@ -2,7 +2,6 @@ part of firebase_storage_dart;
 
 class Signal {
   late final void Function() _onDispose;
-  bool _isDisposed = false;
 
   void onReceive(void Function() callback) {
     _onDispose = callback;
@@ -75,6 +74,29 @@ class StorageApiClient {
 
   Future<Map<String, dynamic>> getMetadata(String fullPath) async {
     final res = await client.get(pathSegments: [Uri.encodeComponent(fullPath)]);
+    return json.decode(res.body);
+  }
+
+  Future<Map<String, dynamic>> updateMetadata(
+    String fullPath,
+    SettableMetadata metadata,
+  ) async {
+    final bodyMap = {
+      for (var entry in metadata.asMap().entries)
+        if (entry.value != null) entry.key: entry.value,
+    };
+
+    final body = json.encode(bodyMap);
+    final bodyBytes = utf8.encode(body);
+
+    final res = await client.patch(
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      pathSegments: [Uri.encodeComponent(fullPath)],
+      bodyBytes: bodyBytes,
+    );
+
     return json.decode(res.body);
   }
 

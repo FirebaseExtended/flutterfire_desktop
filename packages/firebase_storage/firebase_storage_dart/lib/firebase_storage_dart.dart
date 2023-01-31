@@ -10,6 +10,7 @@ import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_core_dart/ipc.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
+import 'package:path/path.dart';
 
 part 'src/internal/source.dart';
 part 'src/internal/errors.dart';
