@@ -61,7 +61,33 @@ class FullMetadata {
           : DateTime.parse(json['timeCreated'] as String),
       updated: json['updated'] == null
           ? null
-          : DateTime.parse(json['timeCreated'] as String),
+          : DateTime.parse(json['updated'] as String),
     );
+  }
+
+  /// Platform interface representation of the metadata.
+  /// Resulting map should only be used by the platform interface.
+  /// It is not to be used by [FullMetadata._fromJson]
+  Map<String, dynamic> asMap() {
+    return {
+      'bucket': bucket,
+      'cacheControl': cacheControl,
+      'contentDisposition': contentDisposition,
+      'contentEncoding': contentEncoding,
+      'contentLanguage': contentLanguage,
+      'contentType': contentType,
+      'customMetadata': customMetadata,
+      'fullPath': fullPath,
+      'generation': generation,
+      'metadataGeneration': metadataGeneration,
+      'md5Hash': md5Hash,
+      'metageneration': metageneration,
+      'name': name,
+      'size': size,
+      'creationTimeMillis':
+          timeCreated == null ? null : timeCreated!.millisecondsSinceEpoch,
+      'updatedTimeMillis':
+          updated == null ? null : updated!.millisecondsSinceEpoch,
+    };
   }
 }

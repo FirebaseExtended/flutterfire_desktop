@@ -10,7 +10,7 @@ dependencies:
   firebase_core_dart: ^1.0.1
   http: ^0.13.5
   mime: ^1.0.4
-  path: ^1.8.3
+  path: ^1.8.2
 
 dev_dependencies:
   lints: ^2.0.0

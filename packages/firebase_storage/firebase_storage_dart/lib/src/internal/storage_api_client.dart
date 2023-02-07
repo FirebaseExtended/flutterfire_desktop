@@ -64,7 +64,7 @@ class StorageApiClient {
 
     final res = await client.get(
       queryParameters: {
-        'prefix': Uri.encodeFull(prefix),
+        'prefix': prefix,
         'delimiter': Uri.encodeFull('/'),
       },
     );

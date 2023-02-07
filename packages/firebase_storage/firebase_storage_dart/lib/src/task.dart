@@ -9,7 +9,7 @@ part of firebase_storage_dart;
 abstract class Task implements Future<TaskSnapshot> {
   final Reference _ref;
   final String _fullPath;
-  late Completer<TaskSnapshot> _completer;
+  final Completer<TaskSnapshot> _completer = Completer<TaskSnapshot>();
 
   /// The latest [TaskSnapshot] for this task.
   late TaskSnapshot snapshot;
@@ -99,8 +99,8 @@ abstract class _ProgressEvents {
   final _controller = StreamController<TaskSnapshot>.broadcast();
   late final StreamSubscription<TaskSnapshot> _subscription;
 
+  Completer<TaskSnapshot> get _completer;
   Reference get _ref;
-  final Completer<TaskSnapshot> _completer = Completer<TaskSnapshot>();
   Signal get _cancelSignal;
 
   late TaskSnapshot _snapshot;
@@ -258,7 +258,7 @@ class _MultipartUploadTask extends UploadTask {
         cancelSignal: _cancelSignal,
       );
 
-      final snapshot = TaskSnapshot._(
+      snapshot = TaskSnapshot._(
         ref: _ref,
         bytesTransferred: data.length,
         totalBytes: data.length,

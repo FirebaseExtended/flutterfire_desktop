@@ -9,9 +9,9 @@ class FirebaseStorage {
 
   static Uri? _emulatorUri;
 
-  Duration _maxOperationRetryTime = const Duration(minutes: 2);
-  Duration _maxUploadRetryTime = const Duration(minutes: 10);
-  Duration _maxDownloadRetryTime = const Duration(minutes: 10);
+  int _maxOperationRetryTime = const Duration(minutes: 2).inMilliseconds;
+  int _maxUploadRetryTime = const Duration(minutes: 10).inMilliseconds;
+  int _maxDownloadRetryTime = const Duration(minutes: 10).inMilliseconds;
 
   FirebaseStorage._({required this.app, String? bucket}) {
     assert(bucket != null || app.options.storageBucket != null);
@@ -37,27 +37,27 @@ class FirebaseStorage {
     return _instances[app] ??= FirebaseStorage._(app: app);
   }
 
-  Duration get maxOperationRetryTime {
+  int get maxOperationRetryTime {
     return _maxOperationRetryTime;
   }
 
-  Duration get maxUploadRetryTime {
+  int get maxUploadRetryTime {
     return _maxUploadRetryTime;
   }
 
-  Duration get maxDownloadRetryTime {
+  int get maxDownloadRetryTime {
     return _maxDownloadRetryTime;
   }
 
-  void setMaxOperationRetryTime(Duration time) {
+  void setMaxOperationRetryTime(int time) {
     _maxOperationRetryTime = time;
   }
 
-  void setMaxUploadRetryTime(Duration time) {
+  void setMaxUploadRetryTime(int time) {
     _maxUploadRetryTime = time;
   }
 
-  void setMaxDownloadRetryTime(Duration time) {
+  void setMaxDownloadRetryTime(int time) {
     _maxDownloadRetryTime = time;
   }
 
