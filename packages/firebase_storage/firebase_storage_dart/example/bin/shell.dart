@@ -1,69 +1,74 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
+import 'dart:async';
 
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_storage_dart/firebase_storage_dart.dart';
 import 'package:firebase_storage_dart_example/firebase_options.dart';
 
-void main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   await Firebase.initializeApp(options: firebaseOptions);
+  await FirebaseAuth.instance.useAuthEmulator();
   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+
+  if (FirebaseAuth.instance.currentUser != null) {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  await FirebaseAuth.instance.signInAnonymously();
 
   final storage = FirebaseStorage.instance;
 
   try {
-    final value = await storage.ref('flutter-tests').list();
-    print(value.prefixes.map((e) => e.name));
-    print(value.items.map((e) => e.name));
+    final ref = storage.ref('protected/large.mov');
+    final newMeta = await ref.updateMetadata(SettableMetadata(
+      customMetadata: {'test': 'test'},
+    ));
 
-    final downloadUrl = await value.items[0].getDownloadURL();
-    print(downloadUrl);
+    print(newMeta);
   } catch (err) {
     print(err);
   }
 
-  try {
-    final snapshot = await storage
-        .ref('writeOnly.txt')
-        .putData(Uint8List.fromList(utf8.encode('hello world')));
+  // try {
+  //   final snapshot = await storage
+  //       .ref('writeOnly.txt')
+  //       .putData(Uint8List.fromList(utf8.encode('hello world')));
 
-    print(snapshot);
-  } catch (err) {
-    print(err);
-  }
+  //   print(snapshot);
+  // } catch (err) {
+  //   print(err);
+  // }
 
-  try {
-    await storage.ref('forbidden.txt').putString('can I write this?');
-    print('Should never be called');
-    exit(-1);
-  } catch (err) {
-    print(err);
-  }
+  // try {
+  //   await storage.ref('forbidden.txt').putString('can I write this?');
+  //   print('Should never be called');
+  //   exit(-1);
+  // } catch (err) {
+  //   print(err);
+  // }
 
-  final jsonMeta = SettableMetadata(contentType: 'application/json');
+  // final jsonMeta = SettableMetadata(contentType: 'application/json');
 
-  try {
-    final snapshot = await storage
-        .ref('flutter-tests/test-string.json')
-        .putString('{"test": "test"}', metadata: jsonMeta);
+  // try {
+  //   final snapshot = await storage
+  //       .ref('flutter-tests/test-string.json')
+  //       .putString('{"test": "test"}', metadata: jsonMeta);
 
-    print(snapshot);
-  } catch (err) {
-    print(err);
-  }
+  //   print(snapshot);
+  // } catch (err) {
+  //   print(err);
+  // }
 
-  try {
-    final snapshot = await storage
-        .ref('flutter-tests/test-string.json')
-        .putData(Uint8List.fromList(utf8.encode('{"test": "test"}')), jsonMeta);
+  // try {
+  //   final snapshot = await storage
+  //       .ref('flutter-tests/test-string.json')
+  //       .putData(Uint8List.fromList(utf8.encode('{"test": "test"}')), jsonMeta);
 
-    print(snapshot);
-  } catch (err) {
-    print(err);
-  }
+  //   print(snapshot);
+  // } catch (err) {
+  //   print(err);
+  // }
 
-  // final storage = FirebaseStorage.instance;
   // final shell = StorageShell(storage, storage.ref('/'));
   // stdout.write(shell);
 

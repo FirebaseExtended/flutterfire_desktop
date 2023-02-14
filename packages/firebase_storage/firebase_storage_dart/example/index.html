@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Firebase Storage Web Example</title>
+  </head>
+
+  <body></body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      signOut,
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import {
+      getStorage,
+      ref,
+      list,
+      connectStorageEmulator,
+      getMetadata,
+      getDownloadURL,
+      deleteObject,
+      uploadBytesResumable,
+      uploadString,
+      uploadBytes,
+      updateMetadata,
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7wZb2tO1-Fs6GbDADUSTs2Qs3w08Hovw",
+      authDomain: "flutterfire-e2e-tests.firebaseapp.com",
+      databaseURL:
+        "https://flutterfire-e2e-tests-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "flutterfire-e2e-tests",
+      storageBucket: "flutterfire-e2e-tests.appspot.com",
+      messagingSenderId: "406099696497",
+      appId: "1:406099696497:web:87e25e51afe982cd3574d0",
+      measurementId: "G-JN95N1JV2E",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const auth = getAuth();
+
+    await signOut(auth);
+    await signInAnonymously(auth);
+
+    connectStorageEmulator(storage, "localhost", 9199);
+    const kref = ref(storage, "protected/large.mov");
+
+    updateMetadata(kref, {
+      customMetadata: {
+        "my-custom-metadata": "my-custom-value",
+      },
+    });
+
+    console.log(files);
+  </script>
+
+  <button>Upload</button>
+</html>

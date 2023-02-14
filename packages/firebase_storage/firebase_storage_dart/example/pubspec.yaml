@@ -3,13 +3,17 @@ description: A sample command-line application.
 version: 1.0.0
 # homepage: https://www.example.com
 
+publish_to: none
+
 environment:
   sdk: ">=2.18.2 <3.0.0"
 
 dependencies:
   path: ^1.8.3
-  firebase_core_dart: ^0.0.1
-  firebase_storage_dart: ^0.0.1
+  firebase_core_dart: ^1.0.1
+  firebase_auth_dart:  ^1.0.1
+  firebase_storage_dart:
+    path: ../
 
 dev_dependencies:
   lints: ^2.0.0
