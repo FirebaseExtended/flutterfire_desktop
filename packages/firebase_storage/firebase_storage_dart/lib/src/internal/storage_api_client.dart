@@ -66,6 +66,9 @@ class StorageApiClient {
       queryParameters: {
         'prefix': prefix,
         'delimiter': Uri.encodeFull('/'),
+        if (options?.maxResults != null)
+          'maxResults': options!.maxResults.toString(),
+        if (options?.pageToken != null) 'pageToken': options!.pageToken,
       },
     );
 

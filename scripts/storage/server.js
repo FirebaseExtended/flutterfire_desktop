@@ -57,6 +57,30 @@ server.addMethod("verifyMD5Hash", async ({ path, hash }) => {
   }
 });
 
+server.addMethod("putString", async ({ path, content }) => {
+  const file = bucket.file(path);
+  await file.save(content);
+});
+
+server.addMethod("verifyExists", async ({ path }) => {
+  const file = bucket.file(path);
+  const [exists] = await file.exists();
+  if (!exists) {
+    throw new Error(`File ${path} does not exist`);
+  }
+});
+
+server.addMethod("putMetadata", async ({ path, metadata }) => {
+  const file = bucket.file(path);
+  await file.setMetadata(metadata);
+});
+
+server.addMethod("getMetadata", async ({ path }) => {
+  const file = bucket.file(path);
+  const [metadata] = await file.getMetadata();
+  return metadata;
+});
+
 const app = express();
 app.use(bodyParser.json());
 

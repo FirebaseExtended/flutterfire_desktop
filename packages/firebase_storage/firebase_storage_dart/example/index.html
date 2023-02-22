@@ -47,15 +47,17 @@
     await signInAnonymously(auth);
 
     connectStorageEmulator(storage, "localhost", 9199);
-    const kref = ref(storage, "protected/large.mov");
 
-    updateMetadata(kref, {
-      customMetadata: {
-        "my-custom-metadata": "my-custom-value",
-      },
+    const storageRef = ref(storage, "/");
+
+    list(storageRef, { maxResults: 10 }).then((res) => {
+      console.log(res);
+      list(storageRef, { maxResults: 10, pageToken: res.nextPageToken }).then(
+        (res) => {
+          console.log(res);
+        }
+      );
     });
-
-    console.log(files);
   </script>
 
   <button>Upload</button>

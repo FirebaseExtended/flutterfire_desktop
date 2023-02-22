@@ -42,8 +42,15 @@ dependencies:
 dev_dependencies:
   convert: ^3.1.1
   crypto: ^3.0.2
+  flutter_driver:
+    sdk: flutter
   flutter_test:
     sdk: flutter
+  http: ^0.13.5
+  integration_test:
+    sdk: flutter
+  json_rpc_2: ^3.0.2
+  stream_channel: ^2.1.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
