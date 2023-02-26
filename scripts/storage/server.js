@@ -1,12 +1,14 @@
 require("dotenv").config();
 
 const fs = require("fs");
+const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
 const { JSONRPCServer } = require("json-rpc-2.0");
 const { initializeApp } = require("firebase-admin/app");
 const { getStorage } = require("firebase-admin/storage");
 const { basename } = require("path");
+const { Throttle } = require("stream-throttle");
 
 const fbApp = initializeApp({
   storageBucket: "flutterfire-e2e-tests.appspot.com",
@@ -81,6 +83,13 @@ server.addMethod("getMetadata", async ({ path }) => {
   return metadata;
 });
 
+// Download/upload speed in bytes per second
+let rate = 1024 * 1024 * 2;
+
+server.addMethod("setSpeed", async ({ speed }) => {
+  rate = speed;
+});
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -92,6 +101,42 @@ app.post("/json-rpc", (req, res) => {
     } else {
       res.sendStatus(204);
     }
+  });
+});
+
+// proxy to firebase emulator
+app.use(async (req, res) => {
+  const options = {
+    hostname: "localhost",
+    port: 9199,
+    path: req.url,
+    method: req.method,
+    headers: req.headers,
+  };
+
+  const emulatorReq = http.request(options, (emulatorRes) => {
+    res.writeHead(emulatorRes.statusCode, emulatorRes.headers);
+
+    req.on("close", () => {
+      throttled.unpipe(res);
+      res.destroy();
+    });
+
+    const throttled = emulatorRes.pipe(new Throttle({ rate }));
+    throttled.pipe(res);
+  });
+
+  const reqPipe = req.pipe(new Throttle({ rate }));
+  reqPipe.pipe(emulatorReq);
+
+  req.on("close", () => {
+    reqPipe.unpipe(emulatorReq);
+    emulatorReq.destroy();
+  });
+
+  emulatorReq.on("error", (err) => {
+    reqPipe.unpipe(emulatorReq);
+    res.destroy();
   });
 });
 

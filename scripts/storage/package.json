@@ -14,6 +14,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "firebase-admin": "^11.5.0",
-    "json-rpc-2.0": "^1.5.1"
+    "json-rpc-2.0": "^1.5.1",
+    "stream-throttle": "^0.1.3"
   }
 }
