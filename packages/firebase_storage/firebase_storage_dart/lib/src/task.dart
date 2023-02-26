@@ -393,8 +393,6 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
   }
 }
 
-final _maxFiniteInt = double.maxFinite.toInt();
-
 class _DownloadTask extends DownloadTask with _ProgressEvents {
   @override
   Signal get _cancelSignal => Signal();
@@ -402,7 +400,7 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
   final File _file;
   late final IOSink _sink;
   int _offset = 0;
-  int _donwloadSize = _maxFiniteInt;
+  int _donwloadSize = -1;
   String? _downloadUrl;
 
   _DownloadTask(
@@ -457,7 +455,7 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
 
   Future<void> _startDownload() async {
     try {
-      if (_donwloadSize == _maxFiniteInt) {
+      if (_donwloadSize == -1) {
         final meta = await _ref.getMetadata();
         _donwloadSize = meta.size!;
       }

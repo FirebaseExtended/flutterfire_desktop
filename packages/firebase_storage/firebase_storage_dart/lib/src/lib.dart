@@ -8,14 +8,13 @@ import 'dart:typed_data';
 
 import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:firebase_core_dart/ipc.dart';
-import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 
 part 'internal/source.dart';
 part 'internal/errors.dart';
 part 'internal/storage_multipart_request_builder.dart';
-part 'internal/http_client.dart';
+part 'internal/retry_client.dart';
 part 'internal/storage_api_client.dart';
 part 'full_metadata.dart';
 part 'settable_metadata.dart';

@@ -1,20 +1,8 @@
 part of firebase_storage_dart;
 
-class Signal {
-  late final void Function() _onDispose;
-
-  void onReceive(void Function() callback) {
-    _onDispose = callback;
-  }
-
-  void send() {
-    _onDispose();
-  }
-}
-
 class StorageApiClient {
   final String bucket;
-  late HttpClient client;
+  late RetryClient client;
 
   StorageApiClient(this.bucket, [Uri? serviceUri]) {
     final defaultUri = Uri(
@@ -24,7 +12,7 @@ class StorageApiClient {
     );
 
     final uri = serviceUri ?? defaultUri;
-    client = HttpClient(uri);
+    client = RetryClient(uri);
   }
 
   Uri useEmulator(String host, int port) {
@@ -38,17 +26,20 @@ class StorageApiClient {
       pathSegments: pathSegments,
     );
 
-    client = HttpClient(emulatorUri);
+    client = RetryClient(emulatorUri);
 
     return emulatorUri;
   }
 
   set _idToken(String token) {
-    HttpClient._authToken = token;
+    RetryClient._authToken = token;
   }
 
   Future<void> delete(String fullPath) async {
-    await client.delete(pathSegments: [Uri.encodeComponent(fullPath)]);
+    await client.request(
+      method: HttpMethod.delete,
+      pathSegments: [Uri.encodeComponent(fullPath)],
+    );
   }
 
   Future<Map<String, dynamic>> list(
@@ -62,7 +53,8 @@ class StorageApiClient {
       prefix = '$path/';
     }
 
-    final res = await client.get(
+    final res = await client.request(
+      method: HttpMethod.get,
       queryParameters: {
         'prefix': prefix,
         'delimiter': Uri.encodeFull('/'),
@@ -76,7 +68,10 @@ class StorageApiClient {
   }
 
   Future<Map<String, dynamic>> getMetadata(String fullPath) async {
-    final res = await client.get(pathSegments: [Uri.encodeComponent(fullPath)]);
+    final res = await client.request(
+      method: HttpMethod.get,
+      pathSegments: [Uri.encodeComponent(fullPath)],
+    );
     return json.decode(res.body);
   }
 
@@ -92,7 +87,8 @@ class StorageApiClient {
     final body = json.encode(bodyMap);
     final bodyBytes = utf8.encode(body);
 
-    final res = await client.patch(
+    final res = await client.request(
+      method: HttpMethod.patch,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
@@ -126,7 +122,7 @@ class StorageApiClient {
   }
 
   Future<Uint8List> getData(Uri uri) async {
-    final res = await client._rawHttpClient.get(uri);
+    final res = await client.request(method: HttpMethod.get, uri: uri);
     return res.bodyBytes;
   }
 
@@ -135,16 +131,15 @@ class StorageApiClient {
     int? offset,
     Signal? cancelSignal,
   }) async {
-    final req = http.Request('GET', uri);
-    if (offset != null) {
-      req.headers['Range'] = 'bytes=$offset-';
-    }
+    final res = await client.request(
+      method: HttpMethod.get,
+      uri: uri,
+      headers: offset != null ? {'Range': 'bytes=$offset-'} : null,
+      cancelSignal: cancelSignal,
+      awaitBody: false,
+    );
 
-    cancelSignal?.onReceive(client._rawHttpClient.close);
-
-    final res = await client._rawHttpClient.send(req);
-
-    return res.stream;
+    return res.stream!;
   }
 
   Future<Map<String, dynamic>> uploadMultipart(
@@ -167,15 +162,15 @@ class StorageApiClient {
 
     final content = builder.buildContent();
 
-    cancelSignal?.onReceive(client._rawHttpClient.close);
-
-    final res = await client.post(
+    final res = await client.request(
+      method: HttpMethod.post,
       headers: {
         'Content-Type': 'multipart/related; boundary=${content.boundary}',
         'X-Goog-Upload-Protocol': 'multipart',
       },
       queryParameters: {'name': fullPath},
       bodyBytes: content.getBodyBytes(),
+      cancelSignal: cancelSignal,
     );
 
     return json.decode(res.body);
@@ -188,7 +183,8 @@ class StorageApiClient {
   }) async {
     final contentType = lookupMimeType(fullPath) ?? 'application/octet-stream';
 
-    final res = await client.post(
+    final res = await client.request(
+      method: HttpMethod.post,
       headers: {
         'X-Goog-Upload-Command': 'start',
         'X-Goog-Upload-Header-Content-Length': length.toString(),
@@ -209,7 +205,7 @@ class StorageApiClient {
       throw FirebaseStorageException._fromHttpStatusCode(res.statusCode);
     }
 
-    final uploadId = res.headers['x-gupload-uploadid'];
+    final uploadId = res.headers.value('x-gupload-uploadid');
 
     if (uploadId == null) {
       throw FirebaseStorageException._unknown();
@@ -226,9 +222,8 @@ class StorageApiClient {
     bool finalize = false,
     Signal? cancelSignal,
   }) async {
-    cancelSignal?.onReceive(client._rawHttpClient.close);
-
-    await client.post(
+    await client.request(
+      method: HttpMethod.post,
       queryParameters: {
         'name': name,
         'upload_id': uploadId,
@@ -239,6 +234,7 @@ class StorageApiClient {
         'X-Goog-Upload-Offset': offset.toString(),
       },
       bodyBytes: data,
+      cancelSignal: cancelSignal,
     );
   }
 }
