@@ -80,6 +80,8 @@ abstract class Task implements Future<TaskSnapshot> {
   }) {
     return _completer.future.timeout(timeLimit, onTimeout: onTimeout);
   }
+
+  final _cancelSignal = Signal();
 }
 
 const _uploadChunkMaxSize = 32 * 1024 * 1024;
@@ -210,7 +212,6 @@ abstract class _ProgressEvents {
 class _MultipartUploadTask extends UploadTask {
   final Uint8List data;
   final SettableMetadata? metadata;
-  final Signal _cancelSignal = Signal();
 
   _MultipartUploadTask._(
     super.ref,
@@ -281,9 +282,6 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
   int _chunkSize = _chunkedUploadBaseChunkSize;
 
   @override
-  Signal _cancelSignal = Signal();
-
-  @override
   Stream<TaskSnapshot> get snapshotEvents => _controller.stream;
 
   _ChunkedUploadTask._(
@@ -347,7 +345,8 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
           _offset + data.length == _source.getTotalSize();
 
       void onSuccess(_) {
-        // ignoring the response if task was canceled or paused.
+        _cancelSignal.dispose();
+
         if (snapshot.state != TaskState.running) return;
         _offset += data.length;
         _chunkSize = chunkSize * 2;
@@ -361,11 +360,11 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
       }
 
       void onError(err) {
+        _cancelSignal.dispose();
         if (snapshot.state != TaskState.running) return;
+
         _controller.addError(err);
       }
-
-      _cancelSignal = Signal();
 
       _ref.storage._apiClient
           .uploadChunk(
@@ -394,9 +393,6 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
 }
 
 class _DownloadTask extends DownloadTask with _ProgressEvents {
-  @override
-  Signal get _cancelSignal => Signal();
-
   final File _file;
   late final IOSink _sink;
   int _offset = 0;
@@ -448,6 +444,16 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
     return shouldResume;
   }
 
+  @override
+  Future<bool> cancel() async {
+    if (await super.cancel()) {
+      await _file.delete();
+      return true;
+    }
+
+    return false;
+  }
+
   void _handleError(Object error) {
     if (snapshot.state._isFinal) return;
     _controller.addError(error);
@@ -482,12 +488,13 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
         state: TaskState.running,
       );
 
-      dataStreamFuture.listen(
+      final sub = dataStreamFuture.listen(
         _receiveChunk,
         onError: _handleError,
-        onDone: _finalize,
         cancelOnError: true,
       );
+
+      _cancelSignal.onReceive(sub.cancel);
     } catch (error) {
       _handleError(error);
     }
@@ -505,6 +512,13 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
       totalBytes: snapshot.totalBytes,
       state: TaskState.running,
     );
+  }
+
+  @override
+  void _handleRunning(TaskSnapshot snapshot) {
+    if (snapshot.bytesTransferred == snapshot.totalBytes) {
+      _finalize();
+    }
   }
 
   Future<void> _finalize() async {

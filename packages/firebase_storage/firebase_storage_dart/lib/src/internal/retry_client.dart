@@ -28,14 +28,22 @@ class Response {
 }
 
 class Signal {
-  late final void Function() _onDispose;
+  final List<Function()> _handlers = [];
 
-  void onReceive(void Function() callback) {
-    _onDispose = callback;
+  void onReceive(Function() handler) {
+    _handlers.add(handler);
   }
 
   void send() {
-    _onDispose();
+    for (final handler in _handlers) {
+      handler();
+    }
+
+    dispose();
+  }
+
+  void dispose() {
+    _handlers.clear();
   }
 }
 

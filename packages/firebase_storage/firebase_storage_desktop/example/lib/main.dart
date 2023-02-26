@@ -26,7 +26,7 @@ Future<void> main() async {
         : DefaultFirebaseOptions.web,
   );
 
-  FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+  FirebaseStorage.instance.useStorageEmulator('localhost', 4040);
   storage = FirebaseStorage.instance;
 
   runApp(const StorageExampleApp());
@@ -179,7 +179,7 @@ class _FolderState extends State<Folder> {
   }
 
   Future<void> uploadBytes(BuildContext context) async {
-    final bytesList = List.generate(20 * 1024 * 1024, (index) => index % 256);
+    final bytesList = List.generate(10 * 1024 * 1024, (index) => index % 256);
     final bytes = Uint8List.fromList(bytesList);
     final metadata = SettableMetadata(
       contentType: 'application/octet-stream',
@@ -850,7 +850,7 @@ class TaskProgress extends StatelessWidget {
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator());
         }
 
         final event = snapshot.requireData;
@@ -858,6 +858,30 @@ class TaskProgress extends StatelessWidget {
 
         return Row(
           children: [
+            if (task.snapshot.state == TaskState.running ||
+                task.snapshot.state == TaskState.paused) ...[
+              IconButton(
+                onPressed: () {
+                  if (task.snapshot.state == TaskState.running) {
+                    task.pause();
+                  } else {
+                    task.resume();
+                  }
+                },
+                icon: Icon(
+                  task.snapshot.state == TaskState.running
+                      ? Icons.pause
+                      : Icons.play_arrow,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  task.cancel();
+                },
+                icon: const Icon(Icons.stop),
+              ),
+              const SizedBox(width: 16)
+            ],
             Expanded(
               child: LinearProgressIndicator(value: progress),
             ),
