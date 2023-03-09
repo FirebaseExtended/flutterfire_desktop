@@ -26,6 +26,7 @@ Future<void> main() async {
         : DefaultFirebaseOptions.web,
   );
 
+  // start a proxy server from scripts/storage with npm start
   FirebaseStorage.instance.useStorageEmulator('localhost', 4040);
   storage = FirebaseStorage.instance;
 

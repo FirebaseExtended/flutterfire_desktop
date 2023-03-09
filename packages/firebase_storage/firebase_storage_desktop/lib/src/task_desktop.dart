@@ -1,11 +1,6 @@
-import 'package:firebase_storage_dart/firebase_storage_dart.dart'
-    as storage_dart;
+part of firebase_storage_desktop;
 
-import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
-
-import 'task_snapshot_desktop.dart';
-
-class TaskDesktop extends TaskPlatform {
+class TaskDesktop extends TaskPlatform implements Future<TaskSnapshotDesktop> {
   final FirebaseStoragePlatform storage;
   final storage_dart.Task _delegate;
 
@@ -17,7 +12,7 @@ class TaskDesktop extends TaskPlatform {
       (event) {
         return TaskSnapshotDesktop(event, storage, TaskState.running);
       },
-    );
+    ).handleError(platformErrorGuard);
   }
 
   @override
@@ -25,26 +20,111 @@ class TaskDesktop extends TaskPlatform {
     return TaskSnapshotDesktop(
       _delegate.snapshot,
       storage,
-      TaskSnapshotDesktop.fromDartState(_delegate.snapshot.state),
+      TaskSnapshotDesktop.platformStateFromDart(_delegate.snapshot.state),
     );
   }
 
   @override
   Future<TaskSnapshotPlatform> get onComplete async {
-    final snapshot = await _delegate;
+    final snapshot = await platformErrorFutureGuard(_delegate);
+
     return TaskSnapshotDesktop(
       snapshot,
       storage,
-      TaskSnapshotDesktop.fromDartState(snapshot.state),
+      TaskSnapshotDesktop.platformStateFromDart(snapshot.state),
     );
   }
 
   @override
-  Future<bool> pause() => _delegate.pause();
+  Future<bool> pause() => platformErrorAsyncGuard(_delegate.pause);
 
   @override
-  Future<bool> resume() => _delegate.resume();
+  Future<bool> resume() => platformErrorAsyncGuard(_delegate.resume);
 
   @override
-  Future<bool> cancel() => _delegate.cancel();
+  Future<bool> cancel() => platformErrorAsyncGuard(_delegate.cancel);
+
+  @override
+  Stream<TaskSnapshotDesktop> asStream() {
+    return _delegate.asStream().map(
+      (event) {
+        return TaskSnapshotDesktop(
+          event,
+          storage,
+          TaskSnapshotDesktop.platformStateFromDart(event.state),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<TaskSnapshotDesktop> catchError(
+    Function onError, {
+    bool Function(Object error)? test,
+  }) {
+    return _delegate.catchError(platformErrorGuard, test: test).then((value) {
+      return TaskSnapshotDesktop(
+        value,
+        storage,
+        TaskSnapshotDesktop.platformStateFromDart(value.state),
+      );
+    });
+  }
+
+  @override
+  Future<R> then<R>(
+    FutureOr<R> Function(TaskSnapshotDesktop value) onValue, {
+    Function? onError,
+  }) {
+    return _delegate.then((value) {
+      return onValue(TaskSnapshotDesktop(
+        value,
+        storage,
+        TaskSnapshotDesktop.platformStateFromDart(value.state),
+      ));
+    }, onError: platformErrorGuard);
+  }
+
+  @override
+  Future<TaskSnapshotDesktop> timeout(
+    Duration timeLimit, {
+    FutureOr<TaskSnapshotDesktop> Function()? onTimeout,
+  }) {
+    return _delegate
+        .timeout(timeLimit,
+            onTimeout: onTimeout == null
+                ? null
+                : () {
+                    final v = onTimeout.call();
+                    if (v is Future) {
+                      return (v as Future<TaskSnapshotDesktop>).then((value) {
+                        return value._delegate;
+                      });
+                    } else {
+                      return v._delegate;
+                    }
+                  })
+        .then((value) {
+      return TaskSnapshotDesktop(
+        value,
+        storage,
+        TaskSnapshotDesktop.platformStateFromDart(value.state),
+      );
+    });
+  }
+
+  @override
+  Future<TaskSnapshotDesktop> whenComplete(
+    FutureOr<void> Function() action,
+  ) async {
+    final s = await platformErrorAsyncGuard(
+      () => _delegate.whenComplete(action),
+    );
+
+    return TaskSnapshotDesktop(
+      s,
+      storage,
+      TaskSnapshotDesktop.platformStateFromDart(s.state),
+    );
+  }
 }

@@ -44,8 +44,16 @@ Future<void> verifyExists(String path) {
   return rpcClient.sendRequest('verifyExists', {'path': path});
 }
 
+Future<void> verifyNotExists(String path) {
+  return rpcClient.sendRequest('verifyNotExists', {'path': path});
+}
+
 Future<void> verifyMD5Hash(String path, String hash) {
   return rpcClient.sendRequest('verifyMD5Hash', {'path': path, 'hash': hash});
+}
+
+Future<void> uploadLargeFile(String path) {
+  return rpcClient.sendRequest('uploadLargeFile', {'path': path});
 }
 
 Matcher fileNotExists(String path) {
@@ -70,4 +78,8 @@ Future<String> getMD5Hash(String filePath) {
   });
 
   return completer.future;
+}
+
+Future<void> setServerSpeed(int speed) {
+  return rpcClient.sendRequest('setSpeed', {'speed': speed});
 }

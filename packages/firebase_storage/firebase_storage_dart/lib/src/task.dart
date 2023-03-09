@@ -142,7 +142,7 @@ abstract class _ProgressEvents {
       state: TaskState.paused,
     );
 
-    return Future.value(false);
+    return Future.value(true);
   }
 
   Future<bool> resume() {
@@ -195,7 +195,7 @@ abstract class _ProgressEvents {
         _cancelSignal.send();
 
         final errorCode = StorageErrorCode.canceled;
-        _controller.addError(errorCode);
+        _controller.addError(FirebaseStorageException._fromCode(errorCode));
         break;
 
       case TaskState.paused:
@@ -307,7 +307,7 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
     }
 
     if (snapshot.bytesTransferred != snapshot.totalBytes) {
-      Future.microtask(() => _uploadChunk());
+      _uploadChunk();
       return;
     }
 
@@ -361,6 +361,8 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
 
       void onError(err) {
         _cancelSignal.dispose();
+
+        if (err is CancelledByClientException) return;
         if (snapshot.state != TaskState.running) return;
 
         if (err is TimeoutException) {
@@ -416,12 +418,6 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
 
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
-      catchError(
-        (_) => _file.deleteSync(),
-        test: (e) =>
-            e is FirebaseStorageException &&
-            e.code == StorageErrorCode.canceled.code,
-      );
     } else {
       _offset = _file.lengthSync();
     }
@@ -455,7 +451,7 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
   @override
   Future<bool> cancel() async {
     if (await super.cancel()) {
-      await _file.delete();
+      _file.deleteSync();
       return true;
     }
 
@@ -463,6 +459,11 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
   }
 
   void _handleError(Object error) {
+    if (_file.existsSync()) {
+      _file.deleteSync();
+      _sink.close();
+    }
+
     if (snapshot.state._isFinal) return;
     _controller.addError(error);
   }
@@ -508,7 +509,7 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
     }
   }
 
-  void _receiveChunk(List<int> data) {
+  void _receiveChunk(List<int> data) async {
     if (snapshot.state != TaskState.running) return;
 
     _sink.add(data);

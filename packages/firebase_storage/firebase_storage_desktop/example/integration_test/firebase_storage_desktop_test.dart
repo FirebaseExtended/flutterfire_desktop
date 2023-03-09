@@ -15,6 +15,12 @@ import 'package:path/path.dart';
 late FirebaseStorage storage;
 late http.Client client;
 
+class Hashes {
+  static String largeUpload = 'jlNGODityFmHO7saFy4asQ==';
+  static String smallUpload = 'CY9rzUYh03PK3k6DJie09g==';
+  static String largeDownload = 'FHXuQ7SczGXOcsdj5TpWyQ==';
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -27,8 +33,12 @@ void main() {
     client = http.Client();
   });
 
+  final bytes = List.generate(10 * 1024 * 1024, (index) => index % 256);
+  final largeBin = Uint8List.fromList(bytes);
+
   setUp(() async {
     await clearStorage();
+    setServerSpeed(1024 * 1024 * 100);
   });
 
   tearDownAll(() async {
@@ -186,6 +196,181 @@ void main() {
         expect(updated.customMetadata, {'foo': 'bar'});
         expect(updated.metadataGeneration, '2');
       });
+    });
+  });
+
+  group('UploadTask', () {
+    test('uses single shot upload for small files', () async {
+      final task = storage.ref('test.txt').putString('test');
+      final events = await task.snapshotEvents.toList();
+      expect(events.length, 1);
+      await verifyExists('test.txt');
+      await verifyMD5Hash('test.txt', Hashes.smallUpload);
+    });
+
+    test('uses resumable upload for large files', () async {
+      final ref = storage.ref('large.bin');
+
+      final task = ref.putData(Uint8List.fromList(largeBin));
+      final events = await task.snapshotEvents.toList();
+
+      expect(events.length, greaterThan(1));
+      expect(events.last.bytesTransferred, largeBin.length);
+      expect(events.last.state, TaskState.success);
+
+      verifyExists('large.bin');
+      verifyMD5Hash('large.bin', Hashes.largeUpload);
+    });
+
+    test('is cancellable', () async {
+      final ref = storage.ref('large.bin');
+
+      final task = ref.putData(largeBin);
+      late FirebaseException error;
+
+      task.snapshotEvents.listen((event) {}, onError: (e) {
+        error = e;
+      });
+      final firstEvent = await task.snapshotEvents.first;
+
+      expect(firstEvent.state, TaskState.running);
+      expect(firstEvent.bytesTransferred, 262144);
+
+      final cancelled = await task.cancel();
+      expect(cancelled, true);
+
+      expect(task.snapshot.state, TaskState.canceled);
+      await expectLater(
+        task,
+        throwsA(
+          isA<FirebaseException>().having((e) => e.code, 'code', 'canceled'),
+        ),
+      );
+
+      expect(error, isNotNull);
+      expect(error.code, 'canceled');
+
+      verifyNotExists('large.bin');
+    });
+
+    test('could be paused and resumed', () async {
+      final ref = storage.ref('large.bin');
+
+      final task = ref.putData(largeBin);
+
+      final firstEvent = await task.snapshotEvents.first;
+
+      expect(firstEvent.state, TaskState.running);
+      expect(firstEvent.bytesTransferred, 262144);
+
+      final paused = await task.pause();
+
+      expect(paused, true);
+
+      await Future.delayed(const Duration(seconds: 2));
+      verifyNotExists('large.bin');
+
+      final resumed = await task.resume();
+
+      expect(resumed, true);
+
+      final lastEvent = await task.snapshotEvents.last;
+
+      expect(lastEvent.state, TaskState.success);
+      expect(lastEvent.bytesTransferred, largeBin.length);
+
+      verifyExists('large.bin');
+      verifyMD5Hash('large.bin', Hashes.largeUpload);
+    });
+  });
+
+  group('DownloadTask', () {
+    final file = File('integration_test/downloads/large.bin');
+
+    setUp(() async {
+      await uploadLargeFile('large.bin');
+      setServerSpeed(1024 * 1024);
+    });
+
+    tearDown(() async {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    });
+
+    test('downloads a file', () async {
+      final ref = storage.ref('large.bin');
+      await ref.writeToFile(file);
+
+      expect(file.existsSync(), true);
+      expect(file.lengthSync(), 20 * 1024 * 1024);
+      expect(await getMD5Hash(file.path), Hashes.largeDownload);
+    });
+
+    test('is cancellable', () async {
+      final ref = storage.ref('large.bin');
+      final task = ref.writeToFile(file);
+
+      late FirebaseException error;
+
+      task.snapshotEvents.listen((event) {}, onError: (e) {
+        error = e;
+      });
+
+      final snapshots = await task.snapshotEvents.take(2).toList();
+      final snapshot = snapshots.last;
+
+      expect(snapshot.state, TaskState.running);
+      expect(file.existsSync(), true);
+
+      final cancelled = await task.cancel();
+
+      expect(cancelled, true);
+      expect(task.snapshot.state, TaskState.canceled);
+
+      await expectLater(
+        task,
+        throwsA(
+          isA<FirebaseException>().having((e) => e.code, 'code', 'canceled'),
+        ),
+      );
+
+      expect(file.existsSync(), false);
+
+      expect(error, isNotNull);
+      expect(error.code, 'canceled');
+    });
+
+    test('could be paused and resumed', () async {
+      final ref = storage.ref('large.bin');
+      final task = ref.writeToFile(file);
+
+      final snapshots = await task.snapshotEvents.take(2).toList();
+      final snapshot = snapshots.last;
+
+      expect(snapshot.state, TaskState.running);
+      final paused = await task.pause();
+
+      expect(file.existsSync(), true);
+
+      await Future.delayed(const Duration(seconds: 1));
+      expect(file.lengthSync(), snapshot.bytesTransferred);
+      expect(paused, true);
+
+      await Future.delayed(const Duration(seconds: 1));
+      expect(file.lengthSync(), snapshot.bytesTransferred);
+
+      final resumed = await task.resume();
+      expect(resumed, true);
+
+      final result = await task;
+
+      expect(result.state, TaskState.success);
+
+      expect(file.existsSync(), true);
+      expect(file.lengthSync(), 20 * 1024 * 1024);
+      expect(result.bytesTransferred, 20 * 1024 * 1024);
+      expect(await getMD5Hash(file.path), Hashes.largeDownload);
     });
   });
 }

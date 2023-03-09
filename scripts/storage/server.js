@@ -72,6 +72,14 @@ server.addMethod("verifyExists", async ({ path }) => {
   }
 });
 
+server.addMethod("verifyNotExists", async ({ path }) => {
+  const file = bucket.file(path);
+  const [exists] = await file.exists();
+  if (exists) {
+    throw new Error(`File ${path} exists`);
+  }
+});
+
 server.addMethod("putMetadata", async ({ path, metadata }) => {
   const file = bucket.file(path);
   await file.setMetadata(metadata);
@@ -81,6 +89,13 @@ server.addMethod("getMetadata", async ({ path }) => {
   const file = bucket.file(path);
   const [metadata] = await file.getMetadata();
   return metadata;
+});
+
+server.addMethod("uploadLargeFile", async ({ path }) => {
+  const file = bucket.file(path);
+  const bytes = 1024 * 1024 * 20;
+  const buffer = Uint8Array.from({ length: bytes }, (_, index) => index % 256);
+  await file.save(buffer);
 });
 
 // Download/upload speed in bytes per second

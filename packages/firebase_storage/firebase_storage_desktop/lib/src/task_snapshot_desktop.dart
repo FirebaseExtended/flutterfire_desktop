@@ -1,13 +1,10 @@
-import 'package:firebase_storage_dart/firebase_storage_dart.dart'
-    as storage_dart;
-import 'package:firebase_storage_desktop/src/reference_desktop.dart';
-import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
+part of firebase_storage_desktop;
 
 class TaskSnapshotDesktop extends TaskSnapshotPlatform {
   final FirebaseStoragePlatform storage;
   final storage_dart.TaskSnapshot _delegate;
 
-  static fromDartState(storage_dart.TaskState state) {
+  static TaskState platformStateFromDart(storage_dart.TaskState state) {
     switch (state) {
       case storage_dart.TaskState.paused:
         return TaskState.paused;
@@ -44,7 +41,7 @@ class TaskSnapshotDesktop extends TaskSnapshotPlatform {
   }
 
   @override
-  TaskState get state => fromDartState(_delegate.state);
+  TaskState get state => platformStateFromDart(_delegate.state);
 
   @override
   int get totalBytes => _delegate.totalBytes;

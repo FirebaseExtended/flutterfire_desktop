@@ -1,8 +1,4 @@
-import 'package:firebase_storage_dart/firebase_storage_dart.dart'
-    as storage_dart;
-import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
-
-import 'reference_desktop.dart';
+part of firebase_storage_desktop;
 
 class ListResultDesktop extends ListResultPlatform {
   final storage_dart.ListResult _delegate;

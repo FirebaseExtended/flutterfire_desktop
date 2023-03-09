@@ -1,9 +1,20 @@
+library firebase_storage_desktop;
+
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage_desktop/src/reference_desktop.dart';
 import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
 import 'package:firebase_core_dart/firebase_core_dart.dart' as core_dart;
 import 'package:firebase_storage_dart/firebase_storage_dart.dart'
     as storage_dart;
+
+part 'src/error.dart';
+part 'src/list_result_desktop.dart';
+part 'src/reference_desktop.dart';
+part 'src/task_desktop.dart';
+part 'src/task_snapshot_desktop.dart';
 
 class FirebaseStorageDesktop extends FirebaseStoragePlatform {
   final core_dart.FirebaseApp? _app;

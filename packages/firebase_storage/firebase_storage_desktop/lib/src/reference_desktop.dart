@@ -1,12 +1,4 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:firebase_storage_dart/firebase_storage_dart.dart'
-    as storage_dart;
-import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
-
-import 'list_result_desktop.dart';
-import 'task_desktop.dart';
+part of firebase_storage_desktop;
 
 storage_dart.SettableMetadata? toDartSettableMetadata(
   SettableMetadata? metadata,
@@ -34,17 +26,17 @@ class ReferenceDesktop extends ReferencePlatform {
 
   @override
   Future<void> delete() {
-    return _delegate.delete();
+    return platformErrorAsyncGuard(_delegate.delete);
   }
 
   @override
   Future<String> getDownloadURL() {
-    return _delegate.getDownloadURL();
+    return platformErrorAsyncGuard(_delegate.getDownloadURL);
   }
 
   @override
   Future<FullMetadata> getMetadata() async {
-    final dartMetadata = await _delegate.getMetadata();
+    final dartMetadata = await platformErrorAsyncGuard(_delegate.getMetadata);
     final json = dartMetadata.asMap();
     return FullMetadata(json);
   }
@@ -60,19 +52,22 @@ class ReferenceDesktop extends ReferencePlatform {
       );
     }
 
-    final dartResult = await _delegate.list(opts);
+    final dartResult = await platformErrorAsyncGuard(
+      () => _delegate.list(opts),
+    );
+
     return ListResultDesktop(dartResult, storage, dartResult.nextPageToken);
   }
 
   @override
   Future<ListResultPlatform> listAll() async {
-    final dartResult = await _delegate.listAll();
+    final dartResult = await platformErrorAsyncGuard(_delegate.listAll);
     return ListResultDesktop(dartResult, storage, null);
   }
 
   @override
   Future<Uint8List?> getData(int maxSize) {
-    return _delegate.getData(maxSize);
+    return platformErrorAsyncGuard(() => _delegate.getData(maxSize));
   }
 
   @override
@@ -132,7 +127,9 @@ class ReferenceDesktop extends ReferencePlatform {
   @override
   Future<FullMetadata> updateMetadata(SettableMetadata metadata) async {
     final dartSettableMeta = toDartSettableMetadata(metadata)!;
-    final dartMetadata = await _delegate.updateMetadata(dartSettableMeta);
+    final dartMetadata = await platformErrorAsyncGuard(
+      () => _delegate.updateMetadata(dartSettableMeta),
+    );
 
     return FullMetadata(dartMetadata.asMap());
   }

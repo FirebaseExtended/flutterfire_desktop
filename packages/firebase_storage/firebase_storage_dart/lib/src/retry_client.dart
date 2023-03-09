@@ -136,9 +136,16 @@ class RetryClient {
 
     final maxWaitTime = retryPolicy.waitTimeForRequestType(requestType);
 
+    bool shouldAbort = false;
+    cancelSignal?.onReceive(() => shouldAbort = true);
+
     return await asyncGuard(
       () async {
         final req = await _ioClient.openUrl(method.value, uri!);
+
+        if (shouldAbort) {
+          req.abort(CancelledByClientException());
+        }
 
         cancelSignal?.onReceive(() {
           req.abort(CancelledByClientException());
@@ -232,6 +239,8 @@ Future<T> asyncGuard<T>(
         StorageErrorCode.retryLimitExceeded,
       );
     } on FirebaseStorageException {
+      rethrow;
+    } on CancelledByClientException {
       rethrow;
     } catch (e, stackTrace) {
       throw FirebaseStorageException._unknown(stackTrace);
