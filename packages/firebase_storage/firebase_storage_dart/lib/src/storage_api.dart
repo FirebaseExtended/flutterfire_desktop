@@ -1,10 +1,10 @@
 part of firebase_storage_dart;
 
-class StorageApiClient {
+class StorageApi {
   final String bucket;
   late RetryClient client;
 
-  StorageApiClient(this.bucket, [Uri? serviceUri]) {
+  StorageApi(this.bucket, [Uri? serviceUri]) {
     final defaultUri = Uri(
       scheme: 'https',
       host: 'firebasestorage.googleapis.com',
@@ -32,7 +32,7 @@ class StorageApiClient {
   }
 
   set _idToken(String token) {
-    RetryClient._authToken = token;
+    client.authToken = token;
   }
 
   Future<void> delete(String fullPath) async {
@@ -99,7 +99,7 @@ class StorageApiClient {
     return json.decode(res.body);
   }
 
-  Uri _buildDownloadURL(Map<String, dynamic> metadata, String fullPath) {
+  Uri buildDownloadUrl(Map<String, dynamic> metadata, String fullPath) {
     final tokensString = metadata['downloadTokens'] as String;
     final tokens = tokensString.split(',');
     final token = tokens[0];
@@ -118,7 +118,7 @@ class StorageApiClient {
 
   Future<String> getDownloadURL(String fullPath) async {
     final metadata = await getMetadata(fullPath);
-    return _buildDownloadURL(metadata, fullPath).toString();
+    return buildDownloadUrl(metadata, fullPath).toString();
   }
 
   Future<Uint8List> getData(Uri uri) async {

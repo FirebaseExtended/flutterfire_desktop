@@ -11,6 +11,12 @@ enum HttpMethod {
   const HttpMethod(this.value);
 }
 
+class RetryPolicy {
+  int maxOperationRetryTime = Duration(minutes: 2).inMilliseconds;
+  int maxUploadRetryTime = Duration(minutes: 10).inMilliseconds;
+  int maxDownloadRetryTime = Duration(minutes: 10).inMilliseconds;
+}
+
 class Response {
   final int statusCode;
   final HttpHeaders headers;
@@ -52,9 +58,10 @@ class CancelledByClientException implements Exception {}
 class RetryClient {
   final Uri baseUri;
   static final Map<String, RetryClient> _requests = {};
-  static String? _authToken;
+  String? authToken;
 
   late final HttpClient _ioClient;
+  final RetryPolicy retryPolicy = RetryPolicy();
 
   RetryClient._(this.baseUri) {
     _ioClient = HttpClient();
@@ -98,9 +105,9 @@ class RetryClient {
       req.abort(CancelledByClientException());
     });
 
-    if (_authToken != null) {
+    if (authToken != null) {
       headers ??= {};
-      headers.addAll({'Authorization': 'Firebase $_authToken'});
+      headers.addAll({'Authorization': 'Firebase $authToken'});
     }
 
     if (headers != null) {

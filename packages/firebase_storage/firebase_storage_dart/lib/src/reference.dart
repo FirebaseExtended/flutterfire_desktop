@@ -11,6 +11,7 @@ class Reference {
 
   late final List<String> _pathComponents;
   late final String _gsUrl;
+  late final StorageApi _api = storage._api;
 
   Reference._({
     required this.storage,
@@ -63,21 +64,21 @@ class Reference {
   }
 
   Future<void> delete() async {
-    await storage._apiClient.delete(fullPath);
+    await _api.delete(fullPath);
   }
 
   Future<String> getDownloadURL() async {
-    final downloadUrl = await storage._apiClient.getDownloadURL(fullPath);
+    final downloadUrl = await _api.getDownloadURL(fullPath);
     return downloadUrl;
   }
 
   Future<FullMetadata> getMetadata() async {
-    final json = await storage._apiClient.getMetadata(fullPath);
+    final json = await _api.getMetadata(fullPath);
     return FullMetadata._fromJson(json);
   }
 
   Future<ListResult> list([ListOptions? options]) async {
-    final json = await storage._apiClient.list(
+    final json = await _api.list(
       fullPath,
       options,
     );
@@ -104,15 +105,15 @@ class Reference {
   }
 
   Future<Uint8List?> getData([int maxSize = 10485760]) async {
-    final metadata = await storage._apiClient.getMetadata(fullPath);
+    final metadata = await _api.getMetadata(fullPath);
     final size = int.parse(metadata['size']);
 
     if (size > maxSize) {
       return null;
     }
 
-    final uri = storage._apiClient._buildDownloadURL(metadata, fullPath);
-    return await storage._apiClient.getData(uri);
+    final uri = _api.buildDownloadUrl(metadata, fullPath);
+    return await _api.getData(uri);
   }
 
   UploadTask putData(Uint8List data, [SettableMetadata? metadata]) {
@@ -179,7 +180,7 @@ class Reference {
   }
 
   Future<FullMetadata> updateMetadata(SettableMetadata metadata) async {
-    final resJson = await storage._apiClient.updateMetadata(fullPath, metadata);
+    final resJson = await _api.updateMetadata(fullPath, metadata);
     return FullMetadata._fromJson(resJson);
   }
 

@@ -252,7 +252,7 @@ class _MultipartUploadTask extends UploadTask {
 
   Future<void> _upload() async {
     try {
-      await storage._apiClient.uploadMultipart(
+      await storage._api.uploadMultipart(
         _fullPath,
         data,
         metadata: metadata,
@@ -318,7 +318,7 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
   }
 
   void _startUpload() {
-    _ref.storage._apiClient
+    _ref.storage._api
         .startChunkedUpload(
           fullPath: _fullPath,
           length: _source.getTotalSize(),
@@ -366,7 +366,7 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
         _controller.addError(err);
       }
 
-      _ref.storage._apiClient
+      _ref.storage._api
           .uploadChunk(
             name: _fullPath,
             uploadId: _uploadId,
@@ -475,7 +475,7 @@ class _DownloadTask extends DownloadTask with _ProgressEvents {
 
   Future<void> _openDownloadStream(String url) async {
     try {
-      final dataStreamFuture = await _ref.storage._apiClient.getStreamedData(
+      final dataStreamFuture = await _ref.storage._api.getStreamedData(
         Uri.parse(url),
         offset: _offset,
         cancelSignal: _cancelSignal,

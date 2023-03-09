@@ -5,13 +5,9 @@ class FirebaseStorage {
   late final String bucket;
 
   late final String _bucketName;
-  late final StorageApiClient _apiClient;
+  late final StorageApi _api;
 
   static Uri? _emulatorUri;
-
-  int _maxOperationRetryTime = const Duration(minutes: 2).inMilliseconds;
-  int _maxUploadRetryTime = const Duration(minutes: 10).inMilliseconds;
-  int _maxDownloadRetryTime = const Duration(minutes: 10).inMilliseconds;
 
   FirebaseStorage._({required this.app, String? bucket}) {
     assert(bucket != null || app.options.storageBucket != null);
@@ -22,11 +18,11 @@ class FirebaseStorage {
     _bucketName = bucket ?? storageBucket ?? '$appId.appspot.com';
     this.bucket = 'gs://$_bucketName';
 
-    _apiClient = StorageApiClient(_bucketName, _emulatorUri);
+    _api = StorageApi(_bucketName, _emulatorUri);
 
     firebasePluginSubscribe(Topics.currentUser(app), (message) {
       final idToken = message['idToken'];
-      _apiClient._idToken = idToken;
+      _api._idToken = idToken;
     });
   }
 
@@ -38,27 +34,27 @@ class FirebaseStorage {
   }
 
   int get maxOperationRetryTime {
-    return _maxOperationRetryTime;
+    return _api.client.retryPolicy.maxOperationRetryTime;
   }
 
   int get maxUploadRetryTime {
-    return _maxUploadRetryTime;
+    return _api.client.retryPolicy.maxUploadRetryTime;
   }
 
   int get maxDownloadRetryTime {
-    return _maxDownloadRetryTime;
+    return _api.client.retryPolicy.maxDownloadRetryTime;
   }
 
   void setMaxOperationRetryTime(int time) {
-    _maxOperationRetryTime = time;
+    _api.client.retryPolicy.maxOperationRetryTime = time;
   }
 
   void setMaxUploadRetryTime(int time) {
-    _maxUploadRetryTime = time;
+    _api.client.retryPolicy.maxUploadRetryTime = time;
   }
 
   void setMaxDownloadRetryTime(int time) {
-    _maxDownloadRetryTime = time;
+    _api.client.retryPolicy.maxDownloadRetryTime = time;
   }
 
   Reference ref([String? path]) {
@@ -88,7 +84,7 @@ class FirebaseStorage {
   }
 
   Future<void> useStorageEmulator(String host, int port) async {
-    _emulatorUri = _apiClient.useEmulator(host, port);
+    _emulatorUri = _api.useEmulator(host, port);
   }
 
   @override
