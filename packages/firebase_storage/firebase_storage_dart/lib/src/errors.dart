@@ -99,13 +99,3 @@ class FirebaseStorageException extends FirebaseException {
     }
   }
 }
-
-Future<T> asyncGuard<T>(Future<T> Function() callback) async {
-  try {
-    return await callback();
-  } on FirebaseStorageException {
-    rethrow;
-  } catch (e, stackTrace) {
-    throw FirebaseStorageException._unknown(stackTrace);
-  }
-}

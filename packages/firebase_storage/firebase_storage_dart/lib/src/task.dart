@@ -307,7 +307,7 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
     }
 
     if (snapshot.bytesTransferred != snapshot.totalBytes) {
-      Future.microtask(() => _uploadNextChunk());
+      Future.microtask(() => _uploadChunk());
       return;
     }
 
@@ -330,10 +330,10 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
 
   void _receiveUploadId(String uploadId) {
     _uploadId = uploadId;
-    _uploadNextChunk();
+    _uploadChunk();
   }
 
-  Future<void> _uploadNextChunk() async {
+  Future<void> _uploadChunk() async {
     final chunkSize = _chunkSize.clamp(
       _chunkedUploadBaseChunkSize,
       _uploadChunkMaxSize,
@@ -363,7 +363,12 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
         _cancelSignal.dispose();
         if (snapshot.state != TaskState.running) return;
 
-        _controller.addError(err);
+        if (err is TimeoutException) {
+          _chunkSize = chunkSize ~/ 2;
+          _uploadChunk();
+        } else {
+          _controller.addError(err);
+        }
       }
 
       _ref.storage._api
@@ -374,6 +379,9 @@ class _ChunkedUploadTask extends UploadTask with _ProgressEvents {
             data: data,
             finalize: isFinalChunk,
             cancelSignal: _cancelSignal,
+            onTimeout: () {
+              throw TimeoutException('Upload timed out');
+            },
           )
           .then(onSuccess)
           .catchError(onError);

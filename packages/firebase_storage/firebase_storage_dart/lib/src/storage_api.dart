@@ -219,6 +219,7 @@ class StorageApi {
     required String uploadId,
     required int offset,
     required Uint8List data,
+    required void Function() onTimeout,
     bool finalize = false,
     Signal? cancelSignal,
   }) async {
@@ -235,6 +236,7 @@ class StorageApi {
       },
       bodyBytes: data,
       cancelSignal: cancelSignal,
+      onTimeout: onTimeout,
     );
   }
 }
