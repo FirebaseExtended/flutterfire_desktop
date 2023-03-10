@@ -1,5 +1,9 @@
 # FlutterFire Desktop
 
+ <a href="https://invertase.link/discord">
+   <img src="https://img.shields.io/discord/295953187817521152.svg?style=flat-square&colorA=7289da&label=Chat%20on%20Discord" alt="Chat on Discord">
+ </a>
+
 A work in progress pure Dart implementation of Firebase with initial support aimed at FlutterFire for Linux & Windows.
 
 A FlutterFire dev preview release will be available soon making these packages available for Linux and Windows.
