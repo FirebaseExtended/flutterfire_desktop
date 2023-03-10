@@ -31,7 +31,7 @@ class StorageApi {
     return emulatorUri;
   }
 
-  set _idToken(String token) {
+  set _idToken(String? token) {
     client.authToken = token;
   }
 

@@ -1,20 +1,23 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth_dart/firebase_auth_dart.dart';
+import 'package:firebase_core_dart/firebase_core_dart.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:firebase_storage_dart/firebase_storage_dart.dart';
 
 class StorageShell {
   final FirebaseStorage storage;
+  final FirebaseAuth auth;
   Reference ref;
 
-  StorageShell(this.storage, this.ref);
+  StorageShell(this.auth, this.storage, this.ref);
 
   Future<String> ls() async {
     final result = await ref.listAll();
     final b = StringBuffer();
 
-    b.write(result.prefixes.map((e) => '${e.name}/').join('\n'));
+    b.writeln(result.prefixes.map((e) => '${e.name}/').join('\n'));
     b.write(result.items.map((e) => e.name).join('\n'));
 
     return b.toString();
@@ -50,13 +53,20 @@ class StorageShell {
 
   Future<void> cd(String path) async {
     final c = Completer();
-    final newRef = ref.child(path);
+
+    final newRef =
+        path == '..' ? ref.parent ?? storage.ref('/') : ref.child(path);
 
     try {
-      await newRef.list(ListOptions(maxResults: 1));
+      if (newRef != storage.ref('/')) {
+        await newRef.list(ListOptions(maxResults: 1));
+      }
       ref = newRef;
-    } catch (e) {
-      c.completeError('No such directory: $path');
+      c.complete();
+    } on FirebaseException {
+      rethrow;
+    } on Exception catch (e) {
+      c.completeError(e);
     }
 
     await c.future;
@@ -64,6 +74,11 @@ class StorageShell {
 
   String pwd() {
     return ref.fullPath;
+  }
+
+  Future<String> login() async {
+    await auth.signInAnonymously();
+    return 'Logged in anonymously';
   }
 
   @override
@@ -89,6 +104,8 @@ class Command {
   Command(this.shell, this.input);
 
   Future<String> execute() async {
+    if (input.isEmpty) return '$shell';
+
     final chunks = input.split(' ').where((element) => element.isNotEmpty);
     final command = chunks.first;
     final args = chunks.skip(1).toList();
@@ -109,6 +126,9 @@ class Command {
 
           out = '';
           break;
+        case 'login':
+          out = await shell.login();
+          break;
         case 'pwd':
           out = shell.pwd();
           break;
@@ -121,10 +141,12 @@ class Command {
         default:
           out = 'Unknown command "$command"';
       }
+    } on FirebaseException catch (e) {
+      return '[${e.plugin}/${e.code}]: ${e.message}\n$shell';
     } catch (err) {
       out = err.toString();
     }
 
-    return '${out.isEmpty ? '' : '$command: $out\n'}$shell';
+    return '${out.isEmpty ? '' : '$out\n'}$shell';
   }
 }

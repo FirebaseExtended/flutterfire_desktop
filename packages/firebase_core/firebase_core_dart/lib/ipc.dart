@@ -12,6 +12,7 @@ void firebasePluginPublish(String topic, dynamic value) {
   _topics[topic] ??= StreamController.broadcast();
   _messageBuffers[topic] ??= [];
   _messageBuffers[topic]!.add(value);
+  _topics[topic]!.add(value);
 }
 
 /// Subscribes to a topic and returns a [Stream] of values published to that

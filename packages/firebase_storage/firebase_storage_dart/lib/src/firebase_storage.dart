@@ -21,7 +21,7 @@ class FirebaseStorage {
     _api = StorageApi(_bucketName, _emulatorUri);
 
     firebasePluginSubscribe(Topics.currentUser(app), (message) {
-      final idToken = message['idToken'];
+      final idToken = message?['idToken'];
       _api._idToken = idToken;
     });
   }
