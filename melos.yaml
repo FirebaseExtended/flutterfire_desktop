@@ -1,8 +1,16 @@
 name: flutterfire_dart
+repository: https://github.com/invertase/flutterfire_desktop
 
 packages:
   - packages/**
   - tests/*
+
+command:
+  version:
+    # Generate commit links in package changelogs.
+    linkToCommits: true
+    # Additionally build a changelog at the root of the workspace.
+    workspaceChangelog: true
 
 scripts:
   lint:all:
@@ -22,8 +30,8 @@ scripts:
   test:
     description: Run tests in a specific package.
     run: melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
-    select-package:
-      dir-exists:
+    packageFilters:
+      dirExists:
         - 'test/'
 
   test:e2e:
@@ -32,8 +40,8 @@ scripts:
         "flutter drive --no-pub --target=./test_driver/driver_e2e.dart"
     description: |
       Run all e2e tests.
-    select-package:
-      dir-exists:
+    packageFilters:
+      dirExists:
         - test_driver
       scope: '*tests*'
 
