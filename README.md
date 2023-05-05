@@ -1,18 +1,17 @@
-# FlutterFire Desktop
+# Firebase's Dart SDK
 
  <a href="https://invertase.link/discord">
    <img src="https://img.shields.io/discord/295953187817521152.svg?style=flat-square&colorA=7289da&label=Chat%20on%20Discord" alt="Chat on Discord">
  </a>
 
-A work in progress pure Dart implementation of Firebase with initial support aimed at FlutterFire for Linux & Windows.
 
-A FlutterFire dev preview release will be available soon making these packages available for Linux and Windows.
+The Dart SDK allows Flutter and Dart apps to consume Firebase services. 
 
-Learn more about the current progress of this project in [our blog](https://invertase.io/blog/announcing-flutterfire-desktop).
+It is an __early-stage, experimental__ pure-Dart implementation of Firebase SDKs, without wrapping the existing Android, iOS, web, or C++ SDKs. The initial work is focused on supporting Firebase for Linux and Windows platforms.
 
 ## Usage
 
-To use this plugin as FlutterFire's implementation for Desktop, add it to your app's `pubspec.yaml` along with the main plugin:
+To use this plugin, add the following dependencies to your app's `pubspec.yaml` file, along with the main plugin:
 
 ```yaml
 dependencies:
@@ -24,7 +23,8 @@ dependencies:
 
 ## Firebase App Initialization
 
-Unlike FlutterFire for mobile and web platforms, the initialization in Desktop is done from Dart, which means there are no additional config files required.
+Unlike the Firebase Flutter SDK, the Firebase initialization is done from Dart code, which means no additional config files are required.
+
 ### DEFAULT app
 To initialize the default app, provide only options without a name.
  ```dart
