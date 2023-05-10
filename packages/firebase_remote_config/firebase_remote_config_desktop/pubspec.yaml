@@ -1,0 +1,45 @@
+name: firebase_remote_config_desktop
+description: Desktop implementation of remote_config
+homepage: https://firebase.flutter.dev
+repository: https://github.com/invertase/flutterfire_desktop
+version: 0.1.0-dev.0
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=1.20.0'
+
+dependencies:
+  firebase_core: ^1.10.0
+  firebase_core_dart: ^0.1.1
+  firebase_core_desktop: ^0.1.1
+  firebase_remote_config_dart: any
+  firebase_remote_config_platform_interface: any
+  flutter:
+    sdk: flutter
+  http: ^0.13.4
+  meta: ^1.3.0
+
+dev_dependencies:
+  firebase_core_platform_interface: ^4.1.0
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.2
+
+dependency_overrides:
+  firebase_remote_config_dart:
+    path: ../firebase_remote_config_dart
+
+flutter:
+  plugin:
+    implements: firebase_remote_config
+    platforms:
+      macos:
+        dartPluginClass: FirebaseRemoteConfigDesktop
+        pluginClass: none
+      linux:
+        dartPluginClass: FirebaseRemoteConfigDesktop
+        pluginClass: none
+      windows:
+        dartPluginClass: FirebaseRemoteConfigDesktop
+        pluginClass: none
