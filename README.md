@@ -55,3 +55,13 @@ To initialize the default app, provide only options without a name.
 This is a community project, contributions to help it progress faster are welcome:
 1. Before starting, please read the [contribution guide of FlutterFire](https://github.com/FirebaseExtended/flutterfire/blob/master/CONTRIBUTING.md).
 2. Refer to the [projects board](https://github.com/invertase/flutterfire_desktop/projects) to see the current progress & planned future work.
+
+## Notes
+
+If you get an error while building linux application, run
+
+```sudo apt install libwebkit2gtk-4.0-dev -y```
+
+You may also have to uninstall flutter(snap) and install the Flutter git version in directory of your choice. You can do so by cloning the git repo using
+
+```git clone https://github.com/flutter/flutter.git```
