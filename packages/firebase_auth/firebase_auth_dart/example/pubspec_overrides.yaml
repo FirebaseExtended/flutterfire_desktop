@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: firebase_auth_dart,firebase_core_dart
+dependency_overrides:
+  firebase_auth_dart:
+    path: ../
+  firebase_core_dart:
+    path: ../../../firebase_core/firebase_core_dart
