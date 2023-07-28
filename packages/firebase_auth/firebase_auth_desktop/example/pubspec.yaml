@@ -31,7 +31,7 @@ dependencies:
     sdk: flutter
   flutter_lints: ^1.0.4
   flutter_signin_button: ^2.0.0
-  google_sign_in: ^5.0.0-nullsafety
+  google_sign_in: ^6.1.4
   google_sign_in_dartio: ^0.2.0
   sign_in_with_apple: ^3.3.0
   yaru: ^0.2.0
@@ -39,8 +39,12 @@ dependencies:
 dependency_overrides:
   firebase_auth_desktop:
     path: ../
+  firebase_auth_dart:
+    path: ../../firebase_auth_dart
   firebase_core_desktop:
     path: ../../../firebase_core/firebase_core_desktop
+  firebase_core_dart:
+    path: ../../../firebase_core/firebase_core_dart
 
 dev_dependencies:
   flutter_test:
