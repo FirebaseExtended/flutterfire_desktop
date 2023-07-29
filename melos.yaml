@@ -2,7 +2,7 @@ name: flutterfire_dart
 
 packages:
   - packages/**
-  - tests/*
+  - tests
 
 scripts:
   lint:all:
@@ -22,18 +22,18 @@ scripts:
   test:
     description: Run tests in a specific package.
     run: melos exec --concurrency=1 -- "flutter test --no-pub --reporter expanded"
-    select-package:
-      dir-exists:
+    packageFilters:
+      dirExists:
         - 'test/'
-
+  
   test:e2e:
     run: |
       melos exec -c 1 --fail-fast -- \
         "flutter drive --no-pub --target=./test_driver/driver_e2e.dart"
     description: |
       Run all e2e tests.
-    select-package:
-      dir-exists:
+    packageFilters:
+      dirExists:
         - test_driver
       scope: '*tests*'
 
