@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_auth
+  gtk
   url_launcher_linux
 )
 
