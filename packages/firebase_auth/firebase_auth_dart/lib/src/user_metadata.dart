@@ -17,14 +17,14 @@ class UserMetadata {
 
   /// When this account was created as dictated by the server clock.
   DateTime? get creationTime =>
-      DateTime.fromMillisecondsSinceEpoch(_creationTimestamp);
+      DateTime.fromMillisecondsSinceEpoch(_creationTimestamp, isUtc: true);
 
   /// When the user last signed in as dictated by the server clock.
   ///
   /// This is only accurate up to a granularity of 2 minutes for consecutive
   /// sign-in attempts.
   DateTime? get lastSignInTime =>
-      DateTime.fromMillisecondsSinceEpoch(_lastSignInTime);
+      DateTime.fromMillisecondsSinceEpoch(_lastSignInTime, isUtc: true);
 
   @override
   String toString() {
