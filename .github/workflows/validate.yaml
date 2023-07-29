@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fixes
 
 jobs:
   analyze:
