@@ -364,6 +364,8 @@ Future<void> main() async {
     late final HttpsCallable httpsCallable;
     late final FirebaseApp app;
     late final FirebaseFunctions functions;
+    late final config =
+        StorageBox(app.options.projectId, configPathPrefix: '.firebase-auth');
 
     Future<http.Response> _authCheck(http.Request value) async {
       if (value.headers.containsKey('Authorization')) {
@@ -382,9 +384,6 @@ Future<void> main() async {
       );
 
       // Clear auth storage
-      final config = StorageBox(app.options.projectId);
-
-      // Clear auth storage
       config.remove('${app.options.apiKey}:${app.name}');
       functions = FirebaseFunctions.instanceFor(app: app);
       functions.setApiClient(MockClient(_authCheck));
@@ -392,9 +391,6 @@ Future<void> main() async {
     });
 
     tearDown(() async {
-      // Clear auth storage
-      final config = StorageBox(app.options.projectId);
-
       // Clear auth storage
       config.remove('${app.options.apiKey}:${app.name}');
     });

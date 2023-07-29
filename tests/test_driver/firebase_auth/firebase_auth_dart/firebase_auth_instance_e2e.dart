@@ -30,15 +30,20 @@ void setupTests() {
     }
 
     group('authStateChanges()', () {
-      StreamQueue<User?>? authStateChanges;
+      late StreamQueue<User?> authStateChanges;
 
-      setUpAll(() {
-        authStateChanges =
-            StreamQueue(FirebaseAuth.instance.authStateChanges());
+      setUp(() async {
+        // Broadcast stream so that it is not paused while using the StreamQueue
+        final stream =
+            FirebaseAuth.instance.authStateChanges().asBroadcastStream();
+        authStateChanges = StreamQueue(stream);
+
+        // Skip current user
+        await authStateChanges.next;
       });
 
       tearDown(() async {
-        await authStateChanges?.cancel();
+        await authStateChanges.cancel();
         await ensureSignedOut();
       });
 
@@ -48,35 +53,41 @@ void setupTests() {
         String uid = FirebaseAuth.instance.currentUser!.uid;
 
         expect(
-          (await authStateChanges?.next)?.uid,
+          (await authStateChanges.next)?.uid,
           equals(uid),
         );
 
         await FirebaseAuth.instance.signOut();
 
         expect(
-          (await authStateChanges?.next),
+          (await authStateChanges.next),
           isNull,
         );
 
         await FirebaseAuth.instance.signInAnonymously();
 
         expect(
-          (await authStateChanges?.next)?.uid != uid,
+          (await authStateChanges.next)?.uid != uid,
           isTrue,
         );
       });
     });
 
     group('idTokenChanges()', () {
-      StreamQueue<User?>? idTokenChanges;
+      late StreamQueue<User?> idTokenChanges;
 
-      setUpAll(() {
-        idTokenChanges = StreamQueue(FirebaseAuth.instance.idTokenChanges());
+      setUp(() async {
+        // Broadcast stream so that it is not paused while using the StreamQueue
+        final stream =
+            FirebaseAuth.instance.idTokenChanges().asBroadcastStream();
+        idTokenChanges = StreamQueue(stream);
+
+        // Skip current user
+        await idTokenChanges.next;
       });
 
       tearDown(() async {
-        await idTokenChanges?.cancel();
+        await idTokenChanges.cancel();
         await ensureSignedOut();
       });
 
@@ -86,21 +97,21 @@ void setupTests() {
         String uid = FirebaseAuth.instance.currentUser!.uid;
 
         expect(
-          (await idTokenChanges?.next)?.uid,
+          (await idTokenChanges.next)?.uid,
           equals(uid),
         );
 
         await FirebaseAuth.instance.signOut();
 
         expect(
-          (await idTokenChanges?.next),
+          (await idTokenChanges.next),
           isNull,
         );
 
         await FirebaseAuth.instance.signInAnonymously();
 
         expect(
-          (await idTokenChanges?.next)?.uid != uid,
+          (await idTokenChanges.next)?.uid != uid,
           isTrue,
         );
       });

@@ -145,6 +145,9 @@ Future<void> main() async {
     group('Authentication', () {
       late final HttpsCallable httpsCallable;
       late final FirebaseApp app;
+       late final config =
+        StorageBox(app.options.projectId, configPathPrefix: '.firebase-auth');
+
       setUp(() async {
         await emulatorClearAllUsers();
       });
@@ -154,10 +157,11 @@ Future<void> main() async {
         final functions = FirebaseFunctions.instanceFor(app: app);
         functions.useFunctionsEmulator('localhost', 5001);
         httpsCallable = functions.httpsCallable('testFunctionAuthorized');
+        
+        // Clear auth storage
+        config.remove('${app.options.apiKey}:${app.name}');
       });
       tearDown(() {
-        final config = StorageBox(app.options.projectId);
-
         // Clear auth storage
         config.remove('${app.options.apiKey}:${app.name}');
       });
