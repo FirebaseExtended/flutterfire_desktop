@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: firebase_core_dart,firebase_core_desktop
+dependency_overrides:
+  firebase_core_dart:
+    path: ../../firebase_core_dart
+  firebase_core_desktop:
+    path: ../

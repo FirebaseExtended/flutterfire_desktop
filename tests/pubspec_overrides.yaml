@@ -1,0 +1,14 @@
+# melos_managed_dependency_overrides: firebase_auth_dart,firebase_auth_desktop,firebase_core_dart,firebase_core_desktop,firebase_functions_dart,firebase_functions_desktop
+dependency_overrides:
+  firebase_auth_dart:
+    path: ../packages/firebase_auth/firebase_auth_dart
+  firebase_auth_desktop:
+    path: ../packages/firebase_auth/firebase_auth_desktop
+  firebase_core_dart:
+    path: ../packages/firebase_core/firebase_core_dart
+  firebase_core_desktop:
+    path: ../packages/firebase_core/firebase_core_desktop
+  firebase_functions_dart:
+    path: ../packages/firebase_functions/firebase_functions_dart
+  firebase_functions_desktop:
+    path: ../packages/firebase_functions/firebase_functions_desktop

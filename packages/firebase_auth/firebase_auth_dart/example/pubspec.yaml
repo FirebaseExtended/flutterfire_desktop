@@ -15,8 +15,3 @@ dependencies:
   cli_util: ^0.3.5
   firebase_auth_dart: ^1.0.1
   firebase_core_dart: ^1.0.1
-dependency_overrides:
-  firebase_auth_dart:
-    path: ../
-  firebase_core_dart:
-    path: ../../../firebase_core/firebase_core_dart

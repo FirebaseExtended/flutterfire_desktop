@@ -35,16 +35,6 @@ dependencies:
   sign_in_with_apple: ^5.0.0
   yaru: ^0.9.0
 
-dependency_overrides:
-  firebase_auth_desktop:
-    path: ../
-  firebase_auth_dart:
-    path: ../../firebase_auth_dart
-  firebase_core_desktop:
-    path: ../../../firebase_core/firebase_core_desktop
-  firebase_core_dart:
-    path: ../../../firebase_core/firebase_core_dart
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
