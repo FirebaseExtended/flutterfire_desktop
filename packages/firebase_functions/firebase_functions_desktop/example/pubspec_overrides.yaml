@@ -9,4 +9,4 @@ dependency_overrides:
   firebase_functions_dart:
     path: ../../firebase_functions_dart
   firebase_functions_desktop:
-    path: ../
+    path: ..
