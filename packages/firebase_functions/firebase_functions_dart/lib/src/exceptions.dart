@@ -48,7 +48,7 @@ class FirebaseFunctionsException extends FirebaseException
       output += '\n$details';
     }
     if (stackTrace != null) {
-      output += '\n\n${stackTrace.toString()}';
+      output += '\n\n$stackTrace';
     }
 
     return output;

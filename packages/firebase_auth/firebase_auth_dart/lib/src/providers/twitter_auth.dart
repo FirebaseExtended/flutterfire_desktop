@@ -72,11 +72,11 @@ class TwitterAuthProvider extends AuthProvider {
 
   /// Sets the OAuth custom parameters to pass in a Twitter OAuth request for
   /// popup and redirect sign-in operations.
-  // ignore: avoid_returning_this
   TwitterAuthProvider setCustomParameters(
     Map<dynamic, dynamic> customOAuthParameters,
   ) {
     _parameters = customOAuthParameters;
+    // ignore: avoid_returning_this
     return this;
   }
 }

@@ -80,7 +80,7 @@ class AuthExampleApp extends StatelessWidget {
                           children: [
                             Text(
                               'Firebase Auth Desktop',
-                              style: Theme.of(context).textTheme.headline4,
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                           ],
                         ),
