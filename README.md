@@ -15,10 +15,10 @@ To use this plugin, add the following dependencies to your app's `pubspec.yaml` 
 
 ```yaml
 dependencies:
-  firebase_auth: ^3.1.5
-  firebase_auth_desktop: ^0.1.1-dev.0
-  firebase_core: ^1.9.0
-  firebase_core_desktop: ^0.1.1-dev.0
+  firebase_auth: ^4.6.3
+  firebase_auth_desktop: ^0.1.2
+  firebase_core: ^2.0.0
+  firebase_core_desktop: ^0.1.2
 ```
 
 ## Firebase App Initialization

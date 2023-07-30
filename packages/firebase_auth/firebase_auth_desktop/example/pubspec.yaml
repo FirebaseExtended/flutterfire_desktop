@@ -25,7 +25,7 @@ dependencies:
   desktop_webview_auth: ^0.0.9
   firebase_auth: 4.6.3
   firebase_auth_desktop: ^1.0.2
-  firebase_core: ^2.15.0
+  firebase_core: ^2.0.0
   firebase_core_desktop: ^1.0.2
   flutter:
     sdk: flutter
