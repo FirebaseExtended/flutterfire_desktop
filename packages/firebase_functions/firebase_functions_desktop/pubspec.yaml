@@ -9,8 +9,9 @@ environment:
   flutter: '>=1.20.0'
 
 dependencies:
-  cloud_functions: 4.0.13
-  cloud_functions_platform_interface: 5.1.32
+  # 4.1.0 adss functions 2nd gen which is not supported
+  cloud_functions: '>=4.0.0 <4.1.0'
+  cloud_functions_platform_interface: '>=5.1.20 <5.2.0'
   firebase_core: ^2.15.0
   firebase_core_dart: ^1.0.1
   firebase_core_desktop: ^1.0.2
