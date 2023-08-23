@@ -159,5 +159,5 @@ const _errorCodeMap = {
   'UNIMPLEMENTED': 'unimplemented',
   'INTERNAL': 'internal',
   'UNAVAILABLE': 'unavailable',
-  'DATA_LOSS': 'data-loss'
+  'DATA_LOSS': 'data-loss',
 };

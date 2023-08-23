@@ -55,7 +55,7 @@ class ConfirmationResult {
           username: userData['screenName'],
           profile: {
             'displayName': userData['displayName'],
-            'photoUrl': userData['photoUrl']
+            'photoUrl': userData['photoUrl'],
           },
         ),
       );
