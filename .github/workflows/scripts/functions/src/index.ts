@@ -23,6 +23,34 @@ export const testFunctionTimeout = functions.https.onCall((data) => {
   });
 });
 
+export const foo = functions.https.onCall((data) => {
+  return data
+});
+
+// For e2e testing that the caller is authorized
+export const testFunctionAuthorized = functions.https.onCall(async (data, context) => {
+  console.log("testFunctionAuthorized called", data, context.auth);
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "testFunctionAuthorized must be called while authenticated."
+    );
+  }
+  try {
+    return 'authorized';
+  } catch (e) {
+    throw new functions.https.HttpsError("internal", (e as any).message, (e as any).details);
+  }
+});
+
+// For e2e testing that the caller is authorized
+export const testExceptions = functions.https.onCall(async (data, context) => {
+  if (data == 'bad-status') {
+    throw new functions.https.HttpsError("invalid-argument", "", "");
+  }
+  return {};
+});
+
 // For e2e testing errors & return values.
 // noinspection JSUnusedGlobalSymbols
 export const testFunctionDefaultRegion = functions.https.onCall((data) => {

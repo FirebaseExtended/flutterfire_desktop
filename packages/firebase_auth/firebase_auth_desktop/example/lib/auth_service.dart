@@ -70,6 +70,7 @@ class AuthService {
       final confirmationResult =
           await FirebaseAuth.instance.signInWithPhoneNumber(phoneNumber);
 
+      // ignore: no_leading_underscores_for_local_identifiers
       final _smsCode = await smsCode.call();
 
       if (_smsCode != null) {

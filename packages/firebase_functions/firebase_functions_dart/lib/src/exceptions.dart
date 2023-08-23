@@ -48,7 +48,7 @@ class FirebaseFunctionsException extends FirebaseException
       output += '\n$details';
     }
     if (stackTrace != null) {
-      output += '\n\n${stackTrace.toString()}';
+      output += '\n\n$stackTrace';
     }
 
     return output;
@@ -159,5 +159,5 @@ const _errorCodeMap = {
   'UNIMPLEMENTED': 'unimplemented',
   'INTERNAL': 'internal',
   'UNAVAILABLE': 'unavailable',
-  'DATA_LOSS': 'data-loss'
+  'DATA_LOSS': 'data-loss',
 };

@@ -130,7 +130,9 @@ void main() {
         languageCode: anyNamed('languageCode'),
       )).thenAnswer((_) => mockAuthPlatform);
 
-      MethodChannelFirebaseAuth.channel.setMockMethodCallHandler((call) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannelFirebaseAuth.channel,
+              (call) async {
         switch (call.method) {
           default:
             return <String, dynamic>{'user': user};
@@ -332,8 +334,8 @@ void main() {
           'uid: 12345)';
 
       final userMetadata = 'UserMetadata('
-          'creationTime: ${DateTime.fromMillisecondsSinceEpoch(kMockCreationTimestamp)}, '
-          'lastSignInTime: ${DateTime.fromMillisecondsSinceEpoch(kMockLastSignInTimestamp)})';
+          'creationTime: ${DateTime.fromMillisecondsSinceEpoch(kMockCreationTimestamp, isUtc: true)}, '
+          'lastSignInTime: ${DateTime.fromMillisecondsSinceEpoch(kMockLastSignInTimestamp, isUtc: true)})';
 
       expect(
         auth!.currentUser.toString(),

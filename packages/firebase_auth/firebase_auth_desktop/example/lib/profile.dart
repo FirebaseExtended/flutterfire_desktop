@@ -197,7 +197,9 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await authService.linkWithGoogle();
     } on FirebaseAuthException catch (e) {
-      ScaffoldSnackbar.of(context).show('${e.message}');
+      if (mounted) {
+        ScaffoldSnackbar.of(context).show('${e.message}');
+      }
       log('$e');
     } finally {
       setIsLoading();
@@ -221,7 +223,9 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldSnackbar.of(context).show('${e.message}');
+      if (mounted) {
+        ScaffoldSnackbar.of(context).show('${e.message}');
+      }
       log('$e');
     } finally {
       setIsLoading();
@@ -254,7 +258,9 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldSnackbar.of(context).show('${e.message}');
+      if (mounted) {
+        ScaffoldSnackbar.of(context).show('${e.message}');
+      }
       log('$e');
     } finally {
       setIsLoading();

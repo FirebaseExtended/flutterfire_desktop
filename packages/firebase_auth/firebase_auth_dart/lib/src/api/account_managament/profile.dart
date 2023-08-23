@@ -27,7 +27,7 @@ class UserProfile extends APIDelegate {
           returnSecureToken: true,
           deleteAttribute: [
             if (photoUrl == null) 'PHOTO_URL',
-            if (displayName == null) 'DISPLAY_NAME'
+            if (displayName == null) 'DISPLAY_NAME',
           ],
         ),
       );

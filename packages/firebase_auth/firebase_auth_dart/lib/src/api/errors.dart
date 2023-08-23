@@ -454,5 +454,5 @@ Map<AuthErrorCode, String> verbose = {
   AuthErrorCode.ALREADY_INITIALIZED: 'initializeAuth() has already been called with '
       'different options. To avoid this error, call initializeAuth() with the '
       'same options as when it was originally called, or call getAuth() to return the'
-      ' already initialized instance.'
+      ' already initialized instance.',
 };

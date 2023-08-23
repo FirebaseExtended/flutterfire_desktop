@@ -413,7 +413,7 @@ class FirebaseAuth {
   ///    Resolve this by calling [fetchSignInMethodsForEmail] and then asking
   ///    the user to sign in using one of the returned providers.
   ///    Once the user is signed in, the original credential can be linked to
-  ///    the user with [linkWithCredential].
+  ///    the user with [User.linkWithCredential].
   /// - `invalid-credential`
   ///   - Thrown if the credential is malformed or has expired.
   /// - `operation-not-allowed`

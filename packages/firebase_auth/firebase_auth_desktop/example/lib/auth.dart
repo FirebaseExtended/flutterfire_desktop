@@ -426,7 +426,7 @@ class _AuthGateState extends State<AuthGate> {
                         if (mode != AuthMode.phone)
                           RichText(
                             text: TextSpan(
-                              style: Theme.of(context).textTheme.bodyText1,
+                              style: Theme.of(context).textTheme.bodyLarge,
                               children: [
                                 TextSpan(
                                   text: mode == AuthMode.login
@@ -453,7 +453,7 @@ class _AuthGateState extends State<AuthGate> {
                         const SizedBox(height: 10),
                         RichText(
                           text: TextSpan(
-                            style: Theme.of(context).textTheme.bodyText1,
+                            style: Theme.of(context).textTheme.bodyLarge,
                             children: [
                               const TextSpan(text: 'Or '),
                               TextSpan(
